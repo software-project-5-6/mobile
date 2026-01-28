@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'admin_dashboard.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -129,9 +130,23 @@ class _LoginScreenState extends State<LoginScreen> {
                                 ),
                               ),
                               onPressed: () {
-                                // We will add Backend connection here later!
-                                print("Email: ${_emailController.text}");
-                                print("Password: ${_passwordController.text}");
+                                String email = _emailController.text;
+                                String password = _passwordController.text;
+
+                                // Check Admin Credentials
+                                if (email == "admin@psms.com" && password == "Ruhuna25!") {
+                                  Navigator.pushReplacement(
+                                    context,
+                                    MaterialPageRoute(builder: (context) => const AdminDashboard()),
+                                  );
+                                } else {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text("Invalid Credentials! Try admin@psms.com"),
+                                      backgroundColor: Colors.red,
+                                    ),
+                                  );
+                                }
                               },
                               child: const Text("Sign In", style: TextStyle(fontSize: 16)),
                             ),
