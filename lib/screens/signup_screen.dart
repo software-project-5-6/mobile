@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'verify_email_screen.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -119,8 +120,20 @@ class _SignupScreenState extends State<SignupScreen> {
                                 ),
                               ),
                               onPressed: () {
-                                // Add Sign Up Logic Later
-                                print("Sign Up Clicked");
+                                // 1. Get the email user typed
+                                String userEmail = _emailController.text;
+                                
+                                if (userEmail.isEmpty) {
+                                    userEmail = "your-email@example.com"; // Default if empty for testing
+                                }
+
+                                // 2. Navigate to Verify Screen and pass the email
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => VerifyEmailScreen(email: userEmail),
+                                  ),
+                                );
                               },
                               child: const Text("Create Account", style: TextStyle(fontSize: 16)),
                             ),
