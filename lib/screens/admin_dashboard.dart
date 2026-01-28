@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'login_screen.dart';
 
 class AdminDashboard extends StatefulWidget {
   const AdminDashboard({super.key});
@@ -17,15 +18,87 @@ class _AdminDashboardState extends State<AdminDashboard> {
         backgroundColor: const Color(0xFF6A11CB), // Purple
         iconTheme: const IconThemeData(color: Colors.white), // White Hamburger Icon
         actions: [
-          // The "SA" (Super Admin) Avatar
-          Padding(
-            padding: const EdgeInsets.only(right: 15.0),
-            child: CircleAvatar(
-              backgroundColor: Colors.white24,
-              child: const Text("SA", style: TextStyle(color: Colors.white)),
-            ),
-          )
-        ],
+            Padding(
+              padding: const EdgeInsets.only(right: 15.0),
+              child: PopupMenuButton<String>(
+                offset: const Offset(0, 50), // Moves the menu down slightly
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15), // Rounded corners like screenshot
+                ),
+                // THE TRIGGER (The Avatar Icon)
+                child: const CircleAvatar(
+                  backgroundColor: Colors.white24,
+                  child: Text("SA", style: TextStyle(color: Colors.white)),
+                ),
+                
+                // THE MENU ITEMS
+                itemBuilder: (context) => [
+                  // 1. User Info Header
+                  const PopupMenuItem<String>(
+                    enabled: false, // Cannot click the header
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text("Super Admin", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black)),
+                        Text("admin@psms.com", style: TextStyle(fontSize: 12, color: Colors.grey)),
+                        Divider(),
+                      ],
+                    ),
+                  ),
+                  
+                  // 2. Profile Button
+                  const PopupMenuItem<String>(
+                    value: 'profile',
+                    child: ListTile(
+                      leading: Icon(Icons.person, color: Colors.grey),
+                      title: Text("Profile"),
+                      contentPadding: EdgeInsets.zero,
+                      dense: true,
+                    ),
+                  ),
+                  
+                  // 3. Settings Button
+                  const PopupMenuItem<String>(
+                    value: 'settings',
+                    child: ListTile(
+                      leading: Icon(Icons.settings, color: Colors.grey),
+                      title: Text("Settings"),
+                      contentPadding: EdgeInsets.zero,
+                      dense: true,
+                    ),
+                  ),
+                  
+                  // Divider before Logout
+                  const PopupMenuDivider(),
+                  
+                  // 4. Logout Button (Red)
+                  const PopupMenuItem<String>(
+                    value: 'logout',
+                    child: ListTile(
+                      leading: Icon(Icons.logout, color: Colors.red), // Red Icon
+                      title: Text("Logout", style: TextStyle(color: Colors.red)), // Red Text
+                      contentPadding: EdgeInsets.zero,
+                      dense: true,
+                    ),
+                  ),
+                ],
+                
+                // WHAT HAPPENS WHEN YOU CLICK AN ITEM
+                onSelected: (value) {
+                  if (value == 'logout') {
+                    // Navigate back to Login Screen
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(builder: (context) => const LoginScreen()),
+                    );
+                  } else {
+                    // Placeholder for Profile/Settings
+                    print("Clicked: $value"); 
+                  }
+                },
+              ),
+            )
+          ],
       ),
 
       // 2. THE DRAWER (This replaces the Web Sidebar)
