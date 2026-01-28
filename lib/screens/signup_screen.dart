@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'login_screen.dart'; // Import Login to go back
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
