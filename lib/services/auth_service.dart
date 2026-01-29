@@ -63,7 +63,7 @@ class AuthService {
     }
   }
 
-  // 4. LOGIN
+  // 4. LOGIN (Fixed: Handles "Already Signed In" error)
   Future<bool> login(String email, String password) async {
     try {
       final result = await Amplify.Auth.signIn(
@@ -72,6 +72,13 @@ class AuthService {
       );
       return result.isSignedIn;
     } on AuthException catch (e) {
+      
+      // FIX: If a user is already signed in, sign them out first!
+      if (e.message.contains('already signed in')) {
+        await Amplify.Auth.signOut(); // Log out the old session
+        return login(email, password); // Try logging in again immediately
+      }
+
       print('Login Error: ${e.message}');
       return false;
     }

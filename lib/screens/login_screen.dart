@@ -3,6 +3,7 @@ import '../services/auth_service.dart'; // Import your AWS Service
 import 'admin_dashboard.dart';
 import 'signup_screen.dart';
 import 'forgot_password_screen.dart';
+import 'user_dashboard.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -208,11 +209,19 @@ class _LoginScreenState extends State<LoginScreen> {
     // 3. Handle Result
     if (success) {
       if (mounted) {
-        // Success! Go to Dashboard
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const AdminDashboard()),
-        );
+       if (_emailController.text.trim() == "admin@psms.com") {
+           // Go to ADMIN Dashboard
+           Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const AdminDashboard()),
+          );
+        } else {
+           // Go to USER Dashboard (Default for everyone else)
+           Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const UserDashboard()), // <--- NEW SCREEN
+          );
+        }
       }
     } else {
       if (mounted) {
