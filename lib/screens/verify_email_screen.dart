@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
-import 'login_screen.dart'; // To navigate safely after success
+import '../services/auth_service.dart'; 
+import 'login_screen.dart'; 
 
 class VerifyEmailScreen extends StatefulWidget {
-  final String email; // We accept the email to show it in the message
+  final String email; 
   
-  const VerifyEmailScreen({super.key, this.email = "pavani@gmail.com"});
+  const VerifyEmailScreen({super.key, required this.email});
 
   @override
   State<VerifyEmailScreen> createState() => _VerifyEmailScreenState();
@@ -12,6 +13,7 @@ class VerifyEmailScreen extends StatefulWidget {
 
 class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
   final _codeController = TextEditingController();
+  bool _isLoading = false; // To show loading spinner
 
   @override
   Widget build(BuildContext context) {
@@ -115,6 +117,7 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
                           TextField(
                             controller: _codeController,
                             textAlign: TextAlign.center,
+                            keyboardType: TextInputType.number,
                             decoration: InputDecoration(
                               labelText: "Verification Code",
                               border: OutlineInputBorder(
@@ -137,19 +140,14 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
                                   borderRadius: BorderRadius.circular(10),
                                 ),
                               ),
-                              onPressed: () {
-                                // Logic to verify code goes here
-                                // For now, let's assume success and go to Login
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(content: Text("Email Verified Successfully!")),
-                                );
-                                Navigator.pushAndRemoveUntil(
-                                  context, 
-                                  MaterialPageRoute(builder: (context) => const LoginScreen()), 
-                                  (route) => false // Clears all history so they can't go back
-                                );
-                              },
-                              child: const Text("Verify Email", style: TextStyle(fontSize: 16)),
+                              onPressed: _isLoading ? null : _handleVerification,
+                              child: _isLoading
+                                  ? const SizedBox(
+                                      height: 20,
+                                      width: 20,
+                                      child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                                    )
+                                  : const Text("Verify Email", style: TextStyle(fontSize: 16)),
                             ),
                           ),
                           const SizedBox(height: 15),
@@ -160,11 +158,7 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
                             children: [
                               const Text("Didn't receive the code?", style: TextStyle(fontSize: 12)),
                               TextButton(
-                                onPressed: () {
-                                   ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(content: Text("Code resent!")),
-                                  );
-                                },
+                                onPressed: _isLoading ? null : _handleResendCode,
                                 child: const Text("Resend Code", style: TextStyle(fontSize: 12)),
                               ),
                             ],
@@ -180,13 +174,6 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
                               style: TextStyle(color: Colors.grey, fontWeight: FontWeight.bold)
                             ),
                           ),
-                          
-                          // RED ERROR MESSAGE (Static for now as per design)
-                          const SizedBox(height: 10),
-                          const Text(
-                            "Verification code sent to your email.", 
-                            style: TextStyle(color: Colors.red, fontSize: 11)
-                          ),
                         ],
                       ),
                     ),
@@ -198,5 +185,61 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
         ),
       ),
     );
+  }
+
+  // --- LOGIC TO HANDLE VERIFICATION ---
+  Future<void> _handleVerification() async {
+    if (_codeController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Please enter the code"), backgroundColor: Colors.red),
+      );
+      return;
+    }
+
+    setState(() => _isLoading = true);
+
+    AuthService authService = AuthService();
+    bool isVerified = await authService.confirmSignUp(
+      widget.email,
+      _codeController.text.trim(),
+    );
+
+    setState(() => _isLoading = false);
+
+    if (isVerified) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Email Verified Successfully! Please Login.")),
+        );
+        // Clear history and go to Login
+        Navigator.pushAndRemoveUntil(
+          context, 
+          MaterialPageRoute(builder: (context) => const LoginScreen()), 
+          (route) => false 
+        );
+      }
+    } else {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Invalid Code. Please try again."), backgroundColor: Colors.red),
+        );
+      }
+    }
+  }
+
+  // --- LOGIC TO RESEND CODE ---
+  Future<void> _handleResendCode() async {
+    setState(() => _isLoading = true);
+
+    AuthService authService = AuthService();
+    await authService.resendCode(widget.email);
+
+    setState(() => _isLoading = false);
+
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Verification code resent to your email.")),
+      );
+    }
   }
 }

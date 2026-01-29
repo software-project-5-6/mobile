@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../services/auth_service.dart'; // Import your AWS Service
 import 'admin_dashboard.dart';
 import 'signup_screen.dart';
 import 'forgot_password_screen.dart';
@@ -13,7 +14,9 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  
   bool _isPasswordVisible = false;
+  bool _isLoading = false; // To show loading spinner
 
   @override
   Widget build(BuildContext context) {
@@ -21,12 +24,12 @@ class _LoginScreenState extends State<LoginScreen> {
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        // 1. THE GRADIENT BACKGROUND (Matches your Web Login)
+        // 1. THE GRADIENT BACKGROUND
         decoration: const BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [Color(0xFF6A11CB), Color(0xFF2575FC)], // Purple to Blue
+            colors: [Color(0xFF6A11CB), Color(0xFF2575FC)],
           ),
         ),
         child: Center(
@@ -102,7 +105,6 @@ class _LoginScreenState extends State<LoginScreen> {
                                 borderRadius: BorderRadius.circular(10),
                               ),
                               prefixIcon: const Icon(Icons.lock_outline),
-                              // Eye Icon Logic
                               suffixIcon: IconButton(
                                 icon: Icon(
                                   _isPasswordVisible
@@ -131,26 +133,14 @@ class _LoginScreenState extends State<LoginScreen> {
                                   borderRadius: BorderRadius.circular(10),
                                 ),
                               ),
-                              onPressed: () {
-                                String email = _emailController.text;
-                                String password = _passwordController.text;
-
-                                // Check Admin Credentials
-                                if (email == "admin@psms.com" && password == "Ruhuna25!") {
-                                  Navigator.pushReplacement(
-                                    context,
-                                    MaterialPageRoute(builder: (context) => const AdminDashboard()),
-                                  );
-                                } else {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                      content: Text("Invalid Credentials! Try admin@psms.com"),
-                                      backgroundColor: Colors.red,
-                                    ),
-                                  );
-                                }
-                              },
-                              child: const Text("Sign In", style: TextStyle(fontSize: 16)),
+                              onPressed: _isLoading ? null : _handleLogin, // Connect to Logic
+                              child: _isLoading
+                                  ? const SizedBox(
+                                      height: 20,
+                                      width: 20,
+                                      child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                                    )
+                                  : const Text("Sign In", style: TextStyle(fontSize: 16)),
                             ),
                           ),
                           const SizedBox(height: 15),
@@ -158,7 +148,6 @@ class _LoginScreenState extends State<LoginScreen> {
                           // FOOTER LINKS
                           TextButton(
                             onPressed: () {
-                              // Navigate to Forgot Password Screen
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(builder: (context) => const ForgotPasswordScreen()),
@@ -173,7 +162,6 @@ class _LoginScreenState extends State<LoginScreen> {
                               const Text("Don't have an account?"),
                               TextButton(
                                 onPressed: () {
-                                  // Navigate to Sign Up Screen
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(builder: (context) => const SignupScreen()),
@@ -194,5 +182,48 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
       ),
     );
+  }
+
+  // --- LOGIC TO HANDLE LOGIN ---
+  Future<void> _handleLogin() async {
+    // 1. Basic Validation
+    if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Please enter email and password"), backgroundColor: Colors.red),
+      );
+      return;
+    }
+
+    setState(() => _isLoading = true); // Start Spinner
+
+    // 2. Call AWS Service
+    AuthService authService = AuthService();
+    bool success = await authService.login(
+      _emailController.text.trim(),
+      _passwordController.text,
+    );
+
+    setState(() => _isLoading = false); // Stop Spinner
+
+    // 3. Handle Result
+    if (success) {
+      if (mounted) {
+        // Success! Go to Dashboard
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const AdminDashboard()),
+        );
+      }
+    } else {
+      if (mounted) {
+        // Fail! Show Error
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Login Failed. Incorrect email or password."),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 }
