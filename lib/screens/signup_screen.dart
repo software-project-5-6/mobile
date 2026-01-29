@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../services/auth_service.dart'; // Import your AWS Service
+import 'verify_email_screen.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -13,10 +15,13 @@ class _SignupScreenState extends State<SignupScreen> {
   final _nameController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
-  
+
   // Toggles for password visibility
   bool _isPasswordVisible = false;
   bool _isConfirmPasswordVisible = false;
+
+  // Loading state to prevent double-clicks
+  bool _isLoading = false;
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +29,7 @@ class _SignupScreenState extends State<SignupScreen> {
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        // 1. PURPLE GRADIENT BACKGROUND (Same as Login)
+        // 1. PURPLE GRADIENT BACKGROUND
         decoration: const BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topLeft,
@@ -91,7 +96,8 @@ class _SignupScreenState extends State<SignupScreen> {
                           const SizedBox(height: 15),
 
                           // PASSWORD FIELD
-                          _buildPasswordField("Password *", _passwordController, _isPasswordVisible, () {
+                          _buildPasswordField(
+                              "Password *", _passwordController, _isPasswordVisible, () {
                             setState(() {
                               _isPasswordVisible = !_isPasswordVisible;
                             });
@@ -99,7 +105,9 @@ class _SignupScreenState extends State<SignupScreen> {
                           const SizedBox(height: 15),
 
                           // CONFIRM PASSWORD FIELD
-                          _buildPasswordField("Confirm Password *", _confirmPasswordController, _isConfirmPasswordVisible, () {
+                          _buildPasswordField(
+                              "Confirm Password *", _confirmPasswordController, _isConfirmPasswordVisible,
+                              () {
                             setState(() {
                               _isConfirmPasswordVisible = !_isConfirmPasswordVisible;
                             });
@@ -118,11 +126,14 @@ class _SignupScreenState extends State<SignupScreen> {
                                   borderRadius: BorderRadius.circular(10),
                                 ),
                               ),
-                              onPressed: () {
-                                // Add Sign Up Logic Later
-                                print("Sign Up Clicked");
-                              },
-                              child: const Text("Create Account", style: TextStyle(fontSize: 16)),
+                              onPressed: _isLoading ? null : _handleSignup, // Disable if loading
+                              child: _isLoading
+                                  ? const SizedBox(
+                                      height: 20,
+                                      width: 20,
+                                      child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                                    )
+                                  : const Text("Create Account", style: TextStyle(fontSize: 16)),
                             ),
                           ),
                           const SizedBox(height: 15),
@@ -134,8 +145,7 @@ class _SignupScreenState extends State<SignupScreen> {
                               const Text("Already have an account?"),
                               TextButton(
                                 onPressed: () {
-                                  // Navigate back to Login
-                                  Navigator.pop(context);
+                                  Navigator.pop(context); // Go back to Login
                                 },
                                 child: const Text("Log In"),
                               ),
@@ -154,6 +164,63 @@ class _SignupScreenState extends State<SignupScreen> {
     );
   }
 
+  // --- LOGIC TO HANDLE SIGNUP ---
+  Future<void> _handleSignup() async {
+    // 1. Basic Validation
+    if (_emailController.text.isEmpty ||
+        _nameController.text.isEmpty ||
+        _passwordController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Please fill all fields"), backgroundColor: Colors.red),
+      );
+      return;
+    }
+
+    if (_passwordController.text != _confirmPasswordController.text) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Passwords do not match"), backgroundColor: Colors.red),
+      );
+      return;
+    }
+
+    setState(() => _isLoading = true); 
+
+    // 2. Call AWS Amplify Service
+    AuthService authService = AuthService();
+    
+    String? errorMessage = await authService.signUp(
+      _emailController.text.trim(),
+      _passwordController.text,
+      _nameController.text.trim(),
+    );
+
+    setState(() => _isLoading = false); // Stop loading spinner
+
+    // 3. Handle Result
+    if (errorMessage == null) {
+      // SUCCESS (Error is null)
+      if (mounted) {
+        // Navigate to Verification Screen
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => VerifyEmailScreen(email: _emailController.text.trim()),
+          ),
+        );
+      }
+    } else {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(errorMessage), // e.g. "Password not long enough"
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 4),
+          ),
+        );
+      }
+    }
+  }
+
   // Helper widget to build standard text fields
   Widget _buildTextField(String label, TextEditingController controller, bool isPassword) {
     return TextField(
@@ -168,7 +235,8 @@ class _SignupScreenState extends State<SignupScreen> {
   }
 
   // Helper widget to build password fields with eye icon
-  Widget _buildPasswordField(String label, TextEditingController controller, bool isVisible, VoidCallback onToggle) {
+  Widget _buildPasswordField(
+      String label, TextEditingController controller, bool isVisible, VoidCallback onToggle) {
     return TextField(
       controller: controller,
       obscureText: !isVisible,
