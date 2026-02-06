@@ -43,4 +43,29 @@ class ProjectService {
       throw e;
     }
   }
+
+  // ... inside ProjectService class ...
+
+  // 5. Get Single Project Details (includes assignedUsers list)
+  Future<Map<String, dynamic>> getProjectById(String id) async {
+    try {
+      final data = await _api.get('/projects/$id');
+      return data as Map<String, dynamic>;
+    } catch (e) {
+      print("Error fetching project details: $e");
+      throw e;
+    }
+  }
+
+  // 6. Remove User from Project
+  Future<void> removeUserFromProject(String projectId, String userId) async {
+    try {
+      // Adjust endpoint based on your actual backend API
+      // Common pattern: DELETE /projects/{projectId}/users/{userId}
+      await _api.delete('/projects/$projectId/users/$userId');
+    } catch (e) {
+      print("Error removing user: $e");
+      throw e;
+    }
+  }
 }

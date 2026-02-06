@@ -4,11 +4,11 @@ import 'package:amplify_flutter/amplify_flutter.dart';
 import 'package:amplify_auth_cognito/amplify_auth_cognito.dart';
 
 class ApiService {
-  // REPLACE '10.0.2.2' with your backend IP (10.0.2.2 is for Android Emulator localhost)
-  static const String baseUrl = "http://10.0.2.2:8080/api/v1"; 
+  // REPLACE '10.0.2.2' with your actual backend IP
+ static const String baseUrl = "http://10.0.2.2:8080/api/v1";
 
-  // Helper to get the ID token from Cognito
-  Future<String?> _getIdToken() async {
+  // --- CHANGED: Made this PUBLIC (removed the underscore) ---
+  Future<String?> getIdToken() async {
     try {
       final session = await Amplify.Auth.fetchAuthSession();
       final cognitoSession = session as CognitoAuthSession;
@@ -21,7 +21,7 @@ class ApiService {
 
   // --- GET Request ---
   Future<dynamic> get(String endpoint) async {
-    final token = await _getIdToken();
+    final token = await getIdToken(); // Updated to call public method
     final response = await http.get(
       Uri.parse('$baseUrl$endpoint'),
       headers: {
@@ -32,9 +32,9 @@ class ApiService {
     return _handleResponse(response);
   }
 
-  // --- POST Request (Create) ---
+  // --- POST Request ---
   Future<dynamic> post(String endpoint, Map<String, dynamic> data) async {
-    final token = await _getIdToken();
+    final token = await getIdToken(); // Updated to call public method
     final response = await http.post(
       Uri.parse('$baseUrl$endpoint'),
       headers: {
@@ -46,9 +46,9 @@ class ApiService {
     return _handleResponse(response);
   }
 
-  // --- PUT Request (Update) - THIS WAS MISSING ---
+  // --- PUT Request ---
   Future<dynamic> put(String endpoint, Map<String, dynamic> data) async {
-    final token = await _getIdToken();
+    final token = await getIdToken(); // Updated to call public method
     final response = await http.put(
       Uri.parse('$baseUrl$endpoint'),
       headers: {
@@ -60,9 +60,9 @@ class ApiService {
     return _handleResponse(response);
   }
 
-  // --- DELETE Request - THIS WAS MISSING ---
+  // --- DELETE Request ---
   Future<dynamic> delete(String endpoint) async {
-    final token = await _getIdToken();
+    final token = await getIdToken(); // Updated to call public method
     final response = await http.delete(
       Uri.parse('$baseUrl$endpoint'),
       headers: {

@@ -5,7 +5,6 @@ import 'project_details_screen.dart';
 import '../widgets/view_project_dialog.dart';
 import 'edit_project_screen.dart';
 import '../widgets/delete_project_dialog.dart';
-
 class AdminProjectsScreen extends StatefulWidget {
   const AdminProjectsScreen({super.key});
 
@@ -153,6 +152,7 @@ class _AdminProjectsScreenState extends State<AdminProjectsScreen> {
 
     return GestureDetector(
       onTap: () {
+        // Navigate to the FULL PAGE DETAILS
         Navigator.push(
           context,
           MaterialPageRoute(
@@ -317,7 +317,7 @@ class _AdminProjectsScreenState extends State<AdminProjectsScreen> {
                         },
                         child: Icon(Icons.delete, color: Colors.red[300], size: 20),
                       ),
-                      
+
                     ],
                   )
                 ],
