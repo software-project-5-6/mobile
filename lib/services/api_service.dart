@@ -4,12 +4,11 @@ import 'package:amplify_flutter/amplify_flutter.dart';
 import 'package:amplify_auth_cognito/amplify_auth_cognito.dart';
 
 class ApiService {
-  // REPLACE '10.0.2.2' with your actual backend IP if running locally.
-  // Android Emulator uses 10.0.2.2 to access localhost.
-  static const String baseUrl = "http://10.0.2.2:8080/api/v1"; 
+  // REPLACE '10.0.2.2' with your actual backend IP
+ static const String baseUrl = "http://10.0.2.2:8080/api/v1";
 
-  // Helper to get the token (Mimics your axios interceptor)
-  Future<String?> _getIdToken() async {
+  // --- CHANGED: Made this PUBLIC (removed the underscore) ---
+  Future<String?> getIdToken() async {
     try {
       final session = await Amplify.Auth.fetchAuthSession();
       final cognitoSession = session as CognitoAuthSession;
@@ -20,22 +19,22 @@ class ApiService {
     }
   }
 
-  // GET Request
+  // --- GET Request ---
   Future<dynamic> get(String endpoint) async {
-    final token = await _getIdToken();
+    final token = await getIdToken(); // Updated to call public method
     final response = await http.get(
       Uri.parse('$baseUrl$endpoint'),
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token', // Attach Token
+        'Authorization': 'Bearer $token', 
       },
     );
     return _handleResponse(response);
   }
 
-  // POST Request
+  // --- POST Request ---
   Future<dynamic> post(String endpoint, Map<String, dynamic> data) async {
-    final token = await _getIdToken();
+    final token = await getIdToken(); // Updated to call public method
     final response = await http.post(
       Uri.parse('$baseUrl$endpoint'),
       headers: {
@@ -47,13 +46,40 @@ class ApiService {
     return _handleResponse(response);
   }
 
-  // Handle Errors (Like your axios interceptor)
+  // --- PUT Request ---
+  Future<dynamic> put(String endpoint, Map<String, dynamic> data) async {
+    final token = await getIdToken(); // Updated to call public method
+    final response = await http.put(
+      Uri.parse('$baseUrl$endpoint'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+      body: jsonEncode(data),
+    );
+    return _handleResponse(response);
+  }
+
+  // --- DELETE Request ---
+  Future<dynamic> delete(String endpoint) async {
+    final token = await getIdToken(); // Updated to call public method
+    final response = await http.delete(
+      Uri.parse('$baseUrl$endpoint'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+    );
+    return _handleResponse(response);
+  }
+
+  // --- Error Handling ---
   dynamic _handleResponse(http.Response response) {
     if (response.statusCode >= 200 && response.statusCode < 300) {
+      if (response.body.isEmpty) return {}; 
       return jsonDecode(response.body);
     } else if (response.statusCode == 401) {
-      print("Unauthorized! Redirect to login.");
-      // Trigger logout logic here if needed
+      print("Unauthorized! Token might be expired.");
       throw Exception("Unauthorized");
     } else {
       throw Exception("Error: ${response.statusCode} - ${response.body}");
