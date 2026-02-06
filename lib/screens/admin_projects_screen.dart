@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import '../services/project_service.dart';
 import 'create_project_screen.dart';
 import 'project_details_screen.dart';
+import '../widgets/view_project_dialog.dart';
+import 'edit_project_screen.dart';
+import '../widgets/delete_project_dialog.dart';
 
 class AdminProjectsScreen extends StatefulWidget {
   const AdminProjectsScreen({super.key});
@@ -245,14 +248,76 @@ class _AdminProjectsScreenState extends State<AdminProjectsScreen> {
                     ],
                   ),
 
-                  // Action Buttons (Eye, Edit, Delete)
+                 // Action Buttons (Eye, Edit, Delete)
                   Row(
                     children: [
-                      const Icon(Icons.remove_red_eye, color: Colors.blue, size: 20),
+                      // 1. VIEW BUTTON (Opens the Dialog)
+                      InkWell(
+                        onTap: () {
+                          showDialog(
+                            context: context,
+                            builder: (context) => ViewProjectDialog(project: project),
+                          );
+                        },
+                        child: const Icon(Icons.remove_red_eye, color: Colors.blue, size: 20),
+                      ),
+                      
                       const SizedBox(width: 15),
-                      const Icon(Icons.edit, color: Colors.amber, size: 20),
+                      
+                      // 2. EDIT BUTTON
+                      InkWell(
+                        onTap: () {
+                          // Navigate to Edit Screen
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => EditProjectScreen(
+                                project: project, // Pass current data
+                                onProjectUpdated: () {
+                                  _fetchProjects(); // Refresh list when done
+                                },
+                              ),
+                            ),
+                          );
+                        },
+                        child: const Icon(Icons.edit, color: Colors.amber, size: 20),
+                      ),
+
                       const SizedBox(width: 15),
-                      Icon(Icons.delete, color: Colors.red[300], size: 20),
+                      
+                      // 3. DELETE BUTTON
+                      InkWell(
+                        onTap: () {
+                          showDialog(
+                            context: context,
+                            builder: (context) => DeleteProjectDialog(
+                              projectName: name, // Uses the project name variable
+                              onConfirm: () async {
+                                // CALL THE API TO DELETE
+                                final id = project['id']?.toString() ?? project['projectId']?.toString();
+                                if (id != null) {
+                                  try {
+                                    await _projectService.deleteProject(id);
+                                    
+                                    // Refresh the list after deleting
+                                    _fetchProjects(); 
+                                    
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(content: Text("Project deleted successfully")),
+                                    );
+                                  } catch (e) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(content: Text("Delete failed: $e"), backgroundColor: Colors.red),
+                                    );
+                                  }
+                                }
+                              },
+                            ),
+                          );
+                        },
+                        child: Icon(Icons.delete, color: Colors.red[300], size: 20),
+                      ),
+                      
                     ],
                   )
                 ],

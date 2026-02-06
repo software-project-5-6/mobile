@@ -3,7 +3,7 @@ import 'api_service.dart';
 class ProjectService {
   final ApiService _api = ApiService();
 
-  // Get All Projects
+  // 1. Get All Projects
   Future<List<dynamic>> getAllProjects() async {
     try {
       final data = await _api.get('/projects');
@@ -14,8 +14,33 @@ class ProjectService {
     }
   }
 
-  // Create Project
+  // 2. Create Project
   Future<void> createProject(Map<String, dynamic> projectData) async {
-    await _api.post('/projects', projectData);
+    try {
+      await _api.post('/projects', projectData);
+    } catch (e) {
+      print("Error creating project: $e");
+      throw e;
+    }
+  }
+
+  // 3. Update Project
+  Future<void> updateProject(String id, Map<String, dynamic> projectData) async {
+    try {
+      await _api.put('/projects/$id', projectData);
+    } catch (e) {
+      print("Error updating project: $e");
+      throw e;
+    }
+  }
+
+  // 4. Delete Project
+  Future<void> deleteProject(String id) async {
+    try {
+      await _api.delete('/projects/$id');
+    } catch (e) {
+      print("Error deleting project: $e");
+      throw e;
+    }
   }
 }
