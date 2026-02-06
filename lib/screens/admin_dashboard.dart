@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'login_screen.dart';
+import 'admin_projects_screen.dart';
 
 class AdminDashboard extends StatefulWidget {
   const AdminDashboard({super.key});
@@ -126,7 +127,16 @@ class _AdminDashboardState extends State<AdminDashboard> {
             ListTile(
               leading: const Icon(Icons.folder),
               title: const Text("Projects"),
-              onTap: () {},
+              onTap: () {
+                // 1. Close the Drawer
+                Navigator.pop(context); 
+                
+                // 2. Navigate to the Admin Projects Screen
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const AdminProjectsScreen()),
+                );
+              },
             ),
             const Divider(), // Admin Tools Section
             const Padding(
