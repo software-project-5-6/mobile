@@ -42,161 +42,158 @@ class _ProjectDetailsScreenState extends State<ProjectDetailsScreen> with Single
 
     return Scaffold(
       backgroundColor: Colors.grey[50],
-      body: SafeArea(
-        child: Column(
-          children: [
-            // --- TOP FIXED SECTION ---
-            Padding(
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // 1. Header Section (Title, Subtitle, Edit Button)
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Back Button + Title
-                      Row(
-                        children: [
-                          InkWell(
-                            onTap: () => Navigator.pop(context),
-                            borderRadius: BorderRadius.circular(50),
-                            child: Container(
-                              padding: const EdgeInsets.all(8),
-                              decoration: const BoxDecoration(
-                                color: Color(0xFF5B6BBF),
-                                shape: BoxShape.circle,
-                              ),
-                              child: const Icon(Icons.arrow_back, color: Colors.white, size: 20),
-                            ),
-                          ),
-                          const SizedBox(width: 16),
-                          const Text(
-                            "Project Details",
-                            style: TextStyle(
-                              fontSize: 26,
-                              fontWeight: FontWeight.bold,
-                              color: Color(0xFF333333),
-                            ),
-                          ),
-                        ],
-                      ),
-                      
-                      // Subtitle
-                      const Padding(
-                        padding: EdgeInsets.only(left: 54.0, top: 4),
-                        child: Text(
-                          "View and manage project information",
-                          style: TextStyle(color: Colors.grey, fontSize: 13),
-                        ),
-                      ),
-
-                      const SizedBox(height: 16),
-
-                      // Edit Button (Aligned to Right)
-                      Align(
-                        alignment: Alignment.centerRight, // <--- ALIGNS BUTTON TO RIGHT
-                        child: ElevatedButton.icon(
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => EditProjectScreen(project: widget.project),
-                              ),
-                            );
-                          },
-                          icon: const Icon(Icons.edit, size: 16),
-                          label: const Text("Edit Project"),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFFED6C02), // Orange
-                            foregroundColor: Colors.white,
-                            elevation: 0,
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-
-                  const SizedBox(height: 30),
-
-                  // 2. Stats Cards
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _buildGradientCard(
-                          title: "TOTAL ARTIFACTS",
-                          value: artifacts,
-                          subtitle: "Files & Documents",
-                          icon: Icons.folder,
-                          colors: [const Color(0xFF00C6FF), const Color(0xFF0072FF)],
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: _buildGradientCard(
-                          title: "TEAM MEMBERS",
-                          value: teamSize,
-                          subtitle: "Active Collaborators",
-                          icon: Icons.people,
-                          colors: [const Color(0xFFFF512F), const Color(0xFFDD2476)],
-                        ),
-                      ),
-                    ],
-                  ),
-
-                  const SizedBox(height: 30),
-
-                  // 3. Tab Bar
-                  Container(
-                    decoration: const BoxDecoration(
-                      border: Border(bottom: BorderSide(color: Colors.grey, width: 0.3)),
-                    ),
-                    child: TabBar(
-                      controller: _tabController,
-                      labelColor: const Color(0xFF5B6BBF),
-                      unselectedLabelColor: Colors.grey,
-                      indicatorColor: const Color(0xFF5B6BBF),
-                      indicatorWeight: 3,
-                      labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-                      tabs: const [
-                        Tab(text: "Project Details", icon: Icon(Icons.info_outline, size: 20)),
-                        Tab(text: "Team Members", icon: Icon(Icons.people_outline, size: 20)),
-                        Tab(text: "Artifacts", icon: Icon(Icons.description_outlined, size: 20)),
-                      ],
-                    ),
-                  ),
-                ],
+      
+      // --- APP BAR: TITLE & SUBTITLE FIXED AT TOP ---
+      appBar: AppBar(
+        backgroundColor: Colors.grey[50],
+        elevation: 0,
+        toolbarHeight: 80, // Increased height to fit subtitle
+        leadingWidth: 70,
+        leading: Center(
+          child: InkWell(
+            onTap: () => Navigator.pop(context),
+            borderRadius: BorderRadius.circular(50),
+            child: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: const BoxDecoration(
+                color: Color(0xFF5B6BBF),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.arrow_back, color: Colors.white, size: 20),
+            ),
+          ),
+        ),
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: const [
+            Text(
+              "Project Details",
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF333333),
               ),
             ),
-
-            // --- BOTTOM SCROLLABLE CONTENT ---
-            Expanded(
-              child: TabBarView(
-                controller: _tabController,
-                children: [
-                  // Tab 1: Project Details
-                  SingleChildScrollView(
-                    padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
-                    child: _buildDetailsContent(name, description, clientName, clientEmail, clientPhone, createdDate, price),
-                  ),
-
-                  // Tab 2: Team Members
-                  SingleChildScrollView(
-                    padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
-                    child: ProjectTeamTab(project: widget.project),
-                  ),
-
-                  SingleChildScrollView(
-                    padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
-                    child: ProjectArtifactsTab(project: widget.project),
-                  ),
-                ],
-              ),
+            SizedBox(height: 4),
+            Text(
+              "View and manage project information",
+              style: TextStyle(color: Colors.grey, fontSize: 12, fontWeight: FontWeight.normal),
             ),
           ],
         ),
+      ),
+
+      // --- BODY CONTENT ---
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // 1. Edit Button (Aligned Right)
+                Align(
+                  alignment: Alignment.centerRight, 
+                  child: ElevatedButton.icon(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => EditProjectScreen(project: widget.project),
+                        ),
+                      );
+                    },
+                    icon: const Icon(Icons.edit, size: 16),
+                    label: const Text("Edit Project"),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFFED6C02), // Orange
+                      foregroundColor: Colors.white,
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 20),
+
+                // 2. Stats Cards
+                Row(
+                  children: [
+                    Expanded(
+                      child: _buildGradientCard(
+                        title: "TOTAL ARTIFACTS",
+                        value: artifacts,
+                        subtitle: "Files & Documents",
+                        icon: Icons.folder,
+                        colors: [const Color(0xFF00C6FF), const Color(0xFF0072FF)],
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: _buildGradientCard(
+                        title: "TEAM MEMBERS",
+                        value: teamSize,
+                        subtitle: "Active Collaborators",
+                        icon: Icons.people,
+                        colors: [const Color(0xFFFF512F), const Color(0xFFDD2476)],
+                      ),
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 30),
+
+                // 3. Tab Bar
+                Container(
+                  decoration: const BoxDecoration(
+                    border: Border(bottom: BorderSide(color: Colors.grey, width: 0.3)),
+                  ),
+                  child: TabBar(
+                    controller: _tabController,
+                    labelColor: const Color(0xFF5B6BBF),
+                    unselectedLabelColor: Colors.grey,
+                    indicatorColor: const Color(0xFF5B6BBF),
+                    indicatorWeight: 3,
+                    labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                    tabs: const [
+                      Tab(text: "Project Details", icon: Icon(Icons.info_outline, size: 20)),
+                      Tab(text: "Team Members", icon: Icon(Icons.people_outline, size: 20)),
+                      Tab(text: "Artifacts", icon: Icon(Icons.description_outlined, size: 20)),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // --- BOTTOM SCROLLABLE CONTENT ---
+          Expanded(
+            child: TabBarView(
+              controller: _tabController,
+              children: [
+                // Tab 1: Project Details
+                SingleChildScrollView(
+                  padding: const EdgeInsets.fromLTRB(24, 20, 24, 24),
+                  child: _buildDetailsContent(name, description, clientName, clientEmail, clientPhone, createdDate, price),
+                ),
+
+                // Tab 2: Team Members
+                SingleChildScrollView(
+                  padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+                  child: ProjectTeamTab(project: widget.project),
+                ),
+
+                // Tab 3: Artifacts
+                SingleChildScrollView(
+                  padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+                  child: ProjectArtifactsTab(project: widget.project),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

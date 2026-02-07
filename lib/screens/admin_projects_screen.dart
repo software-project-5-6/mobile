@@ -134,7 +134,6 @@ class _AdminProjectsScreenState extends State<AdminProjectsScreen> {
     );
   }
 
-  // --- NEW: CARD DESIGN MATCHING YOUR WEB SCREENSHOT ---
   Widget _buildProjectCard(dynamic project) {
     // 1. Extract Data
     final name = project['projectName'] ?? project['name'] ?? 'Untitled';
@@ -150,62 +149,63 @@ class _AdminProjectsScreenState extends State<AdminProjectsScreen> {
       priceDisplay = "\$${double.tryParse(project['price'].toString())?.toStringAsFixed(2) ?? '0.00'}";
     }
 
-    return GestureDetector(
-      onTap: () {
-        // Navigate to the FULL PAGE DETAILS
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => ProjectDetailsScreen(project: project),
-          ),
-        );
-      },
-      child: Card(
-        elevation: 2,
-        margin: const EdgeInsets.only(bottom: 12),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // ROW 1: Project ID Pill + Status/Actions placeholder
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  // ID Pill (Grey, like screenshot "PJ72")
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: Colors.grey[200],
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: Colors.grey.shade300),
-                    ),
-                    child: Text(
-                      id, // e.g. "PJ72"
-                      style: TextStyle(color: Colors.grey[700], fontSize: 12, fontWeight: FontWeight.bold),
-                    ),
+    // --- CARD STARTS HERE (Removed the outer GestureDetector) ---
+    return Card(
+      elevation: 2,
+      margin: const EdgeInsets.only(bottom: 12),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // ROW 1: Project ID Pill + Price Pill
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                // ID Pill
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[200],
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: Colors.grey.shade300),
                   ),
-                  // Price Pill (Green, like screenshot)
-                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: Colors.green.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: Colors.green.withOpacity(0.3)),
-                    ),
-                    child: Text(
-                      priceDisplay,
-                      style: const TextStyle(color: Colors.green, fontSize: 12, fontWeight: FontWeight.bold),
-                    ),
+                  child: Text(
+                    id, 
+                    style: TextStyle(color: Colors.grey[700], fontSize: 12, fontWeight: FontWeight.bold),
                   ),
-                ],
-              ),
-              
-              const SizedBox(height: 12),
+                ),
+                // Price Pill
+                 Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: Colors.green.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: Colors.green.withOpacity(0.3)),
+                  ),
+                  child: Text(
+                    priceDisplay,
+                    style: const TextStyle(color: Colors.green, fontSize: 12, fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ],
+            ),
+            
+            const SizedBox(height: 12),
 
-              // ROW 2: Folder Icon + Project Name
-              Row(
+            // ROW 2: Folder Icon + Project Name (CLICKABLE AREA)
+            InkWell(
+              onTap: () {
+                // Navigate to the FULL PAGE DETAILS only when this row is clicked
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ProjectDetailsScreen(project: project),
+                  ),
+                );
+              },
+              child: Row(
                 children: [
                   const Icon(Icons.folder, color: Color(0xFF5B6BBF), size: 24),
                   const SizedBox(width: 10),
@@ -218,112 +218,104 @@ class _AdminProjectsScreenState extends State<AdminProjectsScreen> {
                   ),
                 ],
               ),
+            ),
 
-              const SizedBox(height: 12),
+            const SizedBox(height: 12),
 
-              // ROW 3: Stats (Team & Artifacts) - Styled like screenshot
-              Row(
-                children: [
-                  // Team Pill (Purple)
-                  _buildIconPill(Icons.people, teamSize.toString(), Colors.purple),
-                  const SizedBox(width: 10),
-                  // Artifact Pill (Blue)
-                  _buildIconPill(Icons.attach_file, artifactCount.toString(), Colors.blue),
-                ],
-              ),
+            // ROW 3: Stats (Team & Artifacts)
+            Row(
+              children: [
+                _buildIconPill(Icons.people, teamSize.toString(), Colors.purple),
+                const SizedBox(width: 10),
+                _buildIconPill(Icons.attach_file, artifactCount.toString(), Colors.blue),
+              ],
+            ),
 
-              const Divider(height: 24),
+            const Divider(height: 24),
 
-              // ROW 4: Client Info + Action Buttons
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  // Client Info
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _buildSmallInfo(Icons.email, clientEmail),
-                      const SizedBox(height: 4),
-                      _buildSmallInfo(Icons.phone, clientPhone),
-                    ],
-                  ),
+            // ROW 4: Client Info + Action Buttons
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                // Client Info
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildSmallInfo(Icons.email, clientEmail),
+                    const SizedBox(height: 4),
+                    _buildSmallInfo(Icons.phone, clientPhone),
+                  ],
+                ),
 
-                 // Action Buttons (Eye, Edit, Delete)
-                  Row(
-                    children: [
-                      // 1. VIEW BUTTON (Opens the Dialog)
-                      InkWell(
-                        onTap: () {
-                          showDialog(
-                            context: context,
-                            builder: (context) => ViewProjectDialog(project: project),
-                          );
-                        },
-                        child: const Icon(Icons.remove_red_eye, color: Colors.blue, size: 20),
-                      ),
-                      
-                      const SizedBox(width: 15),
-                      
-                      // 2. EDIT BUTTON
-                      InkWell(
-                        onTap: () {
-                          // Navigate to Edit Screen
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => EditProjectScreen(
-                                project: project, // Pass current data
-                                onProjectUpdated: () {
-                                  _fetchProjects(); // Refresh list when done
-                                },
-                              ),
-                            ),
-                          );
-                        },
-                        child: const Icon(Icons.edit, color: Colors.amber, size: 20),
-                      ),
-
-                      const SizedBox(width: 15),
-                      
-                      // 3. DELETE BUTTON
-                      InkWell(
-                        onTap: () {
-                          showDialog(
-                            context: context,
-                            builder: (context) => DeleteProjectDialog(
-                              projectName: name, // Uses the project name variable
-                              onConfirm: () async {
-                                // CALL THE API TO DELETE
-                                final id = project['id']?.toString() ?? project['projectId']?.toString();
-                                if (id != null) {
-                                  try {
-                                    await _projectService.deleteProject(id);
-                                    
-                                    // Refresh the list after deleting
-                                    _fetchProjects(); 
-                                    
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(content: Text("Project deleted successfully")),
-                                    );
-                                  } catch (e) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(content: Text("Delete failed: $e"), backgroundColor: Colors.red),
-                                    );
-                                  }
-                                }
+               // Action Buttons (Eye, Edit, Delete)
+                Row(
+                  children: [
+                    // 1. VIEW BUTTON (Opens the Dialog)
+                    InkWell(
+                      onTap: () {
+                        showDialog(
+                          context: context,
+                          builder: (context) => ViewProjectDialog(project: project),
+                        );
+                      },
+                      child: const Icon(Icons.remove_red_eye, color: Colors.blue, size: 20),
+                    ),
+                    
+                    const SizedBox(width: 15),
+                    
+                    // 2. EDIT BUTTON
+                    InkWell(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => EditProjectScreen(
+                              project: project, 
+                              onProjectUpdated: () {
+                                _fetchProjects(); 
                               },
                             ),
-                          );
-                        },
-                        child: Icon(Icons.delete, color: Colors.red[300], size: 20),
-                      ),
+                          ),
+                        );
+                      },
+                      child: const Icon(Icons.edit, color: Colors.amber, size: 20),
+                    ),
 
-                    ],
-                  )
-                ],
-              ),
-            ],
-          ),
+                    const SizedBox(width: 15),
+                    
+                    // 3. DELETE BUTTON
+                    InkWell(
+                      onTap: () {
+                        showDialog(
+                          context: context,
+                          builder: (context) => DeleteProjectDialog(
+                            projectName: name,
+                            onConfirm: () async {
+                              final id = project['id']?.toString() ?? project['projectId']?.toString();
+                              if (id != null) {
+                                try {
+                                  await _projectService.deleteProject(id);
+                                  _fetchProjects(); 
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(content: Text("Project deleted successfully")),
+                                  );
+                                } catch (e) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(content: Text("Delete failed: $e"), backgroundColor: Colors.red),
+                                  );
+                                }
+                              }
+                            },
+                          ),
+                        );
+                      },
+                      child: Icon(Icons.delete, color: Colors.red[300], size: 20),
+                    ),
+                  ],
+                )
+              ],
+            ),
+          ],
         ),
       ),
     );
