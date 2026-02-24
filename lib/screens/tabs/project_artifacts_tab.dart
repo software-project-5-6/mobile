@@ -199,13 +199,26 @@ class _ProjectArtifactsTabState extends State<ProjectArtifactsTab> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(item['originalFilename'] ?? 'Unknown', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                            // Fix 1: Added maxLines and ellipsis to long file names
+                            Text(
+                              item['originalFilename'] ?? 'Unknown', 
+                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
                             const SizedBox(height: 4),
                             Row(
                               children: [
                                 _buildTypeChip(type),
                                 const SizedBox(width: 8),
-                                Text("$sizeStr KB • $dateStr", style: const TextStyle(color: Colors.grey, fontSize: 11)),
+                                // Fix 2: Wrapped the date text in Expanded
+                                Expanded(
+                                  child: Text(
+                                    "$sizeStr KB • $dateStr", 
+                                    style: const TextStyle(color: Colors.grey, fontSize: 11),
+                                    overflow: TextOverflow.ellipsis, // Adds "..." if it gets too tight
+                                  ),
+                                ),
                               ],
                             ),
                           ],
