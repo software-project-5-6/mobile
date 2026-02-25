@@ -5,8 +5,9 @@ import 'tabs/project_artifacts_tab.dart';
 
 class ProjectDetailsScreen extends StatefulWidget {
   final Map<String, dynamic> project;
+  final bool isAdmin; // ADDED: To control what details are shown
 
-  const ProjectDetailsScreen({super.key, required this.project});
+  const ProjectDetailsScreen({super.key, required this.project, required this.isAdmin});
 
   @override
   State<ProjectDetailsScreen> createState() => _ProjectDetailsScreenState();
@@ -47,7 +48,7 @@ class _ProjectDetailsScreenState extends State<ProjectDetailsScreen> with Single
       appBar: AppBar(
         backgroundColor: Colors.grey[50],
         elevation: 0,
-        toolbarHeight: 80, // Increased height to fit subtitle
+        toolbarHeight: 80,
         leadingWidth: 70,
         leading: Center(
           child: InkWell(
@@ -92,29 +93,32 @@ class _ProjectDetailsScreenState extends State<ProjectDetailsScreen> with Single
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // 1. Edit Button (Aligned Right)
-                Align(
-                  alignment: Alignment.centerRight, 
-                  child: ElevatedButton.icon(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => EditProjectScreen(project: widget.project),
-                        ),
-                      );
-                    },
-                    icon: const Icon(Icons.edit, size: 16),
-                    label: const Text("Edit Project"),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFFED6C02), // Orange
-                      foregroundColor: Colors.white,
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                // 1. Edit Button (ADMIN ONLY)
+                if (widget.isAdmin)
+                  Align(
+                    alignment: Alignment.centerRight, 
+                    child: ElevatedButton.icon(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => EditProjectScreen(project: widget.project),
+                          ),
+                        );
+                      },
+                      icon: const Icon(Icons.edit, size: 16),
+                      label: const Text("Edit Project"),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFFED6C02), // Orange
+                        foregroundColor: Colors.white,
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                      ),
                     ),
-                  ),
-                ),
+                  )
+                else 
+                  const SizedBox(height: 48), // Keeps layout spacing consistent when button is hidden
 
                 const SizedBox(height: 20),
 
@@ -182,7 +186,10 @@ class _ProjectDetailsScreenState extends State<ProjectDetailsScreen> with Single
                 // Tab 2: Team Members
                 SingleChildScrollView(
                   padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
-                  child: ProjectTeamTab(project: widget.project),
+                  child: ProjectTeamTab(
+                    project: widget.project,
+                    isAdmin: widget.isAdmin, 
+                  ),
                 ),
 
                 // Tab 3: Artifacts
@@ -249,24 +256,41 @@ class _ProjectDetailsScreenState extends State<ProjectDetailsScreen> with Single
                   child: Text(description, style: const TextStyle(color: Colors.black87, height: 1.6, fontSize: 14)),
                 ),
                 const SizedBox(height: 24), const Divider(), const SizedBox(height: 24),
+                
                 _buildSectionTitle("CLIENT INFORMATION"),
                 const SizedBox(height: 16),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(child: _buildInfoTile(Icons.person, "CLIENT NAME", clientName)),
-                    const SizedBox(width: 16),
-                    Expanded(child: _buildInfoTile(Icons.email, "EMAIL ADDRESS", clientEmail)),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                Row(
-                  children: [
-                    Expanded(child: _buildInfoTile(Icons.phone, "PHONE NUMBER", clientPhone)),
-                    const SizedBox(width: 16),
-                    Expanded(child: Container()),
-                  ],
-                ),
+                
+                // CONDITIONAL RENDERING BASED ON ROLE
+                if (widget.isAdmin) ...[
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(child: _buildInfoTile(Icons.person, "CLIENT NAME", clientName)),
+                      const SizedBox(width: 16),
+                      Expanded(child: _buildInfoTile(Icons.email, "EMAIL ADDRESS", clientEmail)),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      Expanded(child: _buildInfoTile(Icons.phone, "PHONE NUMBER", clientPhone)),
+                      const SizedBox(width: 16),
+                      Expanded(child: Container()),
+                    ],
+                  ),
+                ] else ...[
+                  // USER VIEW: Only show Client Name
+                  Row(
+                    children: [
+                      Expanded(
+                        flex: 1, 
+                        child: _buildInfoTile(Icons.person, "CLIENT NAME", clientName)
+                      ),
+                      const Expanded(flex: 1, child: SizedBox()), // Keeps it half-width matching design
+                    ],
+                  ),
+                ],
+
                 const SizedBox(height: 24), const Divider(), const SizedBox(height: 24),
                 _buildSectionTitle("PROJECT METADATA"),
                 const SizedBox(height: 16),

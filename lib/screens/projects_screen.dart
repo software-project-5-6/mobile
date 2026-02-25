@@ -208,7 +208,12 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => ProjectDetailsScreen(project: project)),
+                  MaterialPageRoute(
+                    builder: (context) => ProjectDetailsScreen(
+                      project: project,
+                      isAdmin: widget.isAdmin, // <-- ADD THIS
+                    )
+                  ),
                 );
               },
               child: Row(

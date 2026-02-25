@@ -5,8 +5,9 @@ import '../../widgets/invite_member_dialog.dart';
 
 class ProjectTeamTab extends StatefulWidget {
   final Map<String, dynamic> project;
+  final bool isAdmin; // ADDED: To control visibility of admin actions
 
-  const ProjectTeamTab({super.key, required this.project});
+  const ProjectTeamTab({super.key, required this.project, required this.isAdmin});
 
   @override
   State<ProjectTeamTab> createState() => _ProjectTeamTabState();
@@ -36,8 +37,11 @@ class _ProjectTeamTabState extends State<ProjectTeamTab> {
       // 1. Fetch fresh project details (for active members)
       final projectDetails = await _projectService.getProjectById(projectId);
       
-      // 2. Fetch pending invitations
-      final pendingInvites = await _invitationService.getPendingInvitations(projectId);
+      // 2. Fetch pending invitations (Only if Admin)
+      List<dynamic> pendingInvites = [];
+      if (widget.isAdmin) {
+        pendingInvites = await _invitationService.getPendingInvitations(projectId);
+      }
 
       if (mounted) {
         setState(() {
@@ -151,27 +155,30 @@ class _ProjectTeamTabState extends State<ProjectTeamTab> {
                   ),
                 ),
               ),
-              const SizedBox(width: 12),
-              ElevatedButton.icon(
-                onPressed: () {
-                  showDialog(
-                    context: context,
-                    builder: (context) => InviteMemberDialog(
-                      projectId: _getProjectId(),
-                      onSuccess: _fetchTeamData, // Refresh list after invite
-                    ),
-                  );
-                },
-                icon: const Icon(Icons.person_add, size: 18),
-                label: const Text("Invite"),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF5B6BBF),
-                  foregroundColor: Colors.white,
-                  elevation: 0,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+              // Show Invite Button ONLY if Admin
+              if (widget.isAdmin) ...[
+                const SizedBox(width: 12),
+                ElevatedButton.icon(
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder: (context) => InviteMemberDialog(
+                        projectId: _getProjectId(),
+                        onSuccess: _fetchTeamData,
+                      ),
+                    );
+                  },
+                  icon: const Icon(Icons.person_add, size: 18),
+                  label: const Text("Invite"),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF5B6BBF),
+                    foregroundColor: Colors.white,
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+                  ),
                 ),
-              ),
+              ]
             ],
           ),
 
@@ -186,11 +193,11 @@ class _ProjectTeamTabState extends State<ProjectTeamTab> {
               border: Border(bottom: BorderSide(color: Colors.grey.shade200)),
             ),
             child: Row(
-              children: const [
-                Expanded(flex: 3, child: Text("Member", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: Colors.black87))),
-                Expanded(flex: 3, child: Text("Email", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: Colors.black87))),
-                Expanded(flex: 2, child: Text("Role", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: Colors.black87))),
-                SizedBox(width: 30), // Space for Delete Icon
+              children: [
+                const Expanded(flex: 3, child: Text("Member", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: Colors.black87))),
+                const Expanded(flex: 3, child: Text("Email", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: Colors.black87))),
+                const Expanded(flex: 2, child: Text("Role", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: Colors.black87))),
+                if (widget.isAdmin) const SizedBox(width: 30), // Space for Delete Icon (Admin Only)
               ],
             ),
           ),
@@ -253,83 +260,84 @@ class _ProjectTeamTabState extends State<ProjectTeamTab> {
                           child: _buildRoleChip(role),
                         ),
                       ),
-                      // Action
-                      SizedBox(
-                        width: 30,
-                        child: IconButton(
-                          icon: Icon(Icons.delete, size: 18, color: Colors.red[300]),
-                          onPressed: () => _confirmRemove(userId, name),
+                      // Action (Delete User - Admin Only)
+                      if (widget.isAdmin)
+                        SizedBox(
+                          width: 30,
+                          child: IconButton(
+                            icon: Icon(Icons.delete, size: 18, color: Colors.red[300]),
+                            onPressed: () => _confirmRemove(userId, name),
+                            padding: EdgeInsets.zero,
+                            constraints: const BoxConstraints(),
+                          ),
+                        ),
+                    ],
+                  ),
+                );
+              },
+            ),
+
+          // --- PENDING INVITATIONS SECTION (ADMIN ONLY) ---
+          if (widget.isAdmin) ...[
+            const SizedBox(height: 30),
+            const Divider(),
+            const SizedBox(height: 10),
+
+            const Text(
+              "Pending Invitations",
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF333333)),
+            ),
+            const SizedBox(height: 10),
+
+            if (_pendingInvitations.isEmpty)
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 20),
+                child: Center(
+                  child: Text("No pending invitations", style: TextStyle(color: Colors.grey, fontSize: 13)),
+                ),
+              )
+            else
+              ListView.separated(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: _pendingInvitations.length,
+                separatorBuilder: (context, index) => Divider(height: 1, color: Colors.grey.shade100),
+                itemBuilder: (context, index) {
+                  final invite = _pendingInvitations[index];
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.mail_outline, size: 20, color: Colors.grey),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(invite['email'] ?? 'Unknown', style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 13)),
+                              const SizedBox(height: 2),
+                              Text("Expires: ${_formatDate(invite['expiresAt'])}", style: const TextStyle(color: Colors.grey, fontSize: 11)),
+                            ],
+                          ),
+                        ),
+                        _buildRoleChip(invite['role'] ?? 'VIEWER'),
+                        const SizedBox(width: 16),
+                        IconButton(
+                          icon: Icon(Icons.delete_outline, color: Colors.red[300], size: 18),
                           padding: EdgeInsets.zero,
                           constraints: const BoxConstraints(),
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              },
-            ),
-
-          const SizedBox(height: 30),
-          const Divider(),
-          const SizedBox(height: 10),
-
-          // --- PENDING INVITATIONS SECTION ---
-          const Text(
-            "Pending Invitations",
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF333333)),
-          ),
-          const SizedBox(height: 10),
-
-          if (_pendingInvitations.isEmpty)
-            const Padding(
-              padding: EdgeInsets.symmetric(vertical: 20),
-              child: Center(
-                child: Text("No pending invitations", style: TextStyle(color: Colors.grey, fontSize: 13)),
+                          onPressed: () {
+                            if (invite['id'] != null) {
+                              _confirmRevoke(invite['id'], invite['email'] ?? 'this user');
+                            }
+                          },
+                        ), 
+                      ],
+                    ),
+                  );
+                },
               ),
-            )
-          else
-            ListView.separated(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: _pendingInvitations.length,
-              separatorBuilder: (context, index) => Divider(height: 1, color: Colors.grey.shade100),
-              itemBuilder: (context, index) {
-                final invite = _pendingInvitations[index];
-                return Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-                  child: Row(
-                    children: [
-                      const Icon(Icons.mail_outline, size: 20, color: Colors.grey),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(invite['email'] ?? 'Unknown', style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 13)),
-                            const SizedBox(height: 2),
-                            Text("Expires: ${_formatDate(invite['expiresAt'])}", style: const TextStyle(color: Colors.grey, fontSize: 11)),
-                          ],
-                        ),
-                      ),
-                      _buildRoleChip(invite['role'] ?? 'VIEWER'),
-                      const SizedBox(width: 16),
-                      // CHANGED: Now an IconButton to allow revocation
-                      IconButton(
-                        icon: Icon(Icons.delete_outline, color: Colors.red[300], size: 18),
-                        padding: EdgeInsets.zero,
-                        constraints: const BoxConstraints(),
-                        onPressed: () {
-                          // Ensure we have a valid ID before trying to revoke
-                          if (invite['id'] != null) {
-                            _confirmRevoke(invite['id'], invite['email'] ?? 'this user');
-                          }
-                        },
-                      ), 
-                    ],
-                  ),
-                );
-              },
-            ),
+          ]
         ],
       ),
     );
@@ -390,7 +398,6 @@ class _ProjectTeamTabState extends State<ProjectTeamTab> {
     );
   }
 
-  // ADDED: Confirmation dialog for revoking invitations
   void _confirmRevoke(int inviteId, String email) {
     showDialog(
       context: context,
