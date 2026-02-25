@@ -52,7 +52,7 @@ class _ProjectTeamTabState extends State<ProjectTeamTab> {
     }
   }
 
-  // Handle Remove User
+  // Handle Remove Active User
   Future<void> _removeUser(String userId) async {
     try {
       await _projectService.removeUserFromProject(_getProjectId(), userId);
@@ -60,6 +60,21 @@ class _ProjectTeamTabState extends State<ProjectTeamTab> {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("User removed successfully")));
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Failed to remove user: $e"), backgroundColor: Colors.red));
+    }
+  }
+
+  // Handle Revoke Pending Invitation
+  Future<void> _revokeInvitation(int inviteId) async {
+    try {
+      await _invitationService.revokeInvitation(inviteId);
+      _fetchTeamData(); // Refresh list
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Invitation revoked successfully"), backgroundColor: Colors.green),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Failed to revoke invitation: $e"), backgroundColor: Colors.red),
+      );
     }
   }
 
@@ -298,8 +313,18 @@ class _ProjectTeamTabState extends State<ProjectTeamTab> {
                       ),
                       _buildRoleChip(invite['role'] ?? 'VIEWER'),
                       const SizedBox(width: 16),
-                      // Revoke Button (Optional)
-                      Icon(Icons.delete_outline, color: Colors.red[300], size: 18), 
+                      // CHANGED: Now an IconButton to allow revocation
+                      IconButton(
+                        icon: Icon(Icons.delete_outline, color: Colors.red[300], size: 18),
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(),
+                        onPressed: () {
+                          // Ensure we have a valid ID before trying to revoke
+                          if (invite['id'] != null) {
+                            _confirmRevoke(invite['id'], invite['email'] ?? 'this user');
+                          }
+                        },
+                      ), 
                     ],
                   ),
                 );
@@ -359,6 +384,27 @@ class _ProjectTeamTabState extends State<ProjectTeamTab> {
               _removeUser(userId);
             },
             child: const Text("Remove", style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ADDED: Confirmation dialog for revoking invitations
+  void _confirmRevoke(int inviteId, String email) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("Revoke Invitation"),
+        content: Text("Are you sure you want to cancel the invitation sent to $email?"),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text("Cancel")),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              _revokeInvitation(inviteId);
+            },
+            child: const Text("Revoke", style: TextStyle(color: Colors.red)),
           ),
         ],
       ),

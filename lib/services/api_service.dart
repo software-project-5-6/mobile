@@ -5,7 +5,7 @@ import 'package:amplify_auth_cognito/amplify_auth_cognito.dart';
 
 class ApiService {
   // REPLACE '10.0.2.2' with your actual backend IP
- static const String baseUrl = "http://10.0.2.2:8080/api/v1";
+  static const String baseUrl = "http://10.0.2.2:8080/api/v1";
 
   // --- CHANGED: Made this PUBLIC (removed the underscore) ---
   Future<String?> getIdToken() async {
@@ -76,8 +76,22 @@ class ApiService {
   // --- Error Handling ---
   dynamic _handleResponse(http.Response response) {
     if (response.statusCode >= 200 && response.statusCode < 300) {
-      if (response.body.isEmpty) return {}; 
-      return jsonDecode(response.body);
+      if (response.body.isEmpty) return {};
+
+      // FIX: Check if the response is explicitly plain text
+      final contentType = response.headers['content-type'] ?? '';
+      if (contentType.contains('text/plain')) {
+        return response.body; // Return the raw text immediately
+      }
+
+      // If it's not plain text, decode it as JSON
+      try {
+        return jsonDecode(response.body);
+      } catch (e) {
+        // Fallback just in case the Content-Type header was missing
+        return response.body; 
+      }
+      
     } else if (response.statusCode == 401) {
       print("Unauthorized! Token might be expired.");
       throw Exception("Unauthorized");
