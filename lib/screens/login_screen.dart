@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import '../services/auth_service.dart'; // Import your AWS Service
-import 'admin_dashboard.dart';
+//import 'admin_dashboard.dart';
 import 'signup_screen.dart';
 import 'forgot_password_screen.dart';
-import 'user_dashboard.dart';
+//import 'user_dashboard.dart';
+import 'dashboard_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -213,13 +214,13 @@ class _LoginScreenState extends State<LoginScreen> {
            // Go to ADMIN Dashboard
            Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (context) => const AdminDashboard()),
+            MaterialPageRoute(builder: (context) => const DashboardScreen(isAdmin: true)),
           );
         } else {
            // Go to USER Dashboard (Default for everyone else)
            Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (context) => const UserDashboard()), // <--- NEW SCREEN
+            MaterialPageRoute(builder: (context) => const DashboardScreen(isAdmin: false)), // <--- NEW SCREEN
           );
         }
       }
