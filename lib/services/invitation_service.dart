@@ -4,9 +4,18 @@ class InvitationService {
   final ApiService _api = ApiService();
 
   // Send an invitation
-  Future<void> sendInvitation(String projectId, String email, String role) async {
+  Future<void> sendInvitation(
+    String projectId,
+    String email,
+    String role,
+  ) async {
     try {
-      await _api.post('/projects/$projectId/invitations', {
+      print(projectId);
+      print(email);
+      print(role);
+
+      await _api.post('/invitations', {
+        'projectId': projectId,
         'email': email,
         'role': role,
       });
@@ -19,7 +28,9 @@ class InvitationService {
   // Get pending invitations (You will need this for the list later)
   Future<List<dynamic>> getPendingInvitations(String projectId) async {
     try {
-      final data = await _api.get('/projects/$projectId/invitations?status=PENDING');
+      final data = await _api.get(
+        '/projects/$projectId/invitations?status=PENDING',
+      );
       return data as List<dynamic>;
     } catch (e) {
       return [];

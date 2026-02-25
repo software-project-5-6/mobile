@@ -18,7 +18,7 @@ class InviteMemberDialog extends StatefulWidget {
 class _InviteMemberDialogState extends State<InviteMemberDialog> {
   final _formKey = GlobalKey<FormState>();
   final _invitationService = InvitationService();
-  
+
   final TextEditingController _emailController = TextEditingController();
   String _selectedRole = "VIEWER";
   bool _isLoading = false;
@@ -27,7 +27,7 @@ class _InviteMemberDialogState extends State<InviteMemberDialog> {
   final Map<String, String> _roleDescriptions = {
     "MANAGER": "Can manage members, edit project settings, and upload files.",
     "CONTRIBUTOR": "Can upload and edit files, but cannot manage members.",
-    "VIEWER": "Can only view and download files. Read-only access."
+    "VIEWER": "Can only view and download files. Read-only access.",
   };
 
   @override
@@ -58,7 +58,10 @@ class _InviteMemberDialogState extends State<InviteMemberDialog> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Failed to send invite: $e"), backgroundColor: Colors.red),
+          SnackBar(
+            content: Text("Failed to send invite: $e"),
+            backgroundColor: Colors.red,
+          ),
         );
       }
     } finally {
@@ -103,11 +106,17 @@ class _InviteMemberDialogState extends State<InviteMemberDialog> {
                 decoration: InputDecoration(
                   labelText: "Email Address *",
                   hintText: "user@example.com",
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 14,
+                  ),
                 ),
                 validator: (value) {
-                  if (value == null || value.isEmpty) return "Email is required";
+                  if (value == null || value.isEmpty)
+                    return "Email is required";
                   if (!value.contains("@")) return "Invalid email format";
                   return null;
                 },
@@ -119,12 +128,20 @@ class _InviteMemberDialogState extends State<InviteMemberDialog> {
                 value: _selectedRole,
                 decoration: InputDecoration(
                   labelText: "Role *",
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 14,
+                  ),
                 ),
                 items: const [
                   DropdownMenuItem(value: "MANAGER", child: Text("Manager")),
-                  DropdownMenuItem(value: "CONTRIBUTOR", child: Text("Contributor")),
+                  DropdownMenuItem(
+                    value: "CONTRIBUTOR",
+                    child: Text("Contributor"),
+                  ),
                   DropdownMenuItem(value: "VIEWER", child: Text("Viewer")),
                 ],
                 onChanged: (value) {
@@ -133,13 +150,17 @@ class _InviteMemberDialogState extends State<InviteMemberDialog> {
                   });
                 },
               ),
-              
+
               // Dynamic Helper Text
               Padding(
                 padding: const EdgeInsets.only(top: 8.0, left: 4),
                 child: Text(
                   _roleDescriptions[_selectedRole]!,
-                  style: TextStyle(fontSize: 12, color: Colors.grey[600], fontStyle: FontStyle.italic),
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey[600],
+                    fontStyle: FontStyle.italic,
+                  ),
                 ),
               ),
 
@@ -151,21 +172,36 @@ class _InviteMemberDialogState extends State<InviteMemberDialog> {
                 children: [
                   TextButton(
                     onPressed: _isLoading ? null : () => Navigator.pop(context),
-                    child: const Text("Cancel", style: TextStyle(color: Colors.grey)),
+                    child: const Text(
+                      "Cancel",
+                      style: TextStyle(color: Colors.grey),
+                    ),
                   ),
                   const SizedBox(width: 8),
                   ElevatedButton.icon(
                     onPressed: _isLoading ? null : _handleSend,
-                    icon: _isLoading 
-                      ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)) 
-                      : const Icon(Icons.send, size: 18),
+                    icon: _isLoading
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2,
+                            ),
+                          )
+                        : const Icon(Icons.send, size: 18),
                     label: Text(_isLoading ? "Sending..." : "Send Invitation"),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF5B6BBF),
                       foregroundColor: Colors.white,
                       elevation: 0,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 12,
+                      ),
                     ),
                   ),
                 ],
