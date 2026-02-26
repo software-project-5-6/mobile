@@ -56,19 +56,79 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
       
       // Top App Bar (Same for both roles)
       appBar: AppBar(
-        backgroundColor: const Color(0xFF5B6BBF),
-        title: const Text("Project Spaces", style: TextStyle(color: Colors.white)),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => Navigator.pop(context),
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh, color: Colors.white),
-            onPressed: _fetchProjects,
+    backgroundColor: const Color(0xFF5B6BBF),
+    elevation: 0,
+    toolbarHeight: 80,
+    automaticallyImplyLeading: false,
+    leadingWidth: 70,
+
+    leading: Center(
+      child: InkWell(
+        onTap: () => Navigator.pop(context),
+        borderRadius: BorderRadius.circular(50),
+        child: Container(
+          padding: const EdgeInsets.all(10),
+          decoration: const BoxDecoration(
+            color: Color.fromARGB(255, 45, 56, 107),
+            shape: BoxShape.circle,
           ),
-        ],
+          child: const Icon(
+            Icons.arrow_back,
+            color: Colors.white,
+            size: 24,
+          ),
+        ),
       ),
+    ),
+
+    title: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: const [
+        Text(
+          "Project Spaces",
+          style: TextStyle(
+            fontSize: 25,
+            fontWeight: FontWeight.w800,
+            color: Color.fromARGB(255, 255, 255, 255),
+            letterSpacing: -0.5,
+          ),
+        ),
+        SizedBox(height: 2),
+        Text(
+          "Manage all your projects",
+          style: TextStyle(
+            color: Color.fromARGB(255, 35, 34, 34),
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+            letterSpacing: 0.2,
+          ),
+        ),
+      ],
+    ),
+
+  actions: [
+    Padding(
+      padding: const EdgeInsets.only(right: 16),
+      child: InkWell(
+        onTap: _fetchProjects,
+        borderRadius: BorderRadius.circular(50),
+        child: Container(
+          padding: const EdgeInsets.all(10),
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.35),
+            shape: BoxShape.circle,
+          ),
+          child: const Icon(
+            Icons.refresh,
+            color: Color.fromARGB(255, 95, 102, 134),
+            size: 22,
+          ),
+        ),
+      ),
+    ),
+  ],
+),
 
       body: Column(
         children: [

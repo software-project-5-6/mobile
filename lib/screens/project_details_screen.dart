@@ -46,7 +46,7 @@ class _ProjectDetailsScreenState extends State<ProjectDetailsScreen> with Single
       
       // --- APP BAR: TITLE & SUBTITLE FIXED AT TOP ---
       appBar: AppBar(
-        backgroundColor: Colors.grey[50],
+        backgroundColor: const Color(0xFF5B6BBF),
         elevation: 0,
         toolbarHeight: 80,
         leadingWidth: 70,
@@ -55,12 +55,12 @@ class _ProjectDetailsScreenState extends State<ProjectDetailsScreen> with Single
             onTap: () => Navigator.pop(context),
             borderRadius: BorderRadius.circular(50),
             child: Container(
-              padding: const EdgeInsets.all(8),
+              padding: const EdgeInsets.all(10),
               decoration: const BoxDecoration(
-                color: Color(0xFF5B6BBF),
+                color: Color.fromARGB(255, 45, 56, 107),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(Icons.arrow_back, color: Colors.white, size: 20),
+              child: const Icon(Icons.arrow_back, color: Colors.white, size: 22),
             ),
           ),
         ),
@@ -71,15 +71,21 @@ class _ProjectDetailsScreenState extends State<ProjectDetailsScreen> with Single
             Text(
               "Project Details",
               style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: Color(0xFF333333),
+                fontSize: 25,
+                fontWeight: FontWeight.w800,
+                color: Color.fromARGB(255, 255, 255, 255),
+                letterSpacing: -0.5,
               ),
             ),
-            SizedBox(height: 4),
+            SizedBox(height: 2),
             Text(
               "View and manage project information",
-              style: TextStyle(color: Colors.grey, fontSize: 12, fontWeight: FontWeight.normal),
+              style: TextStyle(
+                color: Color.fromARGB(255, 35, 34, 34),
+                fontSize: 14, 
+                fontWeight: FontWeight.w600,
+                letterSpacing: 0.2,
+            ),
             ),
           ],
         ),
