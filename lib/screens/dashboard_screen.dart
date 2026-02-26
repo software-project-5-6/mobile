@@ -4,6 +4,7 @@ import '../services/auth_service.dart';
 import 'login_screen.dart';
 import 'projects_screen.dart'; 
 import 'ai_assistant_screen.dart';
+import 'users/users_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   final bool isAdmin; 
@@ -175,12 +176,23 @@ class _DashboardScreenState extends State<DashboardScreen> {
               const Divider(),
               const Padding(
                 padding: EdgeInsets.only(left: 16, top: 10, bottom: 5),
-                child: Text("ADMIN TOOLS", style: TextStyle(color: Colors.grey, fontSize: 12)),
+                child: Text("ADMIN TOOLS", style: TextStyle(color: Color.fromARGB(255, 139, 135, 135), fontSize: 12)),
               ),
               ListTile(
                 leading: const Icon(Icons.people),
                 title: const Text("Users"),
-                onTap: () {},
+                onTap: () {
+                  // Close the side drawer
+                  Navigator.pop(context); 
+                  
+                  // Navigate to the Users screen
+                  Navigator.push(
+                    context, 
+                    MaterialPageRoute(
+                      builder: (context) => const UsersScreen()
+                    )
+                  );
+                },
               ),
             ],
 
