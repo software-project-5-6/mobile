@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import '../../services/user_service.dart';
+import 'components/view_user_dialog.dart';
+import 'components/delete_user_dialog.dart';
 
 class UsersScreen extends StatefulWidget {
   const UsersScreen({super.key});
@@ -8,11 +11,11 @@ class UsersScreen extends StatefulWidget {
 }
 
 class _UsersScreenState extends State<UsersScreen> {
-  // We will connect this to your UserService later
+  final UserService _userService = UserService();
+  
   bool _isLoading = true;
   String? _error;
   String _searchQuery = "";
-  
   List<dynamic> _users = [];
 
   @override
@@ -28,26 +31,24 @@ class _UsersScreenState extends State<UsersScreen> {
     });
 
     try {
-      // Temporary mock data until we connect the backend API
-      await Future.delayed(const Duration(seconds: 1)); 
-      final mockData = [
-        {"id": "UT91", "fullName": "Super Admin", "email": "admin@psms.com", "globalRole": "APP_ADMIN", "createdAt": "2023-01-15T10:00:00Z"},
-        {"id": "UV47", "fullName": "Piyumi Sandunika", "email": "piyumisandunika2002@gmail.com", "globalRole": "APP_USER", "createdAt": "2023-05-20T14:30:00Z"},
-      ];
+      final data = await _userService.getAllUsers();
 
-      setState(() {
-        _users = mockData;
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _users = data;
+          _isLoading = false;
+        });
+      }
     } catch (e) {
-      setState(() {
-        _error = "Failed to load users. Please try again.";
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _error = "Failed to load users. Please check your connection.";
+          _isLoading = false;
+        });
+      }
     }
   }
 
-  // Filter users based on the search bar input
   List<dynamic> get _filteredUsers {
     if (_searchQuery.isEmpty) return _users;
     return _users.where((user) {
@@ -86,13 +87,11 @@ class _UsersScreenState extends State<UsersScreen> {
     );
   }
 
-  // --- UI COMPONENTS ---
-
   AppBar _buildAppBar() {
     return AppBar(
-      backgroundColor: const Color.fromARGB(255, 244, 245, 245),
+      backgroundColor: const Color.fromARGB(255, 158, 169, 218),
       elevation: 0,
-      toolbarHeight: 80,
+      toolbarHeight: 60,
       leadingWidth: 70,
       leading: Center(
         child: InkWell(
@@ -100,8 +99,7 @@ class _UsersScreenState extends State<UsersScreen> {
           borderRadius: BorderRadius.circular(50),
           child: Container(
             padding: const EdgeInsets.all(8),
-            decoration: const BoxDecoration(color: Color(0xFF5B6BBF), shape: BoxShape.circle),
-            child: const Icon(Icons.arrow_back, color: Colors.white, size: 20),
+            child: const Icon(Icons.arrow_back, color: Color.fromARGB(255, 0, 0, 0), size: 20),
           ),
         ),
       ),
@@ -109,9 +107,9 @@ class _UsersScreenState extends State<UsersScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.center,
         children: const [
-          Text("Users", style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Color(0xFF333333))),
+          Text("Users", style: TextStyle(fontSize: 22,fontWeight: FontWeight.bold, color: Color(0xFF333333))),
+          Text("Manage and track all system users", style: TextStyle(color: Color.fromARGB(255, 66, 66, 66), fontSize: 12)),
           SizedBox(height: 4),
-          Text("Manage and track all system users", style: TextStyle(color: Colors.grey, fontSize: 12)),
         ],
       ),
     );
@@ -129,18 +127,9 @@ class _UsersScreenState extends State<UsersScreen> {
           filled: true,
           fillColor: Colors.white,
           contentPadding: const EdgeInsets.symmetric(vertical: 0),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8),
-            borderSide: BorderSide(color: Colors.grey.shade300),
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8),
-            borderSide: BorderSide(color: Colors.grey.shade300),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8),
-            borderSide: const BorderSide(color: Color(0xFF5B6BBF)),
-          ),
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: const Color.fromARGB(255, 194, 193, 193))),
+          enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: Colors.grey.shade300)),
+          focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: Color(0xFF5B6BBF))),
         ),
       ),
     );
@@ -158,7 +147,7 @@ class _UsersScreenState extends State<UsersScreen> {
           margin: const EdgeInsets.only(bottom: 12),
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: const Color.fromARGB(255, 233, 231, 231),
             borderRadius: BorderRadius.circular(12),
             border: Border.all(color: Colors.grey.shade200),
             boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 8, offset: const Offset(0, 4))],
@@ -186,12 +175,12 @@ class _UsersScreenState extends State<UsersScreen> {
                             _buildRoleChip(isAdmin),
                           ],
                         ),
-                        const SizedBox(height: 4),
+                        const SizedBox(height: 5),
                         Row(
                           children: [
                             const Icon(Icons.email, size: 12, color: Colors.grey),
                             const SizedBox(width: 4),
-                            Text(user['email'] ?? 'N/A', style: TextStyle(color: const Color.fromARGB(255, 97, 96, 96), fontSize: 13)),
+                            Text(user['email'] ?? 'N/A', style: const TextStyle(color: Color.fromARGB(255, 97, 96, 96), fontSize: 13)),
                           ],
                         ),
                       ],
@@ -199,37 +188,22 @@ class _UsersScreenState extends State<UsersScreen> {
                   ),
                 ],
               ),
-              const Padding(padding: EdgeInsets.symmetric(vertical: 8), child: Divider(height: 1)),
+              const Padding(padding: EdgeInsets.symmetric(vertical: 5), child: Divider(height: 1)),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text("#${user['id']}", style: TextStyle(color: const Color.fromARGB(255, 97, 96, 96), fontSize: 12, fontWeight: FontWeight.w600)),
+                  Text("#${user['id']}", style: const TextStyle(color: Color.fromARGB(255, 97, 96, 96), fontSize: 12, fontWeight: FontWeight.w600)),
                   Row(
                     children: [
                       IconButton(
                         icon: const Icon(Icons.visibility, color: Colors.blue, size: 20),
-                        onPressed: () {
-                          // TODO: Connect View Dialog
-                          print("View user: ${user['fullName']}");
-                        },
-                        constraints: const BoxConstraints(),
-                        padding: const EdgeInsets.all(8),
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.edit, color: Colors.orange, size: 20),
-                        onPressed: () {
-                          // TODO: Connect Edit Dialog
-                          print("Edit user: ${user['fullName']}");
-                        },
+                        onPressed: () => _showViewDialog(user),
                         constraints: const BoxConstraints(),
                         padding: const EdgeInsets.all(8),
                       ),
                       IconButton(
                         icon: const Icon(Icons.delete, color: Colors.red, size: 20),
-                        onPressed: () {
-                          // TODO: Connect Delete Dialog
-                          print("Delete user: ${user['fullName']}");
-                        },
+                        onPressed: () => _showDeleteDialog(user),
                         constraints: const BoxConstraints(),
                         padding: const EdgeInsets.all(8),
                       ),
@@ -289,6 +263,18 @@ class _UsersScreenState extends State<UsersScreen> {
           Expanded(child: Text(_error!, style: const TextStyle(color: Colors.red, fontSize: 13))),
         ],
       ),
+    );
+  }
+
+  void _showViewDialog(Map<String, dynamic> user) {
+    showDialog(context: context, builder: (context) => ViewUserDialog(user: user));
+  }
+
+  void _showDeleteDialog(Map<String, dynamic> user) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => DeleteUserDialog(user: user, onDeleteSuccess: _fetchUsers),
     );
   }
 }
