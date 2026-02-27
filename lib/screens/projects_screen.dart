@@ -56,9 +56,9 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
       
       // Top App Bar (Same for both roles)
       appBar: AppBar(
-    backgroundColor: const Color(0xFF5B6BBF),
+    backgroundColor: const Color.fromARGB(255, 158, 169, 218),
     elevation: 0,
-    toolbarHeight: 80,
+    toolbarHeight: 60,
     automaticallyImplyLeading: false,
     leadingWidth: 70,
 
@@ -68,13 +68,9 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
         borderRadius: BorderRadius.circular(50),
         child: Container(
           padding: const EdgeInsets.all(10),
-          decoration: const BoxDecoration(
-            color: Color.fromARGB(255, 45, 56, 107),
-            shape: BoxShape.circle,
-          ),
           child: const Icon(
             Icons.arrow_back,
-            color: Colors.white,
+            color: Color.fromARGB(255, 0, 0, 0),
             size: 24,
           ),
         ),
@@ -85,25 +81,9 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisAlignment: MainAxisAlignment.center,
       children: const [
-        Text(
-          "Project Spaces",
-          style: TextStyle(
-            fontSize: 25,
-            fontWeight: FontWeight.w800,
-            color: Color.fromARGB(255, 255, 255, 255),
-            letterSpacing: -0.5,
-          ),
-        ),
+        Text("Project Spaces",style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold, color: Color(0xFF333333))),
         SizedBox(height: 2),
-        Text(
-          "Manage all your projects",
-          style: TextStyle(
-            color: Color.fromARGB(255, 35, 34, 34),
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-            letterSpacing: 0.2,
-          ),
-        ),
+        Text("Manage all your projects",style: TextStyle(color: Color.fromARGB(255, 66, 66, 66), fontSize: 12)),
       ],
     ),
 
@@ -115,10 +95,6 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
         borderRadius: BorderRadius.circular(50),
         child: Container(
           padding: const EdgeInsets.all(10),
-          decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.35),
-            shape: BoxShape.circle,
-          ),
           child: const Icon(
             Icons.refresh,
             color: Color.fromARGB(255, 95, 102, 134),

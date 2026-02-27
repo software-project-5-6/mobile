@@ -107,7 +107,7 @@ class _UsersScreenState extends State<UsersScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.center,
         children: const [
-          Text("Users", style: TextStyle(fontSize: 22,fontWeight: FontWeight.bold, color: Color(0xFF333333))),
+          Text("Users", style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold, color: Color(0xFF333333))),
           Text("Manage and track all system users", style: TextStyle(color: Color.fromARGB(255, 66, 66, 66), fontSize: 12)),
           SizedBox(height: 4),
         ],

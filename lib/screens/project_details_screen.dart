@@ -46,9 +46,9 @@ class _ProjectDetailsScreenState extends State<ProjectDetailsScreen> with Single
       
       // --- APP BAR: TITLE & SUBTITLE FIXED AT TOP ---
       appBar: AppBar(
-        backgroundColor: const Color(0xFF5B6BBF),
+        backgroundColor: const Color.fromARGB(255, 158, 169, 218),
         elevation: 0,
-        toolbarHeight: 80,
+        toolbarHeight: 60,
         leadingWidth: 70,
         leading: Center(
           child: InkWell(
@@ -56,11 +56,7 @@ class _ProjectDetailsScreenState extends State<ProjectDetailsScreen> with Single
             borderRadius: BorderRadius.circular(50),
             child: Container(
               padding: const EdgeInsets.all(10),
-              decoration: const BoxDecoration(
-                color: Color.fromARGB(255, 45, 56, 107),
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(Icons.arrow_back, color: Colors.white, size: 22),
+              child: const Icon(Icons.arrow_back, color: Color.fromARGB(255, 0, 0, 0), size: 22),
             ),
           ),
         ),
@@ -68,25 +64,9 @@ class _ProjectDetailsScreenState extends State<ProjectDetailsScreen> with Single
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.center,
           children: const [
-            Text(
-              "Project Details",
-              style: TextStyle(
-                fontSize: 25,
-                fontWeight: FontWeight.w800,
-                color: Color.fromARGB(255, 255, 255, 255),
-                letterSpacing: -0.5,
-              ),
-            ),
+            Text("Project Details",style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold, color: Color(0xFF333333))),
             SizedBox(height: 2),
-            Text(
-              "View and manage project information",
-              style: TextStyle(
-                color: Color.fromARGB(255, 35, 34, 34),
-                fontSize: 14, 
-                fontWeight: FontWeight.w600,
-                letterSpacing: 0.2,
-            ),
-            ),
+            Text("View and manage project information",style: TextStyle(color: Color.fromARGB(255, 66, 66, 66), fontSize: 12)),
           ],
         ),
       ),
