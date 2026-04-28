@@ -5,6 +5,7 @@ import 'package:amplify_auth_cognito/amplify_auth_cognito.dart';
 
 class UserService {
   // Use 10.0.2.2 if testing on an Android Emulator, or your local network IP for physical devices
+  // final String baseUrl = "http://10.50.20.51:8080/api/v1";
   final String baseUrl = "http://10.0.2.2:8080/api/v1";
 
   // --- FETCH SECURE HEADERS ---

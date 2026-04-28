@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:amplify_flutter/amplify_flutter.dart';
 import '../services/auth_service.dart';
+import '../services/project_service.dart';
+import '../services/chat_service.dart';
 import 'login_screen.dart';
 import 'projects_screen.dart'; 
 import 'ai_assistant_screen.dart';
@@ -16,20 +18,32 @@ class DashboardScreen extends StatefulWidget {
 }
 
 class _DashboardScreenState extends State<DashboardScreen> {
-  int _currentIndex = 0; // 0 = Chat, 1 = Projects (For Users)
+  int _currentIndex = 0; 
 
   // User details state variables
   String _userName = "Loading...";
   String _userEmail = "Loading...";
   String _userInitials = "U";
 
+  // --- Global State for AI Assistant ---
+  Map<String, String>? _currentProjectWithAssistant;
+  String? _currentConversationId;
+
+  // Services for Drawer Data
+  final ProjectService _projectService = ProjectService();
+  final ChatService _chatService = ChatService();
+
+  List<dynamic> _projects = [];
+  List<dynamic> _conversations = [];
+  bool _isLoadingSidebar = true;
+
   @override
   void initState() {
     super.initState();
     _fetchUserDetails();
+    _fetchProjectsForSidebar();
   }
 
-  // Fetch User Data from AWS Cognito
   Future<void> _fetchUserDetails() async {
     try {
       final attributes = await Amplify.Auth.fetchUserAttributes();
@@ -37,16 +51,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
       String name = "";
 
       for (final element in attributes) {
-        if (element.userAttributeKey.key == 'email') {
-          email = element.value;
-        } else if (element.userAttributeKey.key == 'name') {
-          name = element.value;
-        }
+        if (element.userAttributeKey.key == 'email') email = element.value;
+        else if (element.userAttributeKey.key == 'name') name = element.value;
       }
 
-      if (email.isNotEmpty && name.isEmpty) {
-        name = email.split('@')[0]; 
-      }
+      if (email.isNotEmpty && name.isEmpty) name = email.split('@')[0]; 
 
       if (mounted) {
         setState(() {
@@ -56,7 +65,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
         });
       }
     } catch (e) {
-      print("Error fetching user details: $e");
       if (mounted) {
         setState(() {
           _userName = widget.isAdmin ? "Super Admin" : "App User";
@@ -74,10 +82,215 @@ class _DashboardScreenState extends State<DashboardScreen> {
     return name[0].toUpperCase();
   }
 
+  Future<void> _fetchProjectsForSidebar() async {
+    try {
+      final data = await _projectService.getAllProjects();
+      setState(() {
+        _projects = data;
+        if (data.isNotEmpty) {
+          _setCurrentProject({
+            "projectId": data[0]['id'].toString(),
+            "projectName": data[0]['projectName'] ?? data[0]['name'] ?? "Unnamed",
+          });
+        }
+        _isLoadingSidebar = false;
+      });
+    } catch (e) {
+      setState(() => _isLoadingSidebar = false);
+      debugPrint("Error loading projects for sidebar: $e");
+    }
+  }
+
+  Future<void> _fetchConversations(String projectId) async {
+    try {
+      final response = await _chatService.getAllConversationsForProject(projectId);
+      
+      setState(() {
+        if (response is List) {
+          _conversations = response;
+        } else if (response is Map && response.containsKey('conversations')) {
+          _conversations = response['conversations'] ?? [];
+        } else {
+          _conversations = [];
+        }
+
+        if (_conversations.isNotEmpty) {
+          _currentConversationId = _conversations.last['conversationId'].toString();
+        } else {
+          _currentConversationId = null;
+        }
+      });
+    } catch (e) {
+      debugPrint("Error fetching sidebar conversations: $e");
+    }
+  }
+
+  void _setCurrentProject(Map<String, String> project) {
+    setState(() {
+      _currentProjectWithAssistant = project;
+      _currentConversationId = null;
+    });
+    _fetchConversations(project['projectId']!);
+  }
+
+  // --- NEW: Delete Chat Logic ---
+  Future<void> _confirmDeleteChat(String conversationId) async {
+    // 1. Show confirmation popup
+    final bool? confirm = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text("Delete Chat"),
+        content: const Text("Are you sure you want to delete this chat history? This cannot be undone."),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text("Cancel")),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            onPressed: () => Navigator.pop(ctx, true), 
+            child: const Text("Delete", style: TextStyle(color: Colors.white))
+          ),
+        ],
+      ),
+    );
+
+    // 2. If user clicked Delete, call the database
+    if (confirm == true) {
+      try {
+        await _chatService.deleteAllMessagesForConversation(conversationId);
+        
+        // Refresh the list
+        if (_currentProjectWithAssistant != null) {
+          await _fetchConversations(_currentProjectWithAssistant!['projectId']!);
+        }
+
+        // If the user deleted the chat they were currently looking at, reset the screen
+        if (_currentConversationId == conversationId) {
+          setState(() {
+            _currentConversationId = null;
+          });
+        }
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Chat deleted successfully")));
+        }
+      } catch (e) {
+        debugPrint("Failed to delete chat: $e");
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Failed to delete chat"), backgroundColor: Colors.red));
+        }
+      }
+    }
+  }
+
+  Future<void> _showNewChatDialog() async {
+    String newTitle = "";
+    bool isCreating = false;
+    
+    String? dialogSelectedProjectId = _currentProjectWithAssistant?['projectId'];
+    if (dialogSelectedProjectId == null && _projects.isNotEmpty) {
+      dialogSelectedProjectId = _projects[0]['id'].toString();
+    }
+
+    await showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => StatefulBuilder(
+        builder: (context, setStateDialog) {
+          return AlertDialog(
+            title: const Text("Start New Chat"),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (isCreating) const LinearProgressIndicator(),
+                const SizedBox(height: 10),
+                
+                TextField(
+                  autofocus: true,
+                  decoration: const InputDecoration(
+                    hintText: "Enter Chat Title", 
+                    border: OutlineInputBorder(),
+                    contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                  ),
+                  onChanged: (val) => newTitle = val,
+                ),
+                const SizedBox(height: 16),
+                
+                const Text("Assign to Project", style: TextStyle(fontSize: 12, color: Colors.grey, fontWeight: FontWeight.bold)),
+                const SizedBox(height: 6),
+                if (_projects.isNotEmpty)
+                  DropdownButtonFormField<String>(
+                    decoration: const InputDecoration(
+                      border: OutlineInputBorder(),
+                      contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                    ),
+                    value: dialogSelectedProjectId,
+                    isExpanded: true,
+                    items: _projects.map((p) {
+                      return DropdownMenuItem<String>(
+                        value: p['id'].toString(),
+                        child: Text(
+                          p['projectName'] ?? p['name'] ?? 'Unnamed Project', 
+                          style: const TextStyle(fontSize: 14),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      );
+                    }).toList(),
+                    onChanged: (val) {
+                      setStateDialog(() {
+                        dialogSelectedProjectId = val;
+                      });
+                    },
+                  ),
+              ],
+            ),
+            actions: [
+              TextButton(onPressed: () => Navigator.pop(ctx), child: const Text("Cancel")),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF6A11CB)),
+                onPressed: (isCreating || dialogSelectedProjectId == null) ? null : () async {
+                  if (newTitle.trim().isNotEmpty) {
+                    setStateDialog(() => isCreating = true); 
+                    try {
+                      final newId = await _chatService.createConversation({
+                        "projectId": dialogSelectedProjectId!, 
+                        "title": newTitle.trim(),
+                      });
+                      
+                      final proj = _projects.firstWhere((p) => p['id'].toString() == dialogSelectedProjectId);
+                      setState(() {
+                        _currentProjectWithAssistant = {
+                          "projectId": proj['id'].toString(),
+                          "projectName": proj['projectName'] ?? proj['name'] ?? "",
+                        };
+                      });
+                      
+                      await _fetchConversations(dialogSelectedProjectId!);
+                      
+                      setState(() {
+                        _currentConversationId = newId.toString();
+                        _currentIndex = 0; 
+                      });
+                      
+                      Navigator.pop(ctx); 
+                      Navigator.pop(context); 
+                    } catch (e) {
+                      debugPrint("Failed to create chat: $e");
+                      setStateDialog(() => isCreating = false);
+                    }
+                  }
+                },
+                child: const Text("Create", style: TextStyle(color: Colors.white)),
+              ),
+            ],
+          );
+        }
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // --- APP BAR ---
       appBar: AppBar(
         title: const Text("Space Management", style: TextStyle(color: Colors.white, fontSize: 18)),
         backgroundColor: const Color(0xFF6A11CB),
@@ -104,19 +317,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     ],
                   ),
                 ),
-                const PopupMenuItem<String>(
-                  value: 'profile',
-                  child: ListTile(leading: Icon(Icons.person, color: Colors.grey), title: Text("Profile"), contentPadding: EdgeInsets.zero, dense: true),
-                ),
-                const PopupMenuItem<String>(
-                  value: 'settings',
-                  child: ListTile(leading: Icon(Icons.settings, color: Colors.grey), title: Text("Settings"), contentPadding: EdgeInsets.zero, dense: true),
-                ),
+                const PopupMenuItem<String>(value: 'profile', child: ListTile(leading: Icon(Icons.person, color: Colors.grey), title: Text("Profile"), contentPadding: EdgeInsets.zero, dense: true)),
+                const PopupMenuItem<String>(value: 'settings', child: ListTile(leading: Icon(Icons.settings, color: Colors.grey), title: Text("Settings"), contentPadding: EdgeInsets.zero, dense: true)),
                 const PopupMenuDivider(),
-                const PopupMenuItem<String>(
-                  value: 'logout',
-                  child: ListTile(leading: Icon(Icons.logout, color: Colors.red), title: Text("Logout", style: TextStyle(color: Colors.red)), contentPadding: EdgeInsets.zero, dense: true),
-                ),
+                const PopupMenuItem<String>(value: 'logout', child: ListTile(leading: Icon(Icons.logout, color: Colors.red), title: Text("Logout", style: TextStyle(color: Colors.red)), contentPadding: EdgeInsets.zero, dense: true)),
               ],
               onSelected: (value) {
                 if (value == 'logout') _handleLogout();
@@ -126,10 +330,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
         ],
       ),
 
-      // --- DRAWER (Left Side Panel) ---
       drawer: Drawer(
-        child: ListView(
-          padding: EdgeInsets.zero,
+        child: Column(
           children: [
             UserAccountsDrawerHeader(
               decoration: const BoxDecoration(color: Color(0xFF6A11CB)),
@@ -141,84 +343,144 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ),
             ),
             
-            // Tab 0: AI Assistant
-            ListTile(
-              leading: Icon(Icons.auto_awesome, color: _currentIndex == 0 ? const Color(0xFF6A11CB) : Colors.grey),
-              title: Text("AI Assistant", style: TextStyle(fontWeight: _currentIndex == 0 ? FontWeight.bold : FontWeight.normal)),
-              selected: _currentIndex == 0,
-              selectedTileColor: Colors.blue.withOpacity(0.1),
-              onTap: () {
-                setState(() => _currentIndex = 0);
-                Navigator.pop(context);
-              },
-            ),
-            
-            // Tab 1: Projects
-            ListTile(
-              leading: Icon(Icons.folder, color: _currentIndex == 1 ? const Color(0xFF6A11CB) : Colors.grey),
-              title: Text("Projects", style: TextStyle(fontWeight: _currentIndex == 1 ? FontWeight.bold : FontWeight.normal)),
-              selected: _currentIndex == 1,
-              selectedTileColor: Colors.blue.withOpacity(0.1),
-              onTap: () {
-                Navigator.pop(context); // Close Drawer
-                
-                Navigator.push(
-                  context, 
-                  MaterialPageRoute(
-                    builder: (context) => ProjectsScreen(isAdmin: widget.isAdmin)
-                  )
-                );
-              },
-            ),
-            
-            // --- ADMIN ONLY TOOLS ---
-            if (widget.isAdmin) ...[
-              const Divider(),
-              const Padding(
-                padding: EdgeInsets.only(left: 16, top: 10, bottom: 5),
-                child: Text("ADMIN TOOLS", style: TextStyle(color: Color.fromARGB(255, 139, 135, 135), fontSize: 12)),
-              ),
-              ListTile(
-                leading: const Icon(Icons.people),
-                title: const Text("Users"),
-                onTap: () {
-                  // Close the side drawer
-                  Navigator.pop(context); 
-                  
-                  // Navigate to the Users screen
-                  Navigator.push(
-                    context, 
-                    MaterialPageRoute(
-                      builder: (context) => const UsersScreen()
-                    )
-                  );
-                },
-              ),
-            ],
+            Expanded(
+              child: ListView(
+                padding: EdgeInsets.zero,
+                children: [
+                  ExpansionTile(
+                    initiallyExpanded: _currentIndex == 0,
+                    leading: Icon(Icons.auto_awesome, color: _currentIndex == 0 ? const Color(0xFF6A11CB) : Colors.grey),
+                    title: Text("AI Assistant", style: TextStyle(fontWeight: _currentIndex == 0 ? FontWeight.bold : FontWeight.normal)),
+                    onExpansionChanged: (expanded) {
+                      if (expanded) setState(() => _currentIndex = 0);
+                    },
+                    children: [
+                      ListTile(
+                        contentPadding: const EdgeInsets.only(left: 40, right: 16),
+                        leading: const Icon(Icons.add, size: 20),
+                        title: const Text("New Chat", style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+                        onTap: _showNewChatDialog,
+                      ),
+                      
+                      if (!_isLoadingSidebar && _projects.isNotEmpty)
+                        Padding(
+                          padding: const EdgeInsets.only(left: 40, right: 16, top: 8, bottom: 8),
+                          child: DropdownButtonFormField<String>(
+                            decoration: InputDecoration(
+                              contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                              border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                              labelText: "Project Category",
+                            ),
+                            value: _currentProjectWithAssistant?['projectId'],
+                            items: _projects.map((p) {
+                              return DropdownMenuItem<String>(
+                                value: p['id'].toString(),
+                                child: Text(p['projectName'] ?? p['name'] ?? 'Unnamed', style: const TextStyle(fontSize: 14)),
+                              );
+                            }).toList(),
+                            onChanged: (val) {
+                              if (val != null) {
+                                final proj = _projects.firstWhere((p) => p['id'].toString() == val);
+                                _setCurrentProject({
+                                  "projectId": proj['id'].toString(),
+                                  "projectName": proj['projectName'] ?? proj['name'] ?? "",
+                                });
+                              }
+                            },
+                          ),
+                        ),
 
-            // --- USER ONLY PREFERENCES ---
-            if (!widget.isAdmin) ...[
-              const Divider(),
-              const Padding(
-                padding: EdgeInsets.only(left: 16, top: 10, bottom: 5),
-                child: Text("PREFERENCES", style: TextStyle(color: Colors.grey, fontSize: 12)),
+                      const Padding(
+                        padding: EdgeInsets.only(left: 40, top: 8, bottom: 4),
+                        child: Align(
+                          alignment: Alignment.centerLeft,
+                          child: Text("RECENT CHATS", style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.grey)),
+                        ),
+                      ),
+
+                      if (_conversations.isEmpty)
+                        const Padding(
+                          padding: EdgeInsets.only(left: 40, top: 8, bottom: 16),
+                          child: Align(
+                            alignment: Alignment.centerLeft,
+                            child: Text("No chats yet.", style: TextStyle(fontSize: 12, color: Colors.grey, fontStyle: FontStyle.italic)),
+                          ),
+                        ),
+
+                      ..._conversations.map((chat) {
+                        final isSelected = chat['conversationId'].toString() == _currentConversationId;
+                        return Container(
+                          color: isSelected ? const Color(0xFF6A11CB).withValues(alpha: 0.1) : Colors.transparent,
+                          child: ListTile(
+                            contentPadding: const EdgeInsets.only(left: 40, right: 8),
+                            title: Text(chat['title'] ?? 'Untitled', style: TextStyle(fontSize: 13, fontWeight: isSelected ? FontWeight.bold : FontWeight.normal)),
+                            
+                            // --- NEW: The Delete Icon Button ---
+                            trailing: IconButton(
+                              icon: const Icon(Icons.delete_outline, size: 18, color: Colors.grey),
+                              onPressed: () => _confirmDeleteChat(chat['conversationId'].toString()),
+                            ),
+                            
+                            onTap: () {
+                              setState(() {
+                                _currentConversationId = chat['conversationId'].toString();
+                                _currentIndex = 0;
+                              });
+                              Navigator.pop(context); 
+                            },
+                          ),
+                        );
+                      }),
+                    ],
+                  ),
+                  
+                  ListTile(
+                    leading: Icon(Icons.folder, color: _currentIndex == 1 ? const Color(0xFF6A11CB) : Colors.grey),
+                    title: Text("Projects", style: TextStyle(fontWeight: _currentIndex == 1 ? FontWeight.bold : FontWeight.normal)),
+                    selected: _currentIndex == 1,
+                    selectedTileColor: Colors.blue.withValues(alpha: 0.1),
+                    onTap: () {
+                      Navigator.pop(context); 
+                      Navigator.push(context, MaterialPageRoute(builder: (context) => ProjectsScreen(isAdmin: widget.isAdmin)));
+                    },
+                  ),
+                  
+                  if (widget.isAdmin) ...[
+                    const Divider(),
+                    const Padding(
+                      padding: EdgeInsets.only(left: 16, top: 10, bottom: 5),
+                      child: Text("ADMIN TOOLS", style: TextStyle(color: Color.fromARGB(255, 139, 135, 135), fontSize: 12)),
+                    ),
+                    ListTile(
+                      leading: const Icon(Icons.people),
+                      title: const Text("Users"),
+                      onTap: () {
+                        Navigator.pop(context); 
+                        Navigator.push(context, MaterialPageRoute(builder: (context) => const UsersScreen()));
+                      },
+                    ),
+                  ],
+
+                  if (!widget.isAdmin) const Divider(),
+                  
+                  ListTile(
+                    leading: const Icon(Icons.settings),
+                    title: const Text("Settings"),
+                    onTap: () => Navigator.pop(context),
+                  ),
+                ],
               ),
-            ],
-            
-            ListTile(
-              leading: const Icon(Icons.settings),
-              title: const Text("Settings"),
-              onTap: () {
-                Navigator.pop(context);
-              },
             ),
           ],
         ),
       ),
 
-      // --- BODY ---
-      // This checks the current index. If it is 0, it loads the new AI Assistant Screen!
-      body: _currentIndex == 0 ? const AIAssistantScreen() : const ProjectsScreen(isAdmin: false),
+      body: _currentIndex == 0 
+        ? AIAssistantScreen(
+            currentProjectWithAssistant: _currentProjectWithAssistant,
+            currentConversationId: _currentConversationId,
+          ) 
+        : const ProjectsScreen(isAdmin: false),
     );
   }
 

@@ -4,10 +4,9 @@ import 'package:amplify_flutter/amplify_flutter.dart';
 import 'package:amplify_auth_cognito/amplify_auth_cognito.dart';
 
 class ApiService {
-  // REPLACE '10.0.2.2' with your actual backend IP
+  /*static const String baseUrl = "http://10.50.20.51:8080/api/v1";*/
   static const String baseUrl = "http://10.0.2.2:8080/api/v1";
 
-  // --- CHANGED: Made this PUBLIC (removed the underscore) ---
   Future<String?> getIdToken() async {
     try {
       final session = await Amplify.Auth.fetchAuthSession();
