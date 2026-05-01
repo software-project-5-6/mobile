@@ -7,6 +7,7 @@ import 'login_screen.dart';
 import 'projects_screen.dart'; 
 import 'ai_assistant_screen.dart';
 import 'users/users_screen.dart';
+import 'profile_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   final bool isAdmin; 
@@ -323,7 +324,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 const PopupMenuItem<String>(value: 'logout', child: ListTile(leading: Icon(Icons.logout, color: Colors.red), title: Text("Logout", style: TextStyle(color: Colors.red)), contentPadding: EdgeInsets.zero, dense: true)),
               ],
               onSelected: (value) {
-                if (value == 'logout') _handleLogout();
+                if (value == 'profile') {
+                  Navigator.push(
+                    context, 
+                    MaterialPageRoute(builder: (context) => ProfileScreen(isAdmin: widget.isAdmin))
+                  );
+                } else if (value == 'logout') {
+                  _handleLogout();
+                }
               },
             ),
           )
