@@ -2,10 +2,9 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:amplify_flutter/amplify_flutter.dart';
 import 'package:amplify_auth_cognito/amplify_auth_cognito.dart';
-
+import '../constants/api_constants.dart';
 class ApiService {
-  /*static const String baseUrl = "http://10.50.20.51:8080/api/v1";*/
-  static const String baseUrl = "http://10.0.2.2:8080/api/v1";
+  static const String baseUrl = "${ApiConstants.baseUrl}/api/v1";
 
   Future<String?> getIdToken() async {
     try {

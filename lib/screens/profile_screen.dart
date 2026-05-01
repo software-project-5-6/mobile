@@ -3,7 +3,7 @@ import 'package:amplify_flutter/amplify_flutter.dart';
 
 class ProfileScreen extends StatefulWidget {
   final bool isAdmin;
-  
+
   const ProfileScreen({super.key, required this.isAdmin});
 
   @override
@@ -29,8 +29,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
       String name = "";
 
       for (final element in attributes) {
-        if (element.userAttributeKey.key == 'email') email = element.value;
-        else if (element.userAttributeKey.key == 'name') name = element.value;
+        if (element.userAttributeKey.key == 'email')
+          email = element.value;
+        else if (element.userAttributeKey.key == 'name')
+          name = element.value;
       }
 
       if (email.isNotEmpty && name.isEmpty) name = email.split('@')[0];
@@ -38,7 +40,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
       if (mounted) {
         setState(() {
           _email = email.isNotEmpty ? email : "user@example.com";
-          _name = name.isNotEmpty ? name : (widget.isAdmin ? "Super Admin" : "App User");
+          _name = name.isNotEmpty
+              ? name
+              : (widget.isAdmin ? "Super Admin" : "App User");
           _initials = _getInitials(_name);
           _isLoading = false;
         });
@@ -58,7 +62,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
   String _getInitials(String name) {
     if (name.isEmpty) return "U";
     final parts = name.trim().split(" ");
-    if (parts.length >= 2) return "${parts[0][0]}${parts[1][0]}".toUpperCase().substring(0, 2);
+    if (parts.length >= 2)
+      return "${parts[0][0]}${parts[1][0]}".toUpperCase().substring(0, 2);
     return name[0].toUpperCase();
   }
 
@@ -69,18 +74,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[100], // Match the grey background
-      
-      // --- Top App Bar ---
+      backgroundColor: Colors.grey[100],
+
+      // --- ADDED: Top App Bar with the Back Button ---
       appBar: AppBar(
-        backgroundColor: const Color.fromARGB(255, 158, 169, 218),
         elevation: 0,
         toolbarHeight: 60,
         automaticallyImplyLeading: false,
         leadingWidth: 70,
         leading: Center(
           child: InkWell(
-            onTap: () => Navigator.pop(context),
+            onTap: () => Navigator.pop(context), // This makes the back button work!
             borderRadius: BorderRadius.circular(50),
             child: Container(
               padding: const EdgeInsets.all(10),
@@ -92,226 +96,208 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
           ),
         ),
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: const [
-            Text(
-              "My Profile",
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF333333)),
-            ),
-            SizedBox(height: 2),
-            Text(
-              "View your personal info and details",
-              style: TextStyle(color: Color.fromARGB(255, 66, 66, 66), fontSize: 12),
-            ),
-          ],
-        ),
       ),
 
-      // --- Body Content ---
+      // --- Body Content (Mobile Optimized) ---
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator(color: Color(0xFF6A11CB)))
-          : Center( // <-- ADDED THIS CENTER WIDGET
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // --- Main Profile Card ---
-                    Container(
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: Colors.grey.shade200),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.04),
-                            blurRadius: 32,
-                            offset: const Offset(0, 8),
-                          )
-                        ],
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // Banner & Avatar Stack
-                          Stack(
-                            clipBehavior: Clip.none,
-                            children: [
-                              // Purple Banner
-                              Container(
-                                height: 80,
-                                decoration: const BoxDecoration(
-                                  color: Color(0xFF6A11CB), // Primary theme color
-                                  borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
-                                ),
-                              ),
-                              // Overlapping Avatar
-                              Positioned(
-                                top: 40, // Halfway off the banner
-                                left: 24,
-                                child: Container(
-                                  padding: const EdgeInsets.all(4), // Creates the white border
-                                  decoration: const BoxDecoration(
-                                    color: Colors.white,
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: CircleAvatar(
-                                    radius: 36,
-                                    backgroundColor: const Color(0xFFBCD1F4), // Light blue from web
-                                    child: Text(
-                                      _initials,
-                                      style: const TextStyle(
-                                        fontSize: 28,
-                                        fontWeight: FontWeight.bold,
-                                        color: Color(0xFF6A11CB), // Dark text
-                                      ),
-                                    ),
-                                  ),
-                                ),
+          ? const Center(
+              child: CircularProgressIndicator(color: Color(0xFF6A11CB)),
+            )
+          : SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // --- Header Profile Section ---
+                  Container(
+                    width: double.infinity,
+                    color: Colors.white,
+                    padding: const EdgeInsets.only(
+                      top: 30,
+                      bottom: 32,
+                      left: 16,
+                      right: 16,
+                    ),
+                    child: Column(
+                      children: [
+                        CircleAvatar(
+                          radius: 50,
+                          backgroundColor: const Color(
+                            0xFFBCD1F4,
+                          ), // Light blue
+                          child: Text(
+                            _initials,
+                            style: const TextStyle(
+                              fontSize: 36,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF6A11CB), // Dark text
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          _name,
+                          style: const TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black87,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          _email,
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.grey[600],
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        // Role Badge
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 6,
+                          ),
+                          decoration: BoxDecoration(
+                            color: widget.isAdmin
+                                ? Colors.redAccent.withValues(alpha: 0.1)
+                                : const Color(
+                                    0xFF6A11CB,
+                                  ).withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Text(
+                            _getRoleLabel(),
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                              color: widget.isAdmin
+                                  ? Colors.redAccent
+                                  : const Color(0xFF6A11CB),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: 24),
+
+                  // --- Detailed Information List ---
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.only(
+                            left: 8.0,
+                            bottom: 8.0,
+                          ),
+                          child: Text(
+                            "ACCOUNT DETAILS",
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.grey[500],
+                              letterSpacing: 1,
+                            ),
+                          ),
+                        ),
+
+                        // Grouped List Card
+                        Container(
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: Colors.grey.shade200),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.02),
+                                blurRadius: 10,
+                                offset: const Offset(0, 4),
                               ),
                             ],
                           ),
-
-                          // Spacer to push content down past the overlapping avatar
-                          const SizedBox(height: 50), 
-
-                          // User Name & Quick Badges
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  _name,
-                                  style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w800),
-                                ),
-                                const SizedBox(height: 8),
-                                Row(
-                                  children: [
-                                    Icon(Icons.email_outlined, size: 16, color: Colors.grey[600]),
-                                    const SizedBox(width: 4),
-                                    Text(_email, style: TextStyle(fontSize: 14, color: Colors.grey[600])),
-                                    const SizedBox(width: 8),
-                                    Text("•", style: TextStyle(color: Colors.grey[400])),
-                                    const SizedBox(width: 8),
-                                    Text(
-                                      _getRoleLabel(),
-                                      style: TextStyle(
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w600,
-                                        color: widget.isAdmin ? Colors.redAccent : const Color(0xFF6A11CB),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
+                          child: Column(
+                            children: [
+                              _buildMobileListRow(
+                                icon: Icons.person_outline,
+                                label: "Full Name",
+                                value: _name,
+                              ),
+                              const Divider(height: 1, indent: 60),
+                              _buildMobileListRow(
+                                icon: Icons.email_outlined,
+                                label: "Email Address",
+                                value: _email,
+                              ),
+                              const Divider(height: 1, indent: 60),
+                              _buildMobileListRow(
+                                icon: Icons.admin_panel_settings_outlined,
+                                label: "Account Role",
+                                value: _getRoleLabel(),
+                                valueColor: widget.isAdmin
+                                    ? Colors.redAccent
+                                    : const Color(0xFF6A11CB),
+                              ),
+                              const Divider(height: 1, indent: 60),
+                              _buildMobileListRow(
+                                icon: Icons.check_circle_outline,
+                                label: "Account Status",
+                                value: "Active & Verified",
+                                valueColor: Colors.green,
+                              ),
+                            ],
                           ),
-
-                          const Padding(
-                            padding: EdgeInsets.symmetric(vertical: 24.0),
-                            child: Divider(height: 1),
-                          ),
-
-                          // Detailed Information Grid (Account Details)
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  "ACCOUNT DETAILS",
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.grey[500],
-                                    letterSpacing: 1,
-                                  ),
-                                ),
-                                const SizedBox(height: 16),
-
-                                // InfoRows stacked vertically for mobile
-                                _buildInfoRow(
-                                  icon: Icons.person_outline,
-                                  label: "FULL NAME",
-                                  value: _name,
-                                ),
-                                const SizedBox(height: 16),
-                                _buildInfoRow(
-                                  icon: Icons.email_outlined,
-                                  label: "EMAIL ADDRESS",
-                                  value: _email,
-                                ),
-                                const SizedBox(height: 16),
-                                _buildInfoRow(
-                                  icon: Icons.admin_panel_settings_outlined,
-                                  label: "ACCOUNT ROLE",
-                                  value: _getRoleLabel(),
-                                  valueColor: widget.isAdmin ? Colors.redAccent : const Color(0xFF6A11CB),
-                                ),
-                                const SizedBox(height: 16),
-                                _buildInfoRow(
-                                  icon: Icons.check_circle_outline,
-                                  label: "ACCOUNT STATUS",
-                                  value: "Active & Verified", 
-                                  valueColor: Colors.green,
-                                ),
-                                const SizedBox(height: 24),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
+                        ),
+                        const SizedBox(height: 40),
+                      ],
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
     );
   }
 
-  // Helper Widget to create the MUI <Paper variant="outlined"> effect
-  Widget _buildInfoRow({
+  // Helper Widget for the native mobile list feel
+  Widget _buildMobileListRow({
     required IconData icon,
     required String label,
     required String value,
     Color? valueColor,
   }) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        border: Border.all(color: Colors.grey.shade200),
-        borderRadius: BorderRadius.circular(8),
+    return ListTile(
+      contentPadding: const EdgeInsets.symmetric(
+        horizontal: 16.0,
+        vertical: 4.0,
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(icon, size: 18, color: Colors.grey[400]),
-              const SizedBox(width: 8),
-              Text(
-                label,
-                style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey[600]),
-              ),
-            ],
+      leading: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: Colors.grey[100],
+          shape: BoxShape.circle,
+        ),
+        child: Icon(icon, size: 22, color: Colors.grey[600]),
+      ),
+      title: Text(
+        label,
+        style: TextStyle(
+          fontSize: 12,
+          color: Colors.grey[500],
+          fontWeight: FontWeight.w500,
+        ),
+      ),
+      subtitle: Padding(
+        padding: const EdgeInsets.only(top: 4.0),
+        child: Text(
+          value,
+          style: TextStyle(
+            fontSize: 15,
+            fontWeight: FontWeight.w600,
+            color: valueColor ?? Colors.black87,
           ),
-          const SizedBox(height: 8),
-          Padding(
-            padding: const EdgeInsets.only(left: 26.0), // Aligns with text above, indented past icon
-            child: Text(
-              value,
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: valueColor ?? Colors.black87,
-              ),
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }

@@ -1,4 +1,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- ADDED: Required for your app to talk to your Spring Boot API and AWS -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <!-- ADDED: Required for Android 13+ to display push notifications -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
     <application
         android:label="mobile"
         android:name="${applicationName}"

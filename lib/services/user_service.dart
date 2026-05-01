@@ -2,11 +2,11 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:amplify_flutter/amplify_flutter.dart';
 import 'package:amplify_auth_cognito/amplify_auth_cognito.dart';
+import '../constants/api_constants.dart';
 
 class UserService {
   // Use 10.0.2.2 if testing on an Android Emulator, or your local network IP for physical devices
-  // final String baseUrl = "http://10.50.20.51:8080/api/v1";
-  final String baseUrl = "http://10.0.2.2:8080/api/v1";
+  final String baseUrl = "${ApiConstants.baseUrl}/api/v1";
 
   // --- FETCH SECURE HEADERS ---
   Future<Map<String, String>> _getHeaders() async {

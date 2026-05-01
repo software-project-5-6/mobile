@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "204262440320",
+    "project_id": "psms-notification-2c947",
+    "storage_bucket": "psms-notification-2c947.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:204262440320:android:12b27fbd219ab747be1565",
+        "android_client_info": {
+          "package_name": "com.example.mobile"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAk9rHF47GTjA-6QfqDkT0VOZg1itU76GI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
