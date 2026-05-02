@@ -5,6 +5,9 @@ import 'signup_screen.dart';
 import 'forgot_password_screen.dart';
 //import 'user_dashboard.dart';
 import 'dashboard_screen.dart';
+import 'package:amplify_flutter/amplify_flutter.dart';
+import 'package:amplify_auth_cognito/amplify_auth_cognito.dart';
+import '../services/push_notification_service.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -187,6 +190,7 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   // --- LOGIC TO HANDLE LOGIN ---
+  // --- LOGIC TO HANDLE LOGIN ---
   Future<void> _handleLogin() async {
     // 1. Basic Validation
     if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
@@ -205,12 +209,31 @@ class _LoginScreenState extends State<LoginScreen> {
       _passwordController.text,
     );
 
-    setState(() => _isLoading = false); // Stop Spinner
+    // ADD THIS EXACT LINE:
+    if (!mounted) return; 
 
+    setState(() => _isLoading = false); // Stop Spinner
+    
     // 3. Handle Result
     if (success) {
+      
+      // --- NEW PUSH NOTIFICATION SETUP ---
+      try {
+        print("============= TRACER: FETCHING SESSION =============");
+        final session = await Amplify.Auth.fetchAuthSession() as CognitoAuthSession;
+        final jwtToken = session.userPoolTokensResult.value.idToken.raw;
+        
+        print("============= TRACER: CALLING INITIALIZE =============");
+        await PushNotificationService().initialize(jwtToken);
+        
+        print("============= TRACER: INITIALIZE FINISHED =============");
+      } catch (e) {
+        print("============= TRACER ERROR: $e =============");
+      }
+      // ----------------------------------- -----------------------------------
+
       if (mounted) {
-       if (_emailController.text.trim() == "admin@psms.com") {
+        if (_emailController.text.trim() == "admin@psms.com") {
            // Go to ADMIN Dashboard
            Navigator.pushReplacement(
             context,
@@ -220,7 +243,7 @@ class _LoginScreenState extends State<LoginScreen> {
            // Go to USER Dashboard (Default for everyone else)
            Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (context) => const DashboardScreen(isAdmin: false)), // <--- NEW SCREEN
+            MaterialPageRoute(builder: (context) => const DashboardScreen(isAdmin: false)),
           );
         }
       }

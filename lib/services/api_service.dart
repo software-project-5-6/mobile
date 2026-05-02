@@ -12,8 +12,18 @@ class ApiService {
       final cognitoSession = session as CognitoAuthSession;
       return cognitoSession.userPoolTokensResult.value.idToken.raw;
     } catch (e) {
-      print("Error fetching token: $e");
-      return null;
+      // THE FIX: If AWS falsely claims we are signed out right after login, retry once!
+      print("Warning: Token fetch failed, retrying in 500ms... ($e)");
+      await Future.delayed(const Duration(milliseconds: 500));
+      
+      try {
+        final retrySession = await Amplify.Auth.fetchAuthSession();
+        final retryCognitoSession = retrySession as CognitoAuthSession;
+        return retryCognitoSession.userPoolTokensResult.value.idToken.raw;
+      } catch (retryError) {
+        print("Fatal error fetching token: $retryError");
+        return null;
+      }
     }
   }
 

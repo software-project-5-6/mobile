@@ -3,10 +3,24 @@ import 'package:amplify_flutter/amplify_flutter.dart';
 import 'package:amplify_auth_cognito/amplify_auth_cognito.dart';
 import 'amplifyconfiguration.dart'; // Ensure this file exists in lib/
 import 'screens/login_screen.dart';
+import 'package:firebase_core/firebase_core.dart'; // Make sure this is imported
 
 void main() async {
+  // 1. Ensure Flutter bindings are initialized before doing async native calls
   WidgetsFlutterBinding.ensureInitialized();
+
+  // 2. Boot up the Firebase Core engine
+  try {
+    await Firebase.initializeApp();
+    print('✅ Successfully initialized Firebase');
+  } catch (e) {
+    print('❌ Error initializing Firebase: $e');
+  }
+
+  // 3. Boot up AWS Amplify
   await _configureAmplify();
+  
+  // 4. Launch the App
   runApp(const MyApp());
 }
 

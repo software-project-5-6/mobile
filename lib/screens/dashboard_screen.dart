@@ -38,13 +38,26 @@ class _DashboardScreenState extends State<DashboardScreen> {
   List<dynamic> _conversations = [];
   bool _isLoadingSidebar = true;
 
-  @override
+@override
   void initState() {
     super.initState();
-    _fetchUserDetails();
-    _fetchProjectsForSidebar();
+    // Replace the parallel calls with our new staggered initializer
+    _safeInitializeDashboard();
   }
 
+  // --- NEW STAGGERED BOOT SEQUENCE ---
+  Future<void> _safeInitializeDashboard() async {
+    // 1. Give the native AWS bridge a tiny moment to settle after the screen transition
+    await Future.delayed(const Duration(milliseconds: 300));
+    if (!mounted) return;
+
+    // 2. Safely fetch User Details first
+    await _fetchUserDetails();
+    if (!mounted) return;
+
+    // 3. Finally, fetch Projects and chat data
+    await _fetchProjectsForSidebar();
+  }
   Future<void> _fetchUserDetails() async {
     try {
       final attributes = await Amplify.Auth.fetchUserAttributes();
