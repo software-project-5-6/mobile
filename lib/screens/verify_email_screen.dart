@@ -84,9 +84,9 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
                           Container(
                             padding: const EdgeInsets.all(12),
                             decoration: BoxDecoration(
-                              color: Colors.blue.withOpacity(0.05), // Light blue background
+                              color: Colors.blue.withValues(alpha: 0.05), // Updated opacity
                               borderRadius: BorderRadius.circular(8),
-                              border: Border.all(color: Colors.blue.withOpacity(0.2)),
+                              border: Border.all(color: Colors.blue.withValues(alpha: 0.2)), // Updated opacity
                             ),
                             child: Row(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -204,7 +204,9 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
       _codeController.text.trim(),
     );
 
-    setState(() => _isLoading = false);
+    if (mounted) {
+      setState(() => _isLoading = false);
+    }
 
     if (isVerified) {
       if (mounted) {
@@ -231,15 +233,25 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
   Future<void> _handleResendCode() async {
     setState(() => _isLoading = true);
 
-    AuthService authService = AuthService();
-    await authService.resendCode(widget.email);
+    try {
+      AuthService authService = AuthService();
+      await authService.resendCode(widget.email);
 
-    setState(() => _isLoading = false);
-
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Verification code resent to your email.")),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Verification code resent to your email.")),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Failed to resend code: $e"), backgroundColor: Colors.red),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
     }
   }
 }

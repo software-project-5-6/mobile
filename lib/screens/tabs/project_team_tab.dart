@@ -51,7 +51,7 @@ class _ProjectTeamTabState extends State<ProjectTeamTab> {
         });
       }
     } catch (e) {
-      print("Error loading team data: $e");
+      debugPrint("Error loading team data: $e");
       if (mounted) setState(() => _isLoading = false);
     }
   }
@@ -61,9 +61,13 @@ class _ProjectTeamTabState extends State<ProjectTeamTab> {
     try {
       await _projectService.removeUserFromProject(_getProjectId(), userId);
       _fetchTeamData(); // Refresh list
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("User removed successfully")));
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("User removed successfully")));
+      }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Failed to remove user: $e"), backgroundColor: Colors.red));
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Failed to remove user: $e"), backgroundColor: Colors.red));
+      }
     }
   }
 
@@ -72,13 +76,17 @@ class _ProjectTeamTabState extends State<ProjectTeamTab> {
     try {
       await _invitationService.revokeInvitation(inviteId);
       _fetchTeamData(); // Refresh list
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Invitation revoked successfully"), backgroundColor: Colors.green),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Invitation revoked successfully"), backgroundColor: Colors.green),
+        );
+      }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Failed to revoke invitation: $e"), backgroundColor: Colors.red),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Failed to revoke invitation: $e"), backgroundColor: Colors.red),
+        );
+      }
     }
   }
 
@@ -106,7 +114,7 @@ class _ProjectTeamTabState extends State<ProjectTeamTab> {
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: Colors.grey.shade200),
         boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 4))
+          BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 10, offset: const Offset(0, 4))
         ],
       ),
       padding: const EdgeInsets.all(24),
@@ -369,7 +377,7 @@ class _ProjectTeamTabState extends State<ProjectTeamTab> {
       decoration: BoxDecoration(
         color: bg,
         borderRadius: BorderRadius.circular(4),
-        border: Border.all(color: bg.withOpacity(0.5)),
+        border: Border.all(color: bg.withValues(alpha: 0.5)),
       ),
       child: Text(
         role.toUpperCase(),

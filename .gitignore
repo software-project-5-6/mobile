@@ -43,3 +43,11 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+flutter_config.local.json
+
+.env
+.env.*
+flutter_config.local.json
+*.jks
+*.keystore

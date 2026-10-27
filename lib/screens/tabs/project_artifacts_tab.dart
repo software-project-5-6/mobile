@@ -30,7 +30,7 @@ class _ProjectArtifactsTabState extends State<ProjectArtifactsTab> {
       final data = await _artifactService.getArtifacts(id);
       if (mounted) setState(() => _artifacts = data);
     } catch (e) {
-      print("Error: $e");
+      debugPrint("Error loading artifacts: $e");
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -41,19 +41,27 @@ class _ProjectArtifactsTabState extends State<ProjectArtifactsTab> {
       final projectId = widget.project['id']?.toString() ?? widget.project['projectId'].toString();
       await _artifactService.deleteArtifact(projectId, artifactId);
       _loadArtifacts(); // Refresh list
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("File deleted")));
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("File deleted")));
+      }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Delete failed"), backgroundColor: Colors.red));
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Delete failed"), backgroundColor: Colors.red));
+      }
     }
   }
 
   Future<void> _handleDownload(String artifactId, String filename) async {
     try {
       final projectId = widget.project['id']?.toString() ?? widget.project['projectId'].toString();
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Downloading...")));
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Downloading...")));
+      }
       await _artifactService.downloadArtifact(projectId, artifactId, filename);
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Download failed"), backgroundColor: Colors.red));
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Download failed"), backgroundColor: Colors.red));
+      }
     }
   }
 
@@ -70,7 +78,7 @@ class _ProjectArtifactsTabState extends State<ProjectArtifactsTab> {
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: Colors.grey.shade200),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 4))],
+        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 10, offset: const Offset(0, 4))],
       ),
       child: Column(
         children: [

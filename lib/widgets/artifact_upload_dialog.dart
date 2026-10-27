@@ -21,7 +21,7 @@ class _ArtifactUploadDialogState extends State<ArtifactUploadDialog> {
 
   Future<void> _pickFile() async {
     FilePickerResult? result = await FilePicker.platform.pickFiles();
-    if (result != null) {
+    if (result != null && mounted) {
       setState(() {
         _selectedFile = File(result.files.single.path!);
       });
@@ -81,7 +81,7 @@ class _ArtifactUploadDialogState extends State<ArtifactUploadDialog> {
                     Icon(Icons.cloud_upload, size: 40, color: Colors.blue[300]),
                     const SizedBox(height: 10),
                     Text(
-                      _selectedFile != null ? _selectedFile!.path.split('/').last : "Tap to select file",
+                      _selectedFile != null ? _selectedFile!.path.split(RegExp(r'[/\\]')).last : "Tap to select file",
                       style: TextStyle(color: Colors.grey[700], fontWeight: FontWeight.bold),
                       textAlign: TextAlign.center,
                     ),

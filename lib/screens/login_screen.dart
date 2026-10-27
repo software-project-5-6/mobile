@@ -1,12 +1,9 @@
 import 'package:flutter/material.dart';
-import '../services/auth_service.dart'; // Import your AWS Service
-//import 'admin_dashboard.dart';
+import 'package:supabase_flutter/supabase_flutter.dart'; // අලුත් Supabase import එක
+import '../services/auth_service.dart';
 import 'signup_screen.dart';
 import 'forgot_password_screen.dart';
-//import 'user_dashboard.dart';
 import 'dashboard_screen.dart';
-import 'package:amplify_flutter/amplify_flutter.dart';
-import 'package:amplify_auth_cognito/amplify_auth_cognito.dart';
 import '../services/push_notification_service.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -138,7 +135,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                   borderRadius: BorderRadius.circular(10),
                                 ),
                               ),
-                              onPressed: _isLoading ? null : _handleLogin, // Connect to Logic
+                              onPressed: _isLoading ? null : _handleLogin, 
                               child: _isLoading
                                   ? const SizedBox(
                                       height: 20,
@@ -160,7 +157,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             },
                             child: const Text("Forgot Password?"),
                           ),
-                                                    
+                                                                            
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
@@ -190,7 +187,6 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   // --- LOGIC TO HANDLE LOGIN ---
-  // --- LOGIC TO HANDLE LOGIN ---
   Future<void> _handleLogin() async {
     // 1. Basic Validation
     if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
@@ -202,14 +198,13 @@ class _LoginScreenState extends State<LoginScreen> {
 
     setState(() => _isLoading = true); // Start Spinner
 
-    // 2. Call AWS Service
+    // 2. Call Service
     AuthService authService = AuthService();
     bool success = await authService.login(
       _emailController.text.trim(),
       _passwordController.text,
     );
 
-    // ADD THIS EXACT LINE:
     if (!mounted) return; 
 
     setState(() => _isLoading = false); // Stop Spinner
@@ -217,18 +212,21 @@ class _LoginScreenState extends State<LoginScreen> {
     // 3. Handle Result
     if (success) {
       
-      // --- NEW PUSH NOTIFICATION SETUP ---
+      // --- NEW PUSH NOTIFICATION SETUP WITH SUPABASE ---
       try {
-        print("============= TRACER: FETCHING SESSION =============");
-        final session = await Amplify.Auth.fetchAuthSession() as CognitoAuthSession;
-        final jwtToken = session.userPoolTokensResult.value.idToken.raw;
+        debugPrint("Push notification: fetching Supabase session");
+        final session = Supabase.instance.client.auth.currentSession;
+        final jwtToken = session?.accessToken;
         
-        print("============= TRACER: CALLING INITIALIZE =============");
-        await PushNotificationService().initialize(jwtToken);
-        
-        print("============= TRACER: INITIALIZE FINISHED =============");
+        if (jwtToken != null) {
+          debugPrint("Push notification: initializing");
+          await PushNotificationService().initialize(jwtToken);
+          debugPrint("Push notification: initialization completed");
+        } else {
+          debugPrint("Push notification warning: Session token is null");
+        }
       } catch (e) {
-        print("============= TRACER ERROR: $e =============");
+        debugPrint("Push notification error: $e");
       }
       // ----------------------------------- -----------------------------------
 

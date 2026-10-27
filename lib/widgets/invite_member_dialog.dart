@@ -40,7 +40,7 @@ class _InviteMemberDialogState extends State<InviteMemberDialog> {
     showDialog(
       context: context,
       barrierDismissible: false, // Prevents closing by tapping outside
-      barrierColor: Colors.black.withOpacity(0.6), // Dark background matching web
+      barrierColor: Colors.black.withValues(alpha: 0.6), // Dark background matching web
       builder: (BuildContext context) {
         return Dialog(
           backgroundColor: Colors.transparent,
@@ -239,7 +239,7 @@ class _InviteMemberDialogState extends State<InviteMemberDialog> {
 
               // Role Dropdown
               DropdownButtonFormField<String>(
-                value: _selectedRole,
+                initialValue: _selectedRole,
                 decoration: InputDecoration(
                   labelText: "Role *",
                   border: OutlineInputBorder(

@@ -1,71 +1,157 @@
+
+import 'package:flutter/foundation.dart';
+
 import 'api_service.dart';
 
 class ProjectService {
   final ApiService _api = ApiService();
 
-  // 1. Get All Projects
+  String _encodeId(String id) {
+    if (id.trim().isEmpty) {
+      throw ArgumentError('ID cannot be empty.');
+    }
+
+    return Uri.encodeComponent(id.trim());
+  }
+
+  // ==========================================
+  // 1. GET ALL PROJECTS
+  // ==========================================
+
   Future<List<dynamic>> getAllProjects() async {
     try {
-      final data = await _api.get('/projects');
-      return data as List<dynamic>;
+      final response = await _api.get('/projects');
+
+      if (response is List) {
+        return List<dynamic>.from(response);
+      }
+
+      throw const FormatException(
+        'Expected a list of projects.',
+      );
     } catch (e) {
-      print("Error fetching projects: $e");
-      return [];
+      debugPrint('Fetching projects failed: $e');
+      rethrow;
     }
   }
 
-  // 2. Create Project
-  Future<void> createProject(Map<String, dynamic> projectData) async {
+  // ==========================================
+  // 2. CREATE PROJECT
+  // ==========================================
+
+  Future<void> createProject(
+    Map<String, dynamic> projectData,
+  ) async {
     try {
-      await _api.post('/projects', projectData);
+      await _api.post(
+        '/projects',
+        projectData,
+      );
+
+      debugPrint('Project created successfully.');
     } catch (e) {
-      print("Error creating project: $e");
-      throw e;
+      debugPrint('Creating project failed: $e');
+      rethrow;
     }
   }
 
-  // 3. Update Project
-  Future<void> updateProject(String id, Map<String, dynamic> projectData) async {
+  // ==========================================
+  // 3. UPDATE PROJECT
+  // ==========================================
+
+  Future<void> updateProject(
+    String id,
+    Map<String, dynamic> projectData,
+  ) async {
     try {
-      await _api.put('/projects/$id', projectData);
+      final projectId = _encodeId(id);
+
+      await _api.put(
+        '/projects/$projectId',
+        projectData,
+      );
+
+      debugPrint('Project updated successfully.');
     } catch (e) {
-      print("Error updating project: $e");
-      throw e;
+      debugPrint('Updating project failed: $e');
+      rethrow;
     }
   }
 
-  // 4. Delete Project
+  // ==========================================
+  // 4. DELETE PROJECT
+  // ==========================================
+
   Future<void> deleteProject(String id) async {
     try {
-      await _api.delete('/projects/$id');
+      final projectId = _encodeId(id);
+
+      await _api.delete(
+        '/projects/$projectId',
+      );
+
+      debugPrint('Project deleted successfully.');
     } catch (e) {
-      print("Error deleting project: $e");
-      throw e;
+      debugPrint('Deleting project failed: $e');
+      rethrow;
     }
   }
 
-  // ... inside ProjectService class ...
+  // ==========================================
+  // 5. GET SINGLE PROJECT DETAILS
+  // ==========================================
 
-  // 5. Get Single Project Details (includes assignedUsers list)
-  Future<Map<String, dynamic>> getProjectById(String id) async {
+  Future<Map<String, dynamic>> getProjectById(
+    String id,
+  ) async {
     try {
-      final data = await _api.get('/projects/$id');
-      return data as Map<String, dynamic>;
+      final projectId = _encodeId(id);
+
+      final response = await _api.get(
+        '/projects/$projectId',
+      );
+
+      if (response is Map) {
+        return Map<String, dynamic>.from(
+          response,
+        );
+      }
+
+      throw const FormatException(
+        'Invalid project details response.',
+      );
     } catch (e) {
-      print("Error fetching project details: $e");
-      throw e;
+      debugPrint(
+        'Fetching project details failed: $e',
+      );
+      rethrow;
     }
   }
 
-  // 6. Remove User from Project
-  Future<void> removeUserFromProject(String projectId, String userId) async {
+  // ==========================================
+  // 6. REMOVE USER FROM PROJECT
+  // ==========================================
+
+  Future<void> removeUserFromProject(
+    String projectId,
+    String userId,
+  ) async {
     try {
-      // Adjust endpoint based on your actual backend API
-      // Common pattern: DELETE /projects/{projectId}/users/{userId}
-      await _api.delete('/projects/$projectId/users/$userId');
+      final project = _encodeId(projectId);
+      final user = _encodeId(userId);
+
+      await _api.delete(
+        '/projects/$project/users/$user',
+      );
+
+      debugPrint(
+        'User removed from project successfully.',
+      );
     } catch (e) {
-      print("Error removing user: $e");
-      throw e;
+      debugPrint(
+        'Removing project member failed: $e',
+      );
+      rethrow;
     }
   }
 }

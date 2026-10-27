@@ -77,6 +77,7 @@ class _AIAssistantScreenState extends State<AIAssistantScreen> {
         fetchedMessages = response['messages'] ?? [];
       }
       
+      if (!mounted) return;
       setState(() {
         if (fetchedMessages.isEmpty) {
           _messages = [{
@@ -94,7 +95,9 @@ class _AIAssistantScreenState extends State<AIAssistantScreen> {
       });
       _scrollToBottom();
     } catch (e) {
-      setState(() => _error = "Failed to load chat history");
+      if (mounted) {
+        setState(() => _error = "Failed to load chat history");
+      }
     }
   }
   
@@ -140,18 +143,24 @@ class _AIAssistantScreenState extends State<AIAssistantScreen> {
 
       final response = await _chatService.askProject(widget.currentProjectWithAssistant!['projectId']!, queryPayload);
       
-      setState(() {
-        _messages.add({
-          "isUser": false,
-          "text": response['answer'] ?? "I couldn't process that. Please try again.", 
-          "time": DateTime.now(),
+      if (mounted) {
+        setState(() {
+          _messages.add({
+            "isUser": false,
+            "text": response['answer'] ?? "I couldn't process that. Please try again.", 
+            "time": DateTime.now(),
+          });
         });
-      });
+      }
     } catch (e) {
-      setState(() => _error = "Failed to get AI response");
+      if (mounted) {
+        setState(() => _error = "Failed to get AI response");
+      }
     } finally {
-      setState(() => _isSending = false);
-      _scrollToBottom();
+      if (mounted) {
+        setState(() => _isSending = false);
+        _scrollToBottom();
+      }
     }
   }
 

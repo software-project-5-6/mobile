@@ -45,12 +45,12 @@ class _DeleteUserDialogState extends State<DeleteUserDialog> {
           Container(
             padding: const EdgeInsets.symmetric(vertical: 24),
             width: double.infinity,
-            color: Colors.red.withOpacity(0.08),
+            color: Colors.red.withValues(alpha: 0.08),
             child: Column(
               children: [
                 Container(
                   padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(color: Colors.white, shape: BoxShape.circle, boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 8, offset: const Offset(0, 4))]),
+                  decoration: BoxDecoration(color: Colors.white, shape: BoxShape.circle, boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 8, offset: const Offset(0, 4))]),
                   child: const Icon(Icons.warning_amber_rounded, color: Colors.red, size: 36),
                 ),
                 const SizedBox(height: 16),
@@ -71,7 +71,7 @@ class _DeleteUserDialogState extends State<DeleteUserDialog> {
                   child: Row(
                     children: [
                       CircleAvatar(
-                        backgroundColor: const Color(0xFF5B6BBF).withOpacity(0.1),
+                        backgroundColor: const Color(0xFF5B6BBF).withValues(alpha: 0.1),
                         child: Text((widget.user['fullName'] ?? 'U')[0].toUpperCase(), style: const TextStyle(color: Color(0xFF5B6BBF), fontWeight: FontWeight.bold)),
                       ),
                       const SizedBox(width: 12),
@@ -90,7 +90,7 @@ class _DeleteUserDialogState extends State<DeleteUserDialog> {
                 const SizedBox(height: 16),
                 Container(
                   padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(color: Colors.red.withOpacity(0.05), borderRadius: BorderRadius.circular(8)),
+                  decoration: BoxDecoration(color: Colors.red.withValues(alpha: 0.05), borderRadius: BorderRadius.circular(8)),
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [

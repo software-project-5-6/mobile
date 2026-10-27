@@ -199,7 +199,7 @@ class _ProjectDetailsScreenState extends State<ProjectDetailsScreen> with Single
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: Colors.grey.shade200),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 15, offset: const Offset(0, 5))],
+        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 15, offset: const Offset(0, 5))],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -213,7 +213,7 @@ class _ProjectDetailsScreenState extends State<ProjectDetailsScreen> with Single
               children: [
                 Container(
                   padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(color: Colors.white.withOpacity(0.2), borderRadius: BorderRadius.circular(12)),
+                  decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(12)),
                   child: const Icon(Icons.folder, color: Colors.white, size: 30),
                 ),
                 const SizedBox(width: 16),
@@ -282,9 +282,9 @@ class _ProjectDetailsScreenState extends State<ProjectDetailsScreen> with Single
                 const SizedBox(height: 16),
                 Row(
                   children: [
-                    Expanded(child: _buildInfoTile(Icons.calendar_today, "CREATED DATE", createdDate, iconBgColor: Colors.green.withOpacity(0.1), iconColor: Colors.green)),
+                    Expanded(child: _buildInfoTile(Icons.calendar_today, "CREATED DATE", createdDate, iconBgColor: Colors.green.withValues(alpha: 0.1), iconColor: Colors.green)),
                     const SizedBox(width: 16),
-                    Expanded(child: _buildInfoTile(Icons.attach_money, "PROJECT BUDGET", "\$$price", iconBgColor: Colors.blue.withOpacity(0.1), iconColor: Colors.blue)),
+                    Expanded(child: _buildInfoTile(Icons.attach_money, "PROJECT BUDGET", "\$$price", iconBgColor: Colors.blue.withValues(alpha: 0.1), iconColor: Colors.blue)),
                   ],
                 ),
               ],
@@ -303,14 +303,14 @@ class _ProjectDetailsScreenState extends State<ProjectDetailsScreen> with Single
   Widget _buildGradientCard({required String title, required String value, required String subtitle, required IconData icon, required List<Color> colors}) {
     return Container(
       padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(gradient: LinearGradient(colors: colors, begin: Alignment.topLeft, end: Alignment.bottomRight), borderRadius: BorderRadius.circular(20), boxShadow: [BoxShadow(color: colors[0].withOpacity(0.3), blurRadius: 12, offset: const Offset(0, 6))]),
+      decoration: BoxDecoration(gradient: LinearGradient(colors: colors, begin: Alignment.topLeft, end: Alignment.bottomRight), borderRadius: BorderRadius.circular(20), boxShadow: [BoxShadow(color: colors[0].withValues(alpha: 0.3), blurRadius: 12, offset: const Offset(0, 6))]),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Container(padding: const EdgeInsets.all(8), decoration: BoxDecoration(color: Colors.white24, borderRadius: BorderRadius.circular(8)), child: Icon(icon, color: Colors.white, size: 20))]), const SizedBox(height: 16), Text(value, style: const TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold)), const SizedBox(height: 4), Text(title, style: const TextStyle(color: Colors.white70, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1)), Text(subtitle, style: const TextStyle(color: Colors.white, fontSize: 12))]),
     );
   }
 
   Widget _buildInfoTile(IconData icon, String label, String value, {Color? iconColor, Color? iconBgColor}) {
     final themeColor = const Color(0xFF5B6BBF);
-    return Container(padding: const EdgeInsets.all(16), decoration: BoxDecoration(border: Border.all(color: Colors.grey.shade200), borderRadius: BorderRadius.circular(12), color: Colors.grey[50]), child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [Container(padding: const EdgeInsets.all(8), decoration: BoxDecoration(color: iconBgColor ?? themeColor.withOpacity(0.1), borderRadius: BorderRadius.circular(8)), child: Icon(icon, color: iconColor ?? themeColor, size: 20)), const SizedBox(width: 12), Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(label, style: const TextStyle(color: Colors.grey, fontSize: 10, fontWeight: FontWeight.bold)), const SizedBox(height: 4), Text(value, style: const TextStyle(color: Colors.black87, fontWeight: FontWeight.w600, fontSize: 14))]))]));
+    return Container(padding: const EdgeInsets.all(16), decoration: BoxDecoration(border: Border.all(color: Colors.grey.shade200), borderRadius: BorderRadius.circular(12), color: Colors.grey[50]), child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [Container(padding: const EdgeInsets.all(8), decoration: BoxDecoration(color: iconBgColor ?? themeColor.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(8)), child: Icon(icon, color: iconColor ?? themeColor, size: 20)), const SizedBox(width: 12), Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(label, style: const TextStyle(color: Colors.grey, fontSize: 10, fontWeight: FontWeight.bold)), const SizedBox(height: 4), Text(value, style: const TextStyle(color: Colors.black87, fontWeight: FontWeight.w600, fontSize: 14))]))]));
   }
 
   String _formatDate(String? dateStr) {

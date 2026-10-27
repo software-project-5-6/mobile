@@ -1,123 +1,286 @@
-import 'package:amplify_flutter/amplify_flutter.dart';
+
+import 'package:flutter/foundation.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class AuthService {
-  
-  // 1. SIGN UP (Handles "User Already Exists" automatically)
-  Future<String?> signUp(String email, String password, String name) async {
-    try {
-      final userAttributes = {
-        AuthUserAttributeKey.email: email,
-        AuthUserAttributeKey.name: name,
-      };
+  // Supabase must be initialized in main.dart first.
+  SupabaseClient get _supabase => Supabase.instance.client;
 
-      final result = await Amplify.Auth.signUp(
-        username: email,
+  // Log errors in debug mode only.
+  void _logError(String operation, Object error) {
+    if (kDebugMode) {
+      debugPrint('AuthService [$operation]: $error');
+    }
+  }
+
+  // ==========================================
+  // 1. SIGN UP
+  // ==========================================
+
+  Future<String?> signUp(
+    String email,
+    String password,
+    String name,
+  ) async {
+    final cleanEmail = email.trim();
+    final cleanName = name.trim();
+
+    if (cleanEmail.isEmpty ||
+        password.isEmpty ||
+        cleanName.isEmpty) {
+      return 'Please fill in all required fields.';
+    }
+
+    try {
+      final AuthResponse response =
+          await _supabase.auth.signUp(
+        email: cleanEmail,
         password: password,
-        options: SignUpOptions(userAttributes: userAttributes),
+        data: {
+          'name': cleanName,
+        },
       );
 
-      if (result.nextStep.signUpStep == AuthSignUpStep.confirmSignUp) {
-        return null; // SUCCESS
-      } else {
-        return "Signup not complete. Step: ${result.nextStep.signUpStep}";
+      // User created, email confirmation may be required.
+      if (response.user != null ||
+          response.session != null) {
+        return null;
       }
-      
+
+      return 'Signup could not be completed.';
+
     } on AuthException catch (e) {
-      // If user exists but is unconfirmed, resend code
-      if (e.message.contains('already exists')) {
-        try {
-          await Amplify.Auth.resendSignUpCode(username: email);
-          return null; 
-        } on AuthException { 
-          return "Account already exists. Please Log In.";
-        }
+      _logError('Sign Up', e.message);
+
+      if (e.message.toLowerCase().contains(
+        'already registered',
+      )) {
+        return 'Account already exists. Please login.';
       }
-      print('❌ AWS Error: ${e.message}');
-      return e.message; 
+
+      return e.message;
+
     } catch (e) {
-      print('❌ Unknown Error: $e');
-      return "An unknown error occurred.";
+      _logError('Sign Up', e);
+      return 'An unexpected error occurred. Please try again.';
     }
   }
 
-  // 2. CONFIRM EMAIL
-  Future<bool> confirmSignUp(String email, String confirmationCode) async {
+  // ==========================================
+  // 2. VERIFY EMAIL OTP
+  // ==========================================
+
+  Future<bool> confirmSignUp(
+    String email,
+    String confirmationCode,
+  ) async {
+    final cleanEmail = email.trim();
+    final cleanCode = confirmationCode.trim();
+
+    if (cleanEmail.isEmpty || cleanCode.isEmpty) {
+      return false;
+    }
+
     try {
-      final result = await Amplify.Auth.confirmSignUp(
-        username: email,
-        confirmationCode: confirmationCode,
+      final AuthResponse response =
+          await _supabase.auth.verifyOTP(
+        email: cleanEmail,
+        token: cleanCode,
+        type: OtpType.email,
       );
-      return result.isSignUpComplete;
+
+      return response.user != null ||
+          response.session != null;
+
     } on AuthException catch (e) {
-      print('Confirmation Error: ${e.message}');
+      _logError('Email Verification', e.message);
+      return false;
+
+    } catch (e) {
+      _logError('Email Verification', e);
       return false;
     }
   }
 
-  // 3. RESEND CODE
+  // ==========================================
+  // 3. RESEND SIGNUP VERIFICATION CODE
+  // ==========================================
+
   Future<void> resendCode(String email) async {
+    final cleanEmail = email.trim();
+
+    if (cleanEmail.isEmpty) {
+      throw ArgumentError('Email is required.');
+    }
+
     try {
-      await Amplify.Auth.resendSignUpCode(username: email);
+      await _supabase.auth.resend(
+        type: OtpType.signup,
+        email: cleanEmail,
+      );
+
     } on AuthException catch (e) {
-      print('Resend Error: ${e.message}');
+      _logError('Resend Code', e.message);
+      rethrow;
+
+    } catch (e) {
+      _logError('Resend Code', e);
+      rethrow;
     }
   }
 
-  // 4. LOGIN (Fixed: Handles "Already Signed In" error)
-  Future<bool> login(String email, String password) async {
+  // ==========================================
+  // 4. LOGIN
+  // ==========================================
+
+  Future<bool> login(
+    String email,
+    String password,
+  ) async {
+    final cleanEmail = email.trim();
+
+    if (cleanEmail.isEmpty || password.isEmpty) {
+      return false;
+    }
+
     try {
-      final result = await Amplify.Auth.signIn(
-        username: email,
+      final AuthResponse response =
+          await _supabase.auth.signInWithPassword(
+        email: cleanEmail,
         password: password,
       );
-      return result.isSignedIn;
-    } on AuthException catch (e) {
-      
-      // FIX: If a user is already signed in, sign them out first!
-      if (e.message.contains('already signed in')) {
-        await Amplify.Auth.signOut(); // Log out the old session
-        return login(email, password); // Try logging in again immediately
-      }
 
-      print('Login Error: ${e.message}');
+      return response.session != null;
+
+    } on AuthException catch (e) {
+      _logError('Login', e.message);
+      return false;
+
+    } catch (e) {
+      _logError('Login', e);
       return false;
     }
   }
 
+  // ==========================================
   // 5. LOGOUT
+  // ==========================================
+
   Future<void> logout() async {
     try {
-      await Amplify.Auth.signOut();
+      await _supabase.auth.signOut();
+
     } on AuthException catch (e) {
-      print('Logout Error: ${e.message}');
+      _logError('Logout', e.message);
+      rethrow;
+
+    } catch (e) {
+      _logError('Logout', e);
+      rethrow;
     }
   }
 
-// 6. RESET PASSWORD (Send Code) - FIXED
+  // ==========================================
+  // 6. RESET PASSWORD - SEND EMAIL
+  // ==========================================
+
   Future<bool> resetPassword(String email) async {
+    final cleanEmail = email.trim();
+
+    if (cleanEmail.isEmpty) {
+      return false;
+    }
+
     try {
-      final result = await Amplify.Auth.resetPassword(username: email);
-      
-      return result.nextStep.updateStep == AuthResetPasswordStep.confirmResetPasswordWithCode;
-      
+      await _supabase.auth.resetPasswordForEmail(
+        cleanEmail,
+      );
+
+      return true;
+
     } on AuthException catch (e) {
-      print('Reset Password Error: ${e.message}');
+      _logError('Reset Password', e.message);
+      return false;
+
+    } catch (e) {
+      _logError('Reset Password', e);
       return false;
     }
   }
 
-  // 7. CONFIRM NEW PASSWORD
-  Future<bool> confirmResetPassword(String email, String newPassword, String code) async {
-    try {
-      final result = await Amplify.Auth.confirmResetPassword(
-        username: email,
-        newPassword: newPassword,
-        confirmationCode: code,
-      );
-      return result.isPasswordReset; 
-    } on AuthException catch (e) {
-      print('Confirm Reset Error: ${e.message}');
+  // ==========================================
+  // 7. VERIFY RECOVERY OTP + UPDATE PASSWORD
+  // ==========================================
+
+  Future<bool> confirmResetPassword(
+    String email,
+    String newPassword,
+    String code,
+  ) async {
+    final cleanEmail = email.trim();
+    final cleanCode = code.trim();
+
+    if (cleanEmail.isEmpty ||
+        newPassword.isEmpty ||
+        cleanCode.isEmpty) {
       return false;
     }
+
+    try {
+      // Verify the password recovery OTP.
+      final AuthResponse response =
+          await _supabase.auth.verifyOTP(
+        email: cleanEmail,
+        token: cleanCode,
+        type: OtpType.recovery,
+      );
+
+      // Recovery verification must create a session.
+      if (response.session == null) {
+        return false;
+      }
+
+      // User is now authenticated for password update.
+      final UserResponse updatedUser =
+          await _supabase.auth.updateUser(
+        UserAttributes(
+          password: newPassword,
+        ),
+      );
+
+      return updatedUser.user != null;
+
+    } on AuthException catch (e) {
+      _logError('Confirm Reset Password', e.message);
+      return false;
+
+    } catch (e) {
+      _logError('Confirm Reset Password', e);
+      return false;
+    }
+  }
+
+  // ==========================================
+  // 8. CHECK LOGIN STATUS
+  // ==========================================
+
+  bool isLoggedIn() {
+    return _supabase.auth.currentSession != null;
+  }
+
+  // ==========================================
+  // 9. GET CURRENT USER
+  // ==========================================
+
+  User? getCurrentUser() {
+    return _supabase.auth.currentUser;
+  }
+
+  // ==========================================
+  // 10. GET CURRENT ACCESS TOKEN
+  // ==========================================
+
+  String? getAccessToken() {
+    return _supabase.auth.currentSession?.accessToken;
   }
 }

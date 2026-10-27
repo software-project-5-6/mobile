@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:amplify_flutter/amplify_flutter.dart';
+import 'package:supabase_flutter/supabase_flutter.dart'; 
 
 class ProfileScreen extends StatefulWidget {
   final bool isAdmin;
@@ -24,15 +24,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Future<void> _fetchUserDetails() async {
     try {
-      final attributes = await Amplify.Auth.fetchUserAttributes();
+      // Supabase හරහා දැනට ලොග් වෙලා ඉන්න User ව ලබා ගැනීම
+      final User? user = Supabase.instance.client.auth.currentUser;
+      
       String email = "";
       String name = "";
 
-      for (final element in attributes) {
-        if (element.userAttributeKey.key == 'email')
-          email = element.value;
-        else if (element.userAttributeKey.key == 'name')
-          name = element.value;
+      if (user != null) {
+        email = user.email ?? "";
+        // Supabase වල Custom Attributes සේව් වෙන්නේ userMetadata ඇතුලේ
+        name = user.userMetadata?['name'] ?? "";
       }
 
       if (email.isNotEmpty && name.isEmpty) name = email.split('@')[0];
@@ -62,8 +63,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
   String _getInitials(String name) {
     if (name.isEmpty) return "U";
     final parts = name.trim().split(" ");
-    if (parts.length >= 2)
+    if (parts.length >= 2) {
       return "${parts[0][0]}${parts[1][0]}".toUpperCase().substring(0, 2);
+    }
     return name[0].toUpperCase();
   }
 
@@ -84,7 +86,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         leadingWidth: 70,
         leading: Center(
           child: InkWell(
-            onTap: () => Navigator.pop(context), // This makes the back button work!
+            onTap: () => Navigator.pop(context), 
             borderRadius: BorderRadius.circular(50),
             child: Container(
               padding: const EdgeInsets.all(10),

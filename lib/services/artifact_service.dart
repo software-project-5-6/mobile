@@ -1,88 +1,256 @@
+
+import 'dart:async';
 import 'dart:io';
+
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
-import 'package:http_parser/http_parser.dart'; 
-import 'package:mime/mime.dart'; 
-import 'package:path_provider/path_provider.dart'; // Add this to pubspec.yaml for downloads
-import 'package:open_file/open_file.dart'; // Add this to pubspec.yaml for opening files
+import 'package:http_parser/http_parser.dart';
+import 'package:mime/mime.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:open_file/open_file.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+
 import 'api_service.dart';
 
 class ArtifactService {
   final ApiService _api = ApiService();
 
-  // 1. Get All Artifacts
-  Future<List<dynamic>> getArtifacts(String projectId) async {
+  static const Duration _transferTimeout =
+      Duration(minutes: 5);
+
+  String _encodeId(String id) {
+    if (id.trim().isEmpty) {
+      throw ArgumentError('ID cannot be empty.');
+    }
+    return Uri.encodeComponent(id.trim());
+  }
+
+  // ==========================================
+  // 1. GET ALL ARTIFACTS
+  // ==========================================
+
+  Future<List<dynamic>> getArtifacts(
+    String projectId,
+  ) async {
     try {
-      final data = await _api.get('/projects/$projectId/artifacts');
-      return data as List<dynamic>;
+      final id = _encodeId(projectId);
+
+      final response = await _api.get(
+        '/projects/$id/artifacts',
+      );
+
+      if (response is List) {
+        return List<dynamic>.from(response);
+      }
+
+      throw const FormatException(
+        'Expected a list of artifacts.',
+      );
     } catch (e) {
-      print("Error fetching artifacts: $e");
-      return [];
+      debugPrint('Failed to fetch artifacts: $e');
+      rethrow;
     }
   }
 
-  // 2. Upload Artifact
-  Future<void> uploadArtifact(String projectId, File file, String tags) async {
-    try {
-      final token = await _api.getIdToken();
-      // NOTE: Using the /upload endpoint as required by your backend
-      final uri = Uri.parse('${ApiService.baseUrl}/projects/$projectId/artifacts/upload');
-      
-      final request = http.MultipartRequest('POST', uri);
-      request.headers['Authorization'] = 'Bearer $token';
-      
-      final mimeType = lookupMimeType(file.path) ?? 'application/octet-stream';
-      String fileType = 'DOCUMENT';
-      if (mimeType.startsWith('image/')) fileType = 'IMAGE';
-      else if (mimeType.startsWith('audio/')) fileType = 'AUDIO';
-      else if (mimeType.startsWith('video/')) fileType = 'VIDEO';
+  // ==========================================
+  // 2. UPLOAD ARTIFACT
+  // ==========================================
 
-      request.fields['type'] = fileType;
-      request.fields['tags'] = tags;
-      request.fields['uploadedBy'] = "Mobile User"; 
+  Future<void> uploadArtifact(
+    String projectId,
+    File file,
+    String tags,
+  ) async {
+    if (!await file.exists()) {
+      throw FileSystemException(
+        'Upload file not found.',
+        file.path,
+      );
+    }
 
-      request.files.add(await http.MultipartFile.fromPath(
+    final id = _encodeId(projectId);
+    final token = await _api.getIdToken();
+
+    final uri = Uri.parse(
+      '${ApiService.baseUrl}/projects/'
+      '$id/artifacts/upload',
+    );
+
+    final mimeType =
+        lookupMimeType(file.path) ??
+        'application/octet-stream';
+
+    String fileType = 'DOCUMENT';
+
+    if (mimeType.startsWith('image/')) {
+      fileType = 'IMAGE';
+    } else if (mimeType.startsWith('audio/')) {
+      fileType = 'AUDIO';
+    } else if (mimeType.startsWith('video/')) {
+      fileType = 'VIDEO';
+    }
+
+    final user =
+        Supabase.instance.client.auth.currentUser;
+
+    final displayName =
+        user?.userMetadata?['name']?.toString() ??
+        user?.email ??
+        'Mobile User';
+
+    final request = http.MultipartRequest(
+      'POST',
+      uri,
+    );
+
+    request.headers['Authorization'] =
+        'Bearer $token';
+
+    // Preserve existing backend field names.
+    request.fields['type'] = fileType;
+    request.fields['tags'] = tags;
+    request.fields['uploadedBy'] = displayName;
+
+    request.files.add(
+      await http.MultipartFile.fromPath(
         'file',
         file.path,
         contentType: MediaType.parse(mimeType),
-      ));
+      ),
+    );
 
-      final response = await http.Response.fromStream(await request.send());
+    final client = http.Client();
 
-      if (response.statusCode != 200 && response.statusCode != 201) {
-        throw Exception("Upload failed: ${response.body}");
-      }
-    } catch (e) {
-      print("Error uploading: $e");
-      throw e;
-    }
-  }
-
-  // 3. Download Artifact
-  Future<void> downloadArtifact(String projectId, String artifactId, String filename) async {
     try {
-      final token = await _api.getIdToken();
-      final uri = Uri.parse('${ApiService.baseUrl}/projects/$projectId/artifacts/$artifactId/download');
-      
-      final response = await http.get(uri, headers: {'Authorization': 'Bearer $token'});
+      final streamedResponse = await client
+          .send(request)
+          .timeout(_transferTimeout);
 
-      if (response.statusCode == 200) {
-        final dir = await getApplicationDocumentsDirectory();
-        final file = File('${dir.path}/$filename');
-        await file.writeAsBytes(response.bodyBytes);
-        print("File saved to ${file.path}");
-        // Optional: Open the file
-        await OpenFile.open(file.path);
-      } else {
-        throw Exception("Download failed: ${response.statusCode}");
+      final response =
+          await http.Response.fromStream(
+        streamedResponse,
+      ).timeout(_transferTimeout);
+
+      if (response.statusCode < 200 ||
+          response.statusCode >= 300) {
+        throw Exception(
+          'Artifact upload failed '
+          '(${response.statusCode}).',
+        );
       }
+
+      debugPrint('Artifact uploaded successfully.');
+    } on TimeoutException {
+      throw Exception(
+        'Artifact upload timed out.',
+      );
     } catch (e) {
-      print("Error downloading: $e");
-      throw e;
+      debugPrint('Artifact upload failed: $e');
+      rethrow;
+    } finally {
+      client.close();
     }
   }
 
-  // 4. Delete Artifact
-  Future<void> deleteArtifact(String projectId, String artifactId) async {
-    await _api.delete('/projects/$projectId/artifacts/$artifactId');
+  // ==========================================
+  // 3. DOWNLOAD ARTIFACT
+  // ==========================================
+
+  Future<void> downloadArtifact(
+    String projectId,
+    String artifactId,
+    String filename,
+  ) async {
+    final project = _encodeId(projectId);
+    final artifact = _encodeId(artifactId);
+
+    final token = await _api.getIdToken();
+
+    final uri = Uri.parse(
+      '${ApiService.baseUrl}/projects/'
+      '$project/artifacts/$artifact/download',
+    );
+
+    try {
+      final response = await http.get(
+        uri,
+        headers: {
+          'Authorization': 'Bearer $token',
+        },
+      ).timeout(_transferTimeout);
+
+      if (response.statusCode != 200) {
+        throw Exception(
+          'Download failed '
+          '(${response.statusCode}).',
+        );
+      }
+
+      final directory =
+          await getApplicationDocumentsDirectory();
+
+      // Prevent path traversal through server filenames.
+      final lastComponent =
+          filename.split(RegExp(r'[/\\]')).last;
+
+      final safeName = lastComponent.replaceAll(
+        RegExp(r'[^a-zA-Z0-9._() -]'),
+        '_',
+      );
+
+      final finalName = safeName.isEmpty ||
+              safeName == '.' ||
+              safeName == '..'
+          ? 'artifact_$artifactId'
+          : safeName;
+
+      final file = File(
+        '${directory.path}'
+        '${Platform.pathSeparator}$finalName',
+      );
+
+      await file.writeAsBytes(
+        response.bodyBytes,
+        flush: true,
+      );
+
+      debugPrint(
+        'Artifact downloaded successfully.',
+      );
+
+      // Opens with an installed compatible app,
+      // if one is available.
+      await OpenFile.open(file.path);
+    } on TimeoutException {
+      throw Exception(
+        'Artifact download timed out.',
+      );
+    } catch (e) {
+      debugPrint('Artifact download failed: $e');
+      rethrow;
+    }
+  }
+
+  // ==========================================
+  // 4. DELETE ARTIFACT
+  // ==========================================
+
+  Future<void> deleteArtifact(
+    String projectId,
+    String artifactId,
+  ) async {
+    try {
+      final project = _encodeId(projectId);
+      final artifact = _encodeId(artifactId);
+
+      await _api.delete(
+        '/projects/$project/artifacts/$artifact',
+      );
+
+      debugPrint('Artifact deleted successfully.');
+    } catch (e) {
+      debugPrint('Failed to delete artifact: $e');
+      rethrow;
+    }
   }
 }

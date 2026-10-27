@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../services/auth_service.dart'; // Import your AWS Service
+import '../services/auth_service.dart'; // Import Auth Service (Now using Supabase)
 import 'verify_email_screen.dart';
 
 class SignupScreen extends StatefulWidget {
@@ -126,7 +126,7 @@ class _SignupScreenState extends State<SignupScreen> {
                                   borderRadius: BorderRadius.circular(10),
                                 ),
                               ),
-                              onPressed: _isLoading ? null : _handleSignup, // Disable if loading
+                              onPressed: _isLoading ? null : _handleSignup, 
                               child: _isLoading
                                   ? const SizedBox(
                                       height: 20,
@@ -185,7 +185,7 @@ class _SignupScreenState extends State<SignupScreen> {
 
     setState(() => _isLoading = true); 
 
-    // 2. Call AWS Amplify Service
+    // 2. Call Auth Service (Now using Supabase)
     AuthService authService = AuthService();
     
     String? errorMessage = await authService.signUp(
@@ -194,7 +194,9 @@ class _SignupScreenState extends State<SignupScreen> {
       _nameController.text.trim(),
     );
 
-    setState(() => _isLoading = false); // Stop loading spinner
+    if (mounted) {
+      setState(() => _isLoading = false); // Stop loading spinner
+    }
 
     // 3. Handle Result
     if (errorMessage == null) {
@@ -212,7 +214,7 @@ class _SignupScreenState extends State<SignupScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(errorMessage), // e.g. "Password not long enough"
+            content: Text(errorMessage), 
             backgroundColor: Colors.red,
             duration: const Duration(seconds: 4),
           ),

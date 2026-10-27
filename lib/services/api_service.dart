@@ -1,110 +1,257 @@
-import 'dart:convert';
-import 'package:http/http.dart' as http;
-import 'package:amplify_flutter/amplify_flutter.dart';
-import 'package:amplify_auth_cognito/amplify_auth_cognito.dart';
-import '../constants/api_constants.dart';
-class ApiService {
-  static const String baseUrl = "${ApiConstants.baseUrl}/api/v1";
 
-  Future<String?> getIdToken() async {
-    try {
-      final session = await Amplify.Auth.fetchAuthSession();
-      final cognitoSession = session as CognitoAuthSession;
-      return cognitoSession.userPoolTokensResult.value.idToken.raw;
-    } catch (e) {
-      // THE FIX: If AWS falsely claims we are signed out right after login, retry once!
-      print("Warning: Token fetch failed, retrying in 500ms... ($e)");
-      await Future.delayed(const Duration(milliseconds: 500));
-      
+import 'dart:async';
+import 'dart:convert';
+
+import 'package:http/http.dart' as http;
+import 'package:supabase_flutter/supabase_flutter.dart';
+
+import '../constants/api_constants.dart';
+
+class ApiService {
+  // Hosted Spring Boot Backend
+  static const String baseUrl =
+      '${ApiConstants.baseUrl}/api/v1';
+
+  static const Duration _requestTimeout =
+      Duration(seconds: 60);
+
+  // ==========================================
+  // GET SUPABASE ACCESS TOKEN
+  // ==========================================
+
+  Future<String> getIdToken() async {
+    final auth = Supabase.instance.client.auth;
+
+    var session = auth.currentSession;
+
+    if (session == null) {
+      throw StateError(
+        'No active session. Please login first.',
+      );
+    }
+
+    // Refresh the token only when necessary
+    if (session.isExpired) {
       try {
-        final retrySession = await Amplify.Auth.fetchAuthSession();
-        final retryCognitoSession = retrySession as CognitoAuthSession;
-        return retryCognitoSession.userPoolTokensResult.value.idToken.raw;
-      } catch (retryError) {
-        print("Fatal error fetching token: $retryError");
-        return null;
+        final response = await auth.refreshSession();
+        session = response.session;
+      } on AuthException catch (e) {
+        throw StateError(
+          'Session refresh failed: ${e.message}',
+        );
       }
+    }
+
+    if (session == null ||
+        session.isExpired ||
+        session.accessToken.isEmpty) {
+      throw StateError(
+        'Session expired. Please login again.',
+      );
+    }
+
+    return session.accessToken;
+  }
+
+  // ==========================================
+  // GENERATE AUTHENTICATED HEADERS
+  // ==========================================
+
+  Future<Map<String, String>> getHeaders() async {
+    final token = await getIdToken();
+
+    return {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+      'Authorization': 'Bearer $token',
+    };
+  }
+
+  // ==========================================
+  // BUILD API URL
+  // ==========================================
+
+  Uri _buildUri(String endpoint) {
+    final path = endpoint.startsWith('/')
+        ? endpoint
+        : '/$endpoint';
+
+    return Uri.parse('$baseUrl$path');
+  }
+
+  // ==========================================
+  // GET REQUEST
+  // ==========================================
+
+  Future<dynamic> get(String endpoint) async {
+    return _sendRequest(
+      'GET',
+      endpoint,
+    );
+  }
+
+  // ==========================================
+  // POST REQUEST
+  // ==========================================
+
+  Future<dynamic> post(
+    String endpoint,
+    Map<String, dynamic> data,
+  ) async {
+    return _sendRequest(
+      'POST',
+      endpoint,
+      data: data,
+    );
+  }
+
+  // ==========================================
+  // PUT REQUEST
+  // ==========================================
+
+  Future<dynamic> put(
+    String endpoint,
+    Map<String, dynamic> data,
+  ) async {
+    return _sendRequest(
+      'PUT',
+      endpoint,
+      data: data,
+    );
+  }
+
+  // ==========================================
+  // DELETE REQUEST
+  // ==========================================
+
+  Future<dynamic> delete(String endpoint) async {
+    return _sendRequest(
+      'DELETE',
+      endpoint,
+    );
+  }
+
+  // ==========================================
+  // CENTRALIZED HTTP REQUEST HANDLER
+  // ==========================================
+
+  Future<dynamic> _sendRequest(
+    String method,
+    String endpoint, {
+    Map<String, dynamic>? data,
+  }) async {
+    final headers = await getHeaders();
+    final uri = _buildUri(endpoint);
+
+    try {
+      late final http.Response response;
+
+      switch (method) {
+        case 'GET':
+          response = await http
+              .get(uri, headers: headers)
+              .timeout(_requestTimeout);
+          break;
+
+        case 'POST':
+          response = await http
+              .post(
+                uri,
+                headers: headers,
+                body: jsonEncode(data),
+              )
+              .timeout(_requestTimeout);
+          break;
+
+        case 'PUT':
+          response = await http
+              .put(
+                uri,
+                headers: headers,
+                body: jsonEncode(data),
+              )
+              .timeout(_requestTimeout);
+          break;
+
+        case 'DELETE':
+          response = await http
+              .delete(uri, headers: headers)
+              .timeout(_requestTimeout);
+          break;
+
+        default:
+          throw ArgumentError(
+            'Unsupported HTTP method: $method',
+          );
+      }
+
+      return _handleResponse(response);
+    } on TimeoutException {
+      throw Exception(
+        'Request timed out. Please try again.',
+      );
+    } on http.ClientException {
+      throw Exception(
+        'Network error. Please check your internet connection.',
+      );
     }
   }
 
-  // --- GET Request ---
-  Future<dynamic> get(String endpoint) async {
-    final token = await getIdToken(); // Updated to call public method
-    final response = await http.get(
-      Uri.parse('$baseUrl$endpoint'),
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token', 
-      },
-    );
-    return _handleResponse(response);
-  }
+  // ==========================================
+  // RESPONSE HANDLING
+  // ==========================================
 
-  // --- POST Request ---
-  Future<dynamic> post(String endpoint, Map<String, dynamic> data) async {
-    final token = await getIdToken(); // Updated to call public method
-    final response = await http.post(
-      Uri.parse('$baseUrl$endpoint'),
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token',
-      },
-      body: jsonEncode(data),
-    );
-    return _handleResponse(response);
-  }
-
-  // --- PUT Request ---
-  Future<dynamic> put(String endpoint, Map<String, dynamic> data) async {
-    final token = await getIdToken(); // Updated to call public method
-    final response = await http.put(
-      Uri.parse('$baseUrl$endpoint'),
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token',
-      },
-      body: jsonEncode(data),
-    );
-    return _handleResponse(response);
-  }
-
-  // --- DELETE Request ---
-  Future<dynamic> delete(String endpoint) async {
-    final token = await getIdToken(); // Updated to call public method
-    final response = await http.delete(
-      Uri.parse('$baseUrl$endpoint'),
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token',
-      },
-    );
-    return _handleResponse(response);
-  }
-
-  // --- Error Handling ---
   dynamic _handleResponse(http.Response response) {
-    if (response.statusCode >= 200 && response.statusCode < 300) {
-      if (response.body.isEmpty) return {};
+    final statusCode = response.statusCode;
 
-      // FIX: Check if the response is explicitly plain text
-      final contentType = response.headers['content-type'] ?? '';
-      if (contentType.contains('text/plain')) {
-        return response.body; // Return the raw text immediately
+    if (statusCode >= 200 && statusCode < 300) {
+      if (response.body.isEmpty) {
+        return {};
       }
 
-      // If it's not plain text, decode it as JSON
+      final contentType =
+          response.headers['content-type'] ?? '';
+
+      if (contentType.contains('text/plain')) {
+        return response.body;
+      }
+
       try {
         return jsonDecode(response.body);
-      } catch (e) {
-        // Fallback just in case the Content-Type header was missing
-        return response.body; 
+      } on FormatException {
+        return response.body;
       }
-      
-    } else if (response.statusCode == 401) {
-      print("Unauthorized! Token might be expired.");
-      throw Exception("Unauthorized");
-    } else {
-      throw Exception("Error: ${response.statusCode} - ${response.body}");
     }
+
+    if (statusCode == 401) {
+      throw Exception(
+        'Unauthorized (401). Please login again '
+        'or check backend JWT configuration.',
+      );
+    }
+
+    if (statusCode == 403) {
+      throw Exception(
+        'Forbidden (403). You do not have '
+        'permission to access this resource.',
+      );
+    }
+
+    if (statusCode == 404) {
+      throw Exception(
+        'Resource not found (404).',
+      );
+    }
+
+    if (statusCode >= 500) {
+      throw Exception(
+        'Server error ($statusCode). '
+        'Please try again later.',
+      );
+    }
+
+    throw Exception(
+      'Request failed with status code $statusCode.',
+    );
   }
 }

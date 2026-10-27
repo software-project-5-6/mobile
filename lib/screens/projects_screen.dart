@@ -38,7 +38,7 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
         });
       }
     } catch (e) {
-      print("Error loading projects: $e");
+      debugPrint("Error loading projects: $e");
       if (mounted) setState(() => _isLoading = false);
     }
   }
@@ -225,9 +225,9 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                     decoration: BoxDecoration(
-                      color: Colors.green.withOpacity(0.1),
+                      color: Colors.green.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: Colors.green.withOpacity(0.3)),
+                      border: Border.all(color: Colors.green.withValues(alpha: 0.3)),
                     ),
                     child: Text(
                       priceDisplay,
@@ -337,9 +337,13 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
                                   try {
                                     await _projectService.deleteProject(projId);
                                     _fetchProjects(); 
-                                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Project deleted successfully")));
+                                    if (context.mounted) {
+                                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Project deleted successfully")));
+                                    }
                                   } catch (e) {
-                                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Delete failed: $e"), backgroundColor: Colors.red));
+                                    if (context.mounted) {
+                                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Delete failed: $e"), backgroundColor: Colors.red));
+                                    }
                                   }
                                 }
                               },
@@ -363,9 +367,9 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.3)),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Row(
         children: [

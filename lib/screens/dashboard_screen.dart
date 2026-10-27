@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:amplify_flutter/amplify_flutter.dart';
+import 'package:supabase_flutter/supabase_flutter.dart'; // Replaced AWS with Supabase
 import '../services/auth_service.dart';
 import '../services/project_service.dart';
 import '../services/chat_service.dart';
@@ -8,6 +8,7 @@ import 'projects_screen.dart';
 import 'ai_assistant_screen.dart';
 import 'users/users_screen.dart';
 import 'profile_screen.dart';
+import '../services/push_notification_service.dart';
 
 class DashboardScreen extends StatefulWidget {
   final bool isAdmin; 
@@ -41,13 +42,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
 @override
   void initState() {
     super.initState();
-    // Replace the parallel calls with our new staggered initializer
     _safeInitializeDashboard();
   }
 
   // --- NEW STAGGERED BOOT SEQUENCE ---
   Future<void> _safeInitializeDashboard() async {
-    // 1. Give the native AWS bridge a tiny moment to settle after the screen transition
+    // 1. Give the transition a tiny moment to settle
     await Future.delayed(const Duration(milliseconds: 300));
     if (!mounted) return;
 
@@ -58,15 +58,19 @@ class _DashboardScreenState extends State<DashboardScreen> {
     // 3. Finally, fetch Projects and chat data
     await _fetchProjectsForSidebar();
   }
+
   Future<void> _fetchUserDetails() async {
     try {
-      final attributes = await Amplify.Auth.fetchUserAttributes();
+      // Fetch the current user directly from Supabase
+      final User? user = Supabase.instance.client.auth.currentUser;
+      
       String email = "";
       String name = "";
 
-      for (final element in attributes) {
-        if (element.userAttributeKey.key == 'email') email = element.value;
-        else if (element.userAttributeKey.key == 'name') name = element.value;
+      if (user != null) {
+        email = user.email ?? "";
+        // Supabase stores custom attributes in user_metadata
+        name = user.userMetadata?['name'] ?? "";
       }
 
       if (email.isNotEmpty && name.isEmpty) name = email.split('@')[0]; 
@@ -99,6 +103,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Future<void> _fetchProjectsForSidebar() async {
     try {
       final data = await _projectService.getAllProjects();
+      if (!mounted) return;
       setState(() {
         _projects = data;
         if (data.isNotEmpty) {
@@ -110,7 +115,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         _isLoadingSidebar = false;
       });
     } catch (e) {
-      setState(() => _isLoadingSidebar = false);
+      if (mounted) setState(() => _isLoadingSidebar = false);
       debugPrint("Error loading projects for sidebar: $e");
     }
   }
@@ -119,6 +124,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     try {
       final response = await _chatService.getAllConversationsForProject(projectId);
       
+      if (!mounted) return;
       setState(() {
         if (response is List) {
           _conversations = response;
@@ -237,7 +243,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       border: OutlineInputBorder(),
                       contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                     ),
-                    value: dialogSelectedProjectId,
+                    initialValue: dialogSelectedProjectId,
                     isExpanded: true,
                     items: _projects.map((p) {
                       return DropdownMenuItem<String>(
@@ -280,13 +286,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       
                       await _fetchConversations(dialogSelectedProjectId!);
                       
+                      if (!mounted) return;
                       setState(() {
                         _currentConversationId = newId.toString();
                         _currentIndex = 0; 
                       });
                       
-                      Navigator.pop(ctx); 
-                      Navigator.pop(context); 
+                      if (ctx.mounted) {
+                        Navigator.pop(ctx); 
+                      }
+                      if (context.mounted) {
+                        Navigator.pop(context); 
+                      }
                     } catch (e) {
                       debugPrint("Failed to create chat: $e");
                       setStateDialog(() => isCreating = false);
@@ -392,7 +403,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                               border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
                               labelText: "Project Category",
                             ),
-                            value: _currentProjectWithAssistant?['projectId'],
+                            initialValue: _currentProjectWithAssistant?['projectId'],
                             items: _projects.map((p) {
                               return DropdownMenuItem<String>(
                                 value: p['id'].toString(),
@@ -506,6 +517,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Future<void> _handleLogout() async {
+    try {
+      await PushNotificationService().unregister('');
+    } catch (e) {
+      debugPrint("Push notification unregister error during logout: $e");
+    }
     AuthService authService = AuthService();
     await authService.logout();
     if (mounted) {

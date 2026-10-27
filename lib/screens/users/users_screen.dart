@@ -150,14 +150,14 @@ class _UsersScreenState extends State<UsersScreen> {
             color: const Color.fromARGB(255, 233, 231, 231),
             borderRadius: BorderRadius.circular(12),
             border: Border.all(color: Colors.grey.shade200),
-            boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 8, offset: const Offset(0, 4))],
+            boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.02), blurRadius: 8, offset: const Offset(0, 4))],
           ),
           child: Column(
             children: [
               Row(
                 children: [
                   CircleAvatar(
-                    backgroundColor: isAdmin ? Colors.red.shade50 : const Color(0xFF5B6BBF).withOpacity(0.1),
+                    backgroundColor: isAdmin ? Colors.red.shade50 : const Color(0xFF5B6BBF).withValues(alpha: 0.1),
                     child: Text(
                       _getInitials(user['fullName']),
                       style: TextStyle(color: isAdmin ? Colors.red : const Color(0xFF5B6BBF), fontWeight: FontWeight.bold),

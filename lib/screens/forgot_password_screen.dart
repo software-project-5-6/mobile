@@ -283,10 +283,14 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     AuthService authService = AuthService();
     bool success = await authService.resetPassword(_emailController.text.trim());
 
-    setState(() => _isLoading = false);
+    if (mounted) {
+      setState(() => _isLoading = false);
+    }
 
     if (success) {
-      setState(() => _isCodeSent = true); // Switch UI to Stage 2
+      if (mounted) {
+        setState(() => _isCodeSent = true); // Switch UI to Stage 2
+      }
     } else {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -325,7 +329,9 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       _codeController.text.trim(),
     );
 
-    setState(() => _isLoading = false);
+    if (mounted) {
+      setState(() => _isLoading = false);
+    }
 
     if (success) {
       if (mounted) {

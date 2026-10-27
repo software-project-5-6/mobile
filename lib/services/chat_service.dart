@@ -1,71 +1,167 @@
+
+import 'package:flutter/foundation.dart';
+
 import 'api_service.dart';
 
 class ChatService {
   final ApiService _api = ApiService();
 
-  // Ask a question about a specific project
-  Future<Map<String, dynamic>> askProject(String projectId, Map<String, dynamic> questionPayload) async {
-    try {
-      // React: api.post(`/chat/ask`, askObject);
-      // We inject the projectId into the payload to match React's {projectId, conversationId, question}
-      questionPayload['projectId'] = int.tryParse(projectId) ?? projectId; 
-      
-      final response = await _api.post('/chat/ask', questionPayload);
-      return response as Map<String, dynamic>;
-    } catch (e) {
-      print("Error asking project AI: $e");
-      rethrow;
+  String _encodeId(String id) {
+    if (id.trim().isEmpty) {
+      throw ArgumentError('ID cannot be empty.');
     }
+    return Uri.encodeComponent(id.trim());
   }
 
-  // Create a new conversation
-  Future<String> createConversation(Map<String, dynamic> newConversationObject) async {
+  // ==========================================
+  // 1. ASK PROJECT AI
+  // ==========================================
+
+  Future<Map<String, dynamic>> askProject(
+    String projectId,
+    Map<String, dynamic> questionPayload,
+  ) async {
     try {
-      // React: api.post(`/chat/conversation`, newConvesationObject);
-      
-      // Ensure projectId is an integer if your backend expects it
-      if (newConversationObject['projectId'] is String) {
-        newConversationObject['projectId'] = int.tryParse(newConversationObject['projectId']) ?? newConversationObject['projectId'];
+      if (projectId.trim().isEmpty) {
+        throw ArgumentError('Project ID is required.');
       }
 
-      final response = await _api.post('/chat/conversation', newConversationObject);
-      return response.toString(); 
+      // Do not mutate the caller's original Map.
+      final payload =
+          Map<String, dynamic>.from(questionPayload);
+
+      payload['projectId'] =
+          int.tryParse(projectId) ?? projectId;
+
+      final response = await _api.post(
+        '/chat/ask',
+        payload,
+      );
+
+      if (response is Map) {
+        return Map<String, dynamic>.from(response);
+      }
+
+      throw const FormatException(
+        'Invalid AI response format.',
+      );
     } catch (e) {
-      print("Error creating conversation: $e");
+      debugPrint('Project AI request failed: $e');
       rethrow;
     }
   }
 
- // Get All Conversations for a Project
-  Future<dynamic> getAllConversationsForProject(String projectId) async {
+  // ==========================================
+  // 2. CREATE CONVERSATION
+  // ==========================================
+
+  Future<String> createConversation(
+    Map<String, dynamic> newConversationObject,
+  ) async {
     try {
-      final response = await _api.get('/chat/conversations/$projectId');
-      return response; // Return dynamic instead of forcing a Map
+      final payload = Map<String, dynamic>.from(
+        newConversationObject,
+      );
+
+      final projectId = payload['projectId'];
+
+      if (projectId is String) {
+        payload['projectId'] =
+            int.tryParse(projectId) ?? projectId;
+      }
+
+      final response = await _api.post(
+        '/chat/conversation',
+        payload,
+      );
+
+      if (response is String) {
+        return response;
+      }
+
+      if (response is num) {
+        return response.toString();
+      }
+
+      if (response is Map) {
+        final id =
+            response['conversationId'] ??
+            response['id'];
+
+        if (id != null) {
+          return id.toString();
+        }
+      }
+
+      throw const FormatException(
+        'Conversation response does not '
+        'contain a valid ID.',
+      );
     } catch (e) {
-      print("Error fetching project conversations: $e");
+      debugPrint('Create conversation failed: $e');
       rethrow;
     }
   }
 
-  // Get All Messages for a Conversation
-  Future<dynamic> getAllMessagesForConversation(String conversationId) async {
+  // ==========================================
+  // 3. GET PROJECT CONVERSATIONS
+  // ==========================================
+
+  Future<dynamic> getAllConversationsForProject(
+    String projectId,
+  ) async {
     try {
-      final response = await _api.get('/chat/conversation/$conversationId');
-      return response; // Return dynamic instead of forcing a Map
+      final id = _encodeId(projectId);
+
+      return await _api.get(
+        '/chat/conversations/$id',
+      );
     } catch (e) {
-      print("Error fetching messages for conversation: $e");
+      debugPrint(
+        'Fetching project conversations failed: $e',
+      );
       rethrow;
     }
   }
 
-  // Delete All Messages for a Conversation
-  Future<dynamic> deleteAllMessagesForConversation(String conversationId) async {
+  // ==========================================
+  // 4. GET CONVERSATION MESSAGES
+  // ==========================================
+
+  Future<dynamic> getAllMessagesForConversation(
+    String conversationId,
+  ) async {
     try {
-      // React: api.delete(`/chat/conversation/${conversationId}`);
-      final response = await _api.delete('/chat/conversation/$conversationId');
-      return response;
+      final id = _encodeId(conversationId);
+
+      return await _api.get(
+        '/chat/conversation/$id',
+      );
     } catch (e) {
-      print("Error deleting messages for conversation: $e");
+      debugPrint(
+        'Fetching conversation messages failed: $e',
+      );
+      rethrow;
+    }
+  }
+
+  // ==========================================
+  // 5. DELETE CONVERSATION MESSAGES
+  // ==========================================
+
+  Future<dynamic> deleteAllMessagesForConversation(
+    String conversationId,
+  ) async {
+    try {
+      final id = _encodeId(conversationId);
+
+      return await _api.delete(
+        '/chat/conversation/$id',
+      );
+    } catch (e) {
+      debugPrint(
+        'Deleting conversation failed: $e',
+      );
       rethrow;
     }
   }
