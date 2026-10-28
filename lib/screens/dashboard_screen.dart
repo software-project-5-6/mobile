@@ -8,6 +8,7 @@ import 'projects_screen.dart';
 import 'ai_assistant_screen.dart';
 import 'users/users_screen.dart';
 import 'profile_screen.dart';
+import 'settings_screen.dart';
 import '../services/push_notification_service.dart';
 
 class DashboardScreen extends StatefulWidget {
@@ -318,7 +319,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Space Management", style: TextStyle(color: Colors.white, fontSize: 18)),
-        backgroundColor: const Color(0xFF6A11CB),
+        backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
         iconTheme: const IconThemeData(color: Colors.white), 
         actions: [
           Padding(
@@ -336,8 +337,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(_userName, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.black)),
-                      Text(_userEmail, style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                      Text(_userName, style: TextStyle(fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSurface)),
+                      Text(_userEmail, style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6))),
                       const Divider(),
                     ],
                   ),
@@ -352,6 +353,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   Navigator.push(
                     context, 
                     MaterialPageRoute(builder: (context) => ProfileScreen(isAdmin: widget.isAdmin))
+                  );
+                } else if (value == 'settings') {
+                  Navigator.push(
+                    context, 
+                    MaterialPageRoute(builder: (context) => SettingsScreen(isAdmin: widget.isAdmin))
                   );
                 } else if (value == 'logout') {
                   _handleLogout();
@@ -498,7 +504,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   ListTile(
                     leading: const Icon(Icons.settings),
                     title: const Text("Settings"),
-                    onTap: () => Navigator.pop(context),
+                    onTap: () {
+                      Navigator.pop(context);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => SettingsScreen(isAdmin: widget.isAdmin),
+                        ),
+                      );
+                    },
                   ),
                 ],
               ),

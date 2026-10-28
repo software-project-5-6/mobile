@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:supabase_flutter/supabase_flutter.dart'; 
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class ProfileScreen extends StatefulWidget {
   final bool isAdmin;
@@ -24,16 +24,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Future<void> _fetchUserDetails() async {
     try {
-      // Supabase හරහා දැනට ලොග් වෙලා ඉන්න User ව ලබා ගැනීම
       final User? user = Supabase.instance.client.auth.currentUser;
-      
+
       String email = "";
       String name = "";
 
       if (user != null) {
         email = user.email ?? "";
-        // Supabase වල Custom Attributes සේව් වෙන්නේ userMetadata ඇතුලේ
-        name = user.userMetadata?['name'] ?? "";
+        name = user.userMetadata?['name'] ??
+            user.userMetadata?['full_name'] ??
+            "";
       }
 
       if (email.isNotEmpty && name.isEmpty) name = email.split('@')[0];
@@ -75,32 +75,32 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.grey[100],
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
-      // --- ADDED: Top App Bar with the Back Button ---
+    return Scaffold(
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         elevation: 0,
         toolbarHeight: 60,
+        backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
         automaticallyImplyLeading: false,
         leadingWidth: 70,
         leading: Center(
           child: InkWell(
-            onTap: () => Navigator.pop(context), 
+            onTap: () => Navigator.pop(context),
             borderRadius: BorderRadius.circular(50),
             child: Container(
               padding: const EdgeInsets.all(10),
-              child: const Icon(
+              child: Icon(
                 Icons.arrow_back,
-                color: Color.fromARGB(255, 0, 0, 0),
+                color: Theme.of(context).appBarTheme.foregroundColor ??
+                    (isDark ? Colors.white : Colors.black87),
                 size: 24,
               ),
             ),
           ),
         ),
       ),
-
-      // --- Body Content (Mobile Optimized) ---
       body: _isLoading
           ? const Center(
               child: CircularProgressIndicator(color: Color(0xFF6A11CB)),
@@ -112,7 +112,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   // --- Header Profile Section ---
                   Container(
                     width: double.infinity,
-                    color: Colors.white,
+                    color: Theme.of(context).cardColor,
                     padding: const EdgeInsets.only(
                       top: 30,
                       bottom: 32,
@@ -123,25 +123,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       children: [
                         CircleAvatar(
                           radius: 50,
-                          backgroundColor: const Color(
-                            0xFFBCD1F4,
-                          ), // Light blue
+                          backgroundColor: isDark
+                              ? const Color(0xFF334155)
+                              : const Color(0xFFBCD1F4),
                           child: Text(
                             _initials,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 36,
                               fontWeight: FontWeight.bold,
-                              color: Color(0xFF6A11CB), // Dark text
+                              color: isDark
+                                  ? const Color(0xFF818CF8)
+                                  : const Color(0xFF6A11CB),
                             ),
                           ),
                         ),
                         const SizedBox(height: 16),
                         Text(
                           _name,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
-                            color: Colors.black87,
+                            color: Theme.of(context).colorScheme.onSurface,
                           ),
                         ),
                         const SizedBox(height: 4),
@@ -149,7 +151,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           _email,
                           style: TextStyle(
                             fontSize: 14,
-                            color: Colors.grey[600],
+                            color: isDark ? Colors.grey[400] : Colors.grey[600],
                           ),
                         ),
                         const SizedBox(height: 12),
@@ -162,9 +164,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           decoration: BoxDecoration(
                             color: widget.isAdmin
                                 ? Colors.redAccent.withValues(alpha: 0.1)
-                                : const Color(
-                                    0xFF6A11CB,
-                                  ).withValues(alpha: 0.1),
+                                : const Color(0xFF6A11CB)
+                                    .withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(20),
                           ),
                           child: Text(
@@ -200,7 +201,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             style: TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.bold,
-                              color: Colors.grey[500],
+                              color: isDark
+                                  ? Colors.grey[400]
+                                  : Colors.grey[500],
                               letterSpacing: 1,
                             ),
                           ),
@@ -209,32 +212,33 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         // Grouped List Card
                         Container(
                           decoration: BoxDecoration(
-                            color: Colors.white,
+                            color: Theme.of(context).cardColor,
                             borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: Colors.grey.shade200),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withValues(alpha: 0.02),
-                                blurRadius: 10,
-                                offset: const Offset(0, 4),
-                              ),
-                            ],
+                            border: Border.all(
+                              color: Theme.of(context).dividerColor,
+                            ),
                           ),
                           child: Column(
                             children: [
                               _buildMobileListRow(
+                                context: context,
+                                isDark: isDark,
                                 icon: Icons.person_outline,
                                 label: "Full Name",
                                 value: _name,
                               ),
                               const Divider(height: 1, indent: 60),
                               _buildMobileListRow(
+                                context: context,
+                                isDark: isDark,
                                 icon: Icons.email_outlined,
                                 label: "Email Address",
                                 value: _email,
                               ),
                               const Divider(height: 1, indent: 60),
                               _buildMobileListRow(
+                                context: context,
+                                isDark: isDark,
                                 icon: Icons.admin_panel_settings_outlined,
                                 label: "Account Role",
                                 value: _getRoleLabel(),
@@ -244,6 +248,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               ),
                               const Divider(height: 1, indent: 60),
                               _buildMobileListRow(
+                                context: context,
+                                isDark: isDark,
                                 icon: Icons.check_circle_outline,
                                 label: "Account Status",
                                 value: "Active & Verified",
@@ -262,8 +268,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  // Helper Widget for the native mobile list feel
   Widget _buildMobileListRow({
+    required BuildContext context,
+    required bool isDark,
     required IconData icon,
     required String label,
     required String value,
@@ -277,16 +284,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
       leading: Container(
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          color: Colors.grey[100],
+          color: isDark ? const Color(0xFF0F172A) : Colors.grey[100],
           shape: BoxShape.circle,
         ),
-        child: Icon(icon, size: 22, color: Colors.grey[600]),
+        child: Icon(
+          icon,
+          size: 22,
+          color: isDark ? Colors.grey[400] : Colors.grey[600],
+        ),
       ),
       title: Text(
         label,
         style: TextStyle(
           fontSize: 12,
-          color: Colors.grey[500],
+          color: isDark ? Colors.grey[400] : Colors.grey[500],
           fontWeight: FontWeight.w500,
         ),
       ),
@@ -297,7 +308,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           style: TextStyle(
             fontSize: 15,
             fontWeight: FontWeight.w600,
-            color: valueColor ?? Colors.black87,
+            color: valueColor ?? Theme.of(context).colorScheme.onSurface,
           ),
         ),
       ),

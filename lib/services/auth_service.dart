@@ -280,6 +280,32 @@ class AuthService {
   // 10. GET CURRENT ACCESS TOKEN
   // ==========================================
 
+  // ==========================================
+  // 11. UPDATE PASSWORD (AUTHENTICATED)
+  // ==========================================
+
+  Future<bool> updatePassword(String newPassword) async {
+    final cleanPassword = newPassword.trim();
+    if (cleanPassword.isEmpty || cleanPassword.length < 6) {
+      return false;
+    }
+
+    try {
+      final UserResponse response = await _supabase.auth.updateUser(
+        UserAttributes(
+          password: cleanPassword,
+        ),
+      );
+      return response.user != null;
+    } on AuthException catch (e) {
+      _logError('Update Password', e.message);
+      rethrow;
+    } catch (e) {
+      _logError('Update Password', e);
+      rethrow;
+    }
+  }
+
   String? getAccessToken() {
     return _supabase.auth.currentSession?.accessToken;
   }

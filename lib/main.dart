@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'screens/login_screen.dart';
+import 'theme/app_theme.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -36,24 +37,37 @@ Future<void> main() async {
 
   debugPrint('Supabase initialized successfully');
 
-  runApp(const MyApp());
+  // Initialize ThemeController and restore persisted preference
+  final themeController = ThemeController();
+  await themeController.loadTheme();
+
+  runApp(MyApp(themeController: themeController));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final ThemeController? themeController;
+
+  const MyApp({super.key, this.themeController});
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'PSMS Mobile',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF6A11CB),
-        ),
-        useMaterial3: true,
+    final controller = themeController ?? ThemeController();
+
+    return ThemeProvider(
+      notifier: controller,
+      child: ListenableBuilder(
+        listenable: controller,
+        builder: (context, _) {
+          return MaterialApp(
+            title: 'PSMS Mobile',
+            debugShowCheckedModeBanner: false,
+            theme: AppTheme.lightTheme,
+            darkTheme: AppTheme.darkTheme,
+            themeMode: controller.themeMode,
+            home: const LoginScreen(),
+          );
+        },
       ),
-      home: const LoginScreen(),
     );
   }
 }
