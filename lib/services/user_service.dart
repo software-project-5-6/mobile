@@ -1,4 +1,3 @@
-
 import 'package:flutter/foundation.dart';
 import 'api_service.dart';
 
@@ -28,7 +27,6 @@ class UserService {
       throw const FormatException(
         'Invalid response format: expected a list of users.',
       );
-
     } catch (e) {
       debugPrint('UserService: Failed to load users.');
       rethrow;
@@ -43,9 +41,7 @@ class UserService {
     final id = userId.trim();
 
     if (id.isEmpty) {
-      throw ArgumentError(
-        'User ID cannot be empty.',
-      );
+      throw ArgumentError('User ID cannot be empty.');
     }
 
     try {
@@ -58,7 +54,6 @@ class UserService {
       await _apiService.delete('/users/$encodedId');
 
       debugPrint('User deleted successfully.');
-
     } catch (e) {
       debugPrint('UserService: Failed to delete user.');
       rethrow;

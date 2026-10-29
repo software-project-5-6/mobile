@@ -31,9 +31,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
       if (user != null) {
         email = user.email ?? "";
-        name = user.userMetadata?['name'] ??
-            user.userMetadata?['full_name'] ??
-            "";
+        name =
+            user.userMetadata?['name'] ?? user.userMetadata?['full_name'] ?? "";
       }
 
       if (email.isNotEmpty && name.isEmpty) name = email.split('@')[0];
@@ -93,7 +92,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
               padding: const EdgeInsets.all(10),
               child: Icon(
                 Icons.arrow_back,
-                color: Theme.of(context).appBarTheme.foregroundColor ??
+                color:
+                    Theme.of(context).appBarTheme.foregroundColor ??
                     (isDark ? Colors.white : Colors.black87),
                 size: 24,
               ),
@@ -101,6 +101,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
         ),
       ),
+
+      // --- Body Content (Mobile Optimized) ---
       body: _isLoading
           ? const Center(
               child: CircularProgressIndicator(color: Color(0xFF6A11CB)),
@@ -164,8 +166,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           decoration: BoxDecoration(
                             color: widget.isAdmin
                                 ? Colors.redAccent.withValues(alpha: 0.1)
-                                : const Color(0xFF6A11CB)
-                                    .withValues(alpha: 0.1),
+                                : const Color(
+                                    0xFF6A11CB,
+                                  ).withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(20),
                           ),
                           child: Text(
@@ -217,6 +220,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             border: Border.all(
                               color: Theme.of(context).dividerColor,
                             ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.02),
+                                blurRadius: 10,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
                           ),
                           child: Column(
                             children: [
@@ -268,6 +278,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
+  // Helper Widget for the native mobile list feel
   Widget _buildMobileListRow({
     required BuildContext context,
     required bool isDark,

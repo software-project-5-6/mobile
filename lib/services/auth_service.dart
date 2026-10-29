@@ -1,4 +1,3 @@
-
 import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -17,49 +16,35 @@ class AuthService {
   // 1. SIGN UP
   // ==========================================
 
-  Future<String?> signUp(
-    String email,
-    String password,
-    String name,
-  ) async {
+  Future<String?> signUp(String email, String password, String name) async {
     final cleanEmail = email.trim();
     final cleanName = name.trim();
 
-    if (cleanEmail.isEmpty ||
-        password.isEmpty ||
-        cleanName.isEmpty) {
+    if (cleanEmail.isEmpty || password.isEmpty || cleanName.isEmpty) {
       return 'Please fill in all required fields.';
     }
 
     try {
-      final AuthResponse response =
-          await _supabase.auth.signUp(
+      final AuthResponse response = await _supabase.auth.signUp(
         email: cleanEmail,
         password: password,
-        data: {
-          'name': cleanName,
-        },
+        data: {'name': cleanName},
       );
 
       // User created, email confirmation may be required.
-      if (response.user != null ||
-          response.session != null) {
+      if (response.user != null || response.session != null) {
         return null;
       }
 
       return 'Signup could not be completed.';
-
     } on AuthException catch (e) {
       _logError('Sign Up', e.message);
 
-      if (e.message.toLowerCase().contains(
-        'already registered',
-      )) {
+      if (e.message.toLowerCase().contains('already registered')) {
         return 'Account already exists. Please login.';
       }
 
       return e.message;
-
     } catch (e) {
       _logError('Sign Up', e);
       return 'An unexpected error occurred. Please try again.';
@@ -70,10 +55,7 @@ class AuthService {
   // 2. VERIFY EMAIL OTP
   // ==========================================
 
-  Future<bool> confirmSignUp(
-    String email,
-    String confirmationCode,
-  ) async {
+  Future<bool> confirmSignUp(String email, String confirmationCode) async {
     final cleanEmail = email.trim();
     final cleanCode = confirmationCode.trim();
 
@@ -82,20 +64,16 @@ class AuthService {
     }
 
     try {
-      final AuthResponse response =
-          await _supabase.auth.verifyOTP(
+      final AuthResponse response = await _supabase.auth.verifyOTP(
         email: cleanEmail,
         token: cleanCode,
         type: OtpType.email,
       );
 
-      return response.user != null ||
-          response.session != null;
-
+      return response.user != null || response.session != null;
     } on AuthException catch (e) {
       _logError('Email Verification', e.message);
       return false;
-
     } catch (e) {
       _logError('Email Verification', e);
       return false;
@@ -114,15 +92,10 @@ class AuthService {
     }
 
     try {
-      await _supabase.auth.resend(
-        type: OtpType.signup,
-        email: cleanEmail,
-      );
-
+      await _supabase.auth.resend(type: OtpType.signup, email: cleanEmail);
     } on AuthException catch (e) {
       _logError('Resend Code', e.message);
       rethrow;
-
     } catch (e) {
       _logError('Resend Code', e);
       rethrow;
@@ -133,10 +106,7 @@ class AuthService {
   // 4. LOGIN
   // ==========================================
 
-  Future<bool> login(
-    String email,
-    String password,
-  ) async {
+  Future<bool> login(String email, String password) async {
     final cleanEmail = email.trim();
 
     if (cleanEmail.isEmpty || password.isEmpty) {
@@ -144,18 +114,15 @@ class AuthService {
     }
 
     try {
-      final AuthResponse response =
-          await _supabase.auth.signInWithPassword(
+      final AuthResponse response = await _supabase.auth.signInWithPassword(
         email: cleanEmail,
         password: password,
       );
 
       return response.session != null;
-
     } on AuthException catch (e) {
       _logError('Login', e.message);
       return false;
-
     } catch (e) {
       _logError('Login', e);
       return false;
@@ -169,11 +136,9 @@ class AuthService {
   Future<void> logout() async {
     try {
       await _supabase.auth.signOut();
-
     } on AuthException catch (e) {
       _logError('Logout', e.message);
       rethrow;
-
     } catch (e) {
       _logError('Logout', e);
       rethrow;
@@ -192,16 +157,12 @@ class AuthService {
     }
 
     try {
-      await _supabase.auth.resetPasswordForEmail(
-        cleanEmail,
-      );
+      await _supabase.auth.resetPasswordForEmail(cleanEmail);
 
       return true;
-
     } on AuthException catch (e) {
       _logError('Reset Password', e.message);
       return false;
-
     } catch (e) {
       _logError('Reset Password', e);
       return false;
@@ -220,16 +181,13 @@ class AuthService {
     final cleanEmail = email.trim();
     final cleanCode = code.trim();
 
-    if (cleanEmail.isEmpty ||
-        newPassword.isEmpty ||
-        cleanCode.isEmpty) {
+    if (cleanEmail.isEmpty || newPassword.isEmpty || cleanCode.isEmpty) {
       return false;
     }
 
     try {
       // Verify the password recovery OTP.
-      final AuthResponse response =
-          await _supabase.auth.verifyOTP(
+      final AuthResponse response = await _supabase.auth.verifyOTP(
         email: cleanEmail,
         token: cleanCode,
         type: OtpType.recovery,
@@ -241,19 +199,14 @@ class AuthService {
       }
 
       // User is now authenticated for password update.
-      final UserResponse updatedUser =
-          await _supabase.auth.updateUser(
-        UserAttributes(
-          password: newPassword,
-        ),
+      final UserResponse updatedUser = await _supabase.auth.updateUser(
+        UserAttributes(password: newPassword),
       );
 
       return updatedUser.user != null;
-
     } on AuthException catch (e) {
       _logError('Confirm Reset Password', e.message);
       return false;
-
     } catch (e) {
       _logError('Confirm Reset Password', e);
       return false;
@@ -292,9 +245,7 @@ class AuthService {
 
     try {
       final UserResponse response = await _supabase.auth.updateUser(
-        UserAttributes(
-          password: cleanPassword,
-        ),
+        UserAttributes(password: cleanPassword),
       );
       return response.user != null;
     } on AuthException catch (e) {

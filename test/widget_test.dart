@@ -7,16 +7,19 @@
 
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:mobile/constants/app_branding.dart';
 import 'package:mobile/main.dart';
 
 void main() {
-  testWidgets('App renders LoginScreen smoke test', (WidgetTester tester) async {
+  testWidgets('App renders LoginScreen smoke test', (
+    WidgetTester tester,
+  ) async {
     // Build our app and trigger a frame.
     await tester.pumpWidget(const MyApp());
 
-    // Verify that the login screen header and button are present.
-    expect(find.text('PSMS'), findsOneWidget);
-    expect(find.text('Project Space Management System'), findsOneWidget);
+    // Verify that the rebranded login screen header and button are present.
+    expect(find.text(AppBranding.appName), findsOneWidget);
+    expect(find.text(AppBranding.productDescription), findsOneWidget);
     expect(find.text('Sign In'), findsOneWidget);
   });
 }

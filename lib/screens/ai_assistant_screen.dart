@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../services/chat_service.dart';
+import '../services/chat_service.dart';
 import '../widgets/ai_markdown_message.dart';
 
 class AIAssistantScreen extends StatefulWidget {
@@ -64,7 +64,7 @@ class _AIAssistantScreenState extends State<AIAssistantScreen> {
             "text":
                 "Hello! Open the side menu to select a project or start a new chat.",
             "time": DateTime.now(),
-          }
+          },
         ];
       });
     }
@@ -72,8 +72,9 @@ class _AIAssistantScreenState extends State<AIAssistantScreen> {
 
   Future<void> _fetchConversationMessages(String conversationId) async {
     try {
-      final response =
-          await _chatService.getAllMessagesForConversation(conversationId);
+      final response = await _chatService.getAllMessagesForConversation(
+        conversationId,
+      );
 
       // SAFE PARSING: Handle both Array [...] and Object {"messages": [...]}
       List<dynamic> fetchedMessages = [];
@@ -92,15 +93,17 @@ class _AIAssistantScreenState extends State<AIAssistantScreen> {
               "text":
                   "Hello! I'm ready to help with ${widget.currentProjectWithAssistant?['projectName'] ?? 'this project'}.",
               "time": DateTime.now(),
-            }
+            },
           ];
         } else {
           _messages = fetchedMessages
-              .map((msg) => {
-                    "isUser": msg['role'] == 'user',
-                    "text": msg['content'] ?? '',
-                    "time": DateTime.now(),
-                  })
+              .map(
+                (msg) => {
+                  "isUser": msg['role'] == 'user',
+                  "text": msg['content'] ?? '',
+                  "time": DateTime.now(),
+                },
+              )
               .toList();
         }
       });
@@ -131,17 +134,14 @@ class _AIAssistantScreenState extends State<AIAssistantScreen> {
     if (widget.currentProjectWithAssistant == null ||
         widget.currentProjectWithAssistant!['projectId'] == null) {
       setState(
-          () => _error = "Please open the menu and select a Project first.");
+        () => _error = "Please open the menu and select a Project first.",
+      );
       return;
     }
 
     setState(() {
       _error = null;
-      _messages.add({
-        "isUser": true,
-        "text": text,
-        "time": DateTime.now(),
-      });
+      _messages.add({"isUser": true, "text": text, "time": DateTime.now()});
       _isSending = true;
       if (predefinedText == null) _messageController.clear();
     });
@@ -155,13 +155,16 @@ class _AIAssistantScreenState extends State<AIAssistantScreen> {
       };
 
       final response = await _chatService.askProject(
-          widget.currentProjectWithAssistant!['projectId']!, queryPayload);
+        widget.currentProjectWithAssistant!['projectId']!,
+        queryPayload,
+      );
 
       if (mounted) {
         setState(() {
           _messages.add({
             "isUser": false,
-            "text": response['answer'] ??
+            "text":
+                response['answer'] ??
                 "I couldn't process that. Please try again.",
             "time": DateTime.now(),
           });
@@ -213,8 +216,11 @@ class _AIAssistantScreenState extends State<AIAssistantScreen> {
           CircleAvatar(
             radius: 20,
             backgroundColor: primaryColor,
-            child:
-                const Icon(Icons.auto_awesome, color: Colors.white, size: 20),
+            child: const Icon(
+              Icons.auto_awesome,
+              color: Colors.white,
+              size: 20,
+            ),
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -246,7 +252,7 @@ class _AIAssistantScreenState extends State<AIAssistantScreen> {
               color: isDark ? Colors.white70 : Colors.black54,
             ),
             onPressed: () => Scaffold.of(context).openDrawer(),
-          )
+          ),
         ],
       ),
     );
@@ -262,8 +268,9 @@ class _AIAssistantScreenState extends State<AIAssistantScreen> {
         final isUser = msg['isUser'];
 
         final DateTime time = msg['time'];
-        final hour =
-            time.hour > 12 ? time.hour - 12 : (time.hour == 0 ? 12 : time.hour);
+        final hour = time.hour > 12
+            ? time.hour - 12
+            : (time.hour == 0 ? 12 : time.hour);
         final amPm = time.hour >= 12 ? "PM" : "AM";
         final timeString =
             "${hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')} $amPm";
@@ -271,16 +278,20 @@ class _AIAssistantScreenState extends State<AIAssistantScreen> {
         return Padding(
           padding: const EdgeInsets.only(bottom: 16),
           child: Row(
-            mainAxisAlignment:
-                isUser ? MainAxisAlignment.end : MainAxisAlignment.start,
+            mainAxisAlignment: isUser
+                ? MainAxisAlignment.end
+                : MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               if (!isUser) ...[
                 CircleAvatar(
                   radius: 18,
                   backgroundColor: primaryColor,
-                  child: const Icon(Icons.auto_awesome,
-                      color: Colors.white, size: 18),
+                  child: const Icon(
+                    Icons.auto_awesome,
+                    color: Colors.white,
+                    size: 18,
+                  ),
                 ),
                 const SizedBox(width: 12),
               ],
@@ -291,13 +302,13 @@ class _AIAssistantScreenState extends State<AIAssistantScreen> {
                     color: isUser
                         ? primaryColor
                         : (isDark
-                            ? const Color(0xFF1E293B)
-                            : Colors.grey.shade100),
+                              ? const Color(0xFF1E293B)
+                              : Colors.grey.shade100),
                     border: isUser
                         ? null
                         : (isDark
-                            ? Border.all(color: const Color(0xFF334155))
-                            : null),
+                              ? Border.all(color: const Color(0xFF334155))
+                              : null),
                     borderRadius: BorderRadius.circular(8).copyWith(
                       topLeft: isUser ? const Radius.circular(8) : Radius.zero,
                       topRight: isUser ? Radius.zero : const Radius.circular(8),
@@ -310,12 +321,12 @@ class _AIAssistantScreenState extends State<AIAssistantScreen> {
                         Text(
                           msg['text'] ?? '',
                           style: const TextStyle(
-                              color: Colors.white, fontSize: 15),
+                            color: Colors.white,
+                            fontSize: 15,
+                          ),
                         )
                       else
-                        AiMarkdownMessage(
-                          content: msg['text'] ?? '',
-                        ),
+                        AiMarkdownMessage(content: msg['text'] ?? ''),
                       const SizedBox(height: 8),
                       Text(
                         timeString,
@@ -323,8 +334,8 @@ class _AIAssistantScreenState extends State<AIAssistantScreen> {
                           color: isUser
                               ? Colors.white70
                               : (isDark
-                                  ? Colors.grey.shade400
-                                  : Colors.grey.shade500),
+                                    ? Colors.grey.shade400
+                                    : Colors.grey.shade500),
                           fontSize: 11,
                         ),
                       ),
@@ -337,9 +348,13 @@ class _AIAssistantScreenState extends State<AIAssistantScreen> {
                 CircleAvatar(
                   radius: 18,
                   backgroundColor: Colors.purple.shade300,
-                  child: const Text("U",
-                      style: TextStyle(
-                          color: Colors.white, fontWeight: FontWeight.bold)),
+                  child: const Text(
+                    "U",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
               ],
             ],
@@ -356,10 +371,14 @@ class _AIAssistantScreenState extends State<AIAssistantScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           CircleAvatar(
-              radius: 18,
-              backgroundColor: primaryColor,
-              child: const Icon(Icons.auto_awesome,
-                  color: Colors.white, size: 18)),
+            radius: 18,
+            backgroundColor: primaryColor,
+            child: const Icon(
+              Icons.auto_awesome,
+              color: Colors.white,
+              size: 18,
+            ),
+          ),
           const SizedBox(width: 12),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
@@ -368,8 +387,9 @@ class _AIAssistantScreenState extends State<AIAssistantScreen> {
               border: isDark
                   ? Border.all(color: const Color(0xFF334155))
                   : null,
-              borderRadius:
-                  BorderRadius.circular(8).copyWith(topLeft: Radius.zero),
+              borderRadius: BorderRadius.circular(
+                8,
+              ).copyWith(topLeft: Radius.zero),
             ),
             child: Text(
               "Typing...",
@@ -416,13 +436,18 @@ class _AIAssistantScreenState extends State<AIAssistantScreen> {
                   decoration: InputDecoration(
                     hintText: "Type your message here...",
                     hintStyle: TextStyle(
-                      color: isDark ? Colors.grey.shade500 : Colors.grey.shade400,
+                      color: isDark
+                          ? Colors.grey.shade500
+                          : Colors.grey.shade400,
                     ),
                     contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16, vertical: 14),
+                      horizontal: 16,
+                      vertical: 14,
+                    ),
                     filled: true,
-                    fillColor:
-                        isDark ? const Color(0xFF0F172A) : Colors.grey.shade50,
+                    fillColor: isDark
+                        ? const Color(0xFF0F172A)
+                        : Colors.grey.shade50,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
                       borderSide: BorderSide(
@@ -462,8 +487,8 @@ class _AIAssistantScreenState extends State<AIAssistantScreen> {
                     Icons.send,
                     color: isDark ? Colors.white70 : Colors.black54,
                   ),
-                  onPressed: _isSending ||
-                          widget.currentProjectWithAssistant == null
+                  onPressed:
+                      _isSending || widget.currentProjectWithAssistant == null
                       ? null
                       : () => _handleSendMessage(),
                 ),
@@ -482,7 +507,7 @@ class _AIAssistantScreenState extends State<AIAssistantScreen> {
                 _buildChip("What can you do?", isDark),
               ],
             ),
-          ]
+          ],
         ],
       ),
     );
@@ -497,8 +522,7 @@ class _AIAssistantScreenState extends State<AIAssistantScreen> {
           color: isDark ? Colors.white70 : Colors.black87,
         ),
       ),
-      backgroundColor:
-          isDark ? const Color(0xFF334155) : Colors.grey.shade200,
+      backgroundColor: isDark ? const Color(0xFF334155) : Colors.grey.shade200,
       side: BorderSide.none,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       onPressed: () {

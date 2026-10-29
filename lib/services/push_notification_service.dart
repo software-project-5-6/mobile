@@ -1,4 +1,3 @@
-
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -13,42 +12,31 @@ import '../constants/api_constants.dart';
 import 'api_service.dart';
 
 class PushNotificationService {
-  final FirebaseMessaging _messaging =
-      FirebaseMessaging.instance;
+  final FirebaseMessaging _messaging = FirebaseMessaging.instance;
 
   final ApiService _api = ApiService();
 
-  static const Duration _requestTimeout =
-      Duration(seconds: 60);
+  static const Duration _requestTimeout = Duration(seconds: 60);
 
-  static const String _deviceIdKey =
-      'psms_installation_device_id';
+  static const String _deviceIdKey = 'psms_installation_device_id';
 
   // Keep the original backend endpoint paths.
-  static const String _registerPath =
-      '/api/notifications/register-device';
+  static const String _registerPath = '/api/notifications/register-device';
 
-  static const String _unregisterPath =
-      '/api/notifications/unregister-device';
+  static const String _unregisterPath = '/api/notifications/unregister-device';
 
-  StreamSubscription<RemoteMessage>?
-      _foregroundSubscription;
+  StreamSubscription<RemoteMessage>? _foregroundSubscription;
 
-  StreamSubscription<RemoteMessage>?
-      _openedSubscription;
+  StreamSubscription<RemoteMessage>? _openedSubscription;
 
-  StreamSubscription<String>?
-      _tokenRefreshSubscription;
+  StreamSubscription<String>? _tokenRefreshSubscription;
 
   bool _initialMessageChecked = false;
 
   // Assign this callback from the UI/navigation layer.
-  void Function(Map<String, dynamic>)?
-      onNotificationTap;
+  void Function(Map<String, dynamic>)? onNotificationTap;
 
-  PushNotificationService({
-    this.onNotificationTap,
-  });
+  PushNotificationService({this.onNotificationTap});
 
   // ==========================================
   // 1. INITIALIZE PUSH NOTIFICATIONS
@@ -61,8 +49,7 @@ class PushNotificationService {
         return false;
       }
 
-      final settings =
-          await _messaging.requestPermission(
+      final settings = await _messaging.requestPermission(
         alert: true,
         badge: true,
         sound: true,
@@ -83,8 +70,7 @@ class PushNotificationService {
         return false;
       }
 
-      final deviceType =
-          Platform.isAndroid ? 'ANDROID' : 'IOS';
+      final deviceType = Platform.isAndroid ? 'ANDROID' : 'IOS';
 
       final deviceId = await _getDeviceId();
 
@@ -92,22 +78,13 @@ class PushNotificationService {
       setupNotificationHandlers();
       setupTokenRefreshHandler(jwtToken);
 
-      await registerDevice(
-        fcmToken,
-        deviceType,
-        deviceId,
-        jwtToken,
-      );
+      await registerDevice(fcmToken, deviceType, deviceId, jwtToken);
 
-      debugPrint(
-        'Push notifications initialized successfully.',
-      );
+      debugPrint('Push notifications initialized successfully.');
 
       return true;
     } catch (e) {
-      debugPrint(
-        'Push notification initialization failed: $e',
-      );
+      debugPrint('Push notification initialization failed: $e');
       return false;
     }
   }
@@ -119,8 +96,7 @@ class PushNotificationService {
   Future<String> _getDeviceId() async {
     final preferences = SharedPreferencesAsync();
 
-    final existingId =
-        await preferences.getString(_deviceIdKey);
+    final existingId = await preferences.getString(_deviceIdKey);
 
     if (existingId != null && existingId.isNotEmpty) {
       return existingId;
@@ -128,19 +104,11 @@ class PushNotificationService {
 
     final random = Random.secure();
 
-    final bytes = List<int>.generate(
-      16,
-      (_) => random.nextInt(256),
-    );
+    final bytes = List<int>.generate(16, (_) => random.nextInt(256));
 
-    final newId = base64UrlEncode(
-      bytes,
-    ).replaceAll('=', '');
+    final newId = base64UrlEncode(bytes).replaceAll('=', '');
 
-    await preferences.setString(
-      _deviceIdKey,
-      newId,
-    );
+    await preferences.setString(_deviceIdKey, newId);
 
     return newId;
   }
@@ -160,30 +128,27 @@ class PushNotificationService {
     // Always retrieve the CURRENT Supabase JWT.
     final accessToken = await _api.getIdToken();
 
-    final uri = Uri.parse(
-      '${ApiConstants.baseUrl}$_registerPath',
-    );
+    final uri = Uri.parse('${ApiConstants.baseUrl}$_registerPath');
 
     try {
-      final response = await http.post(
-        uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-        body: jsonEncode({
-          'token': token,
-          'deviceType': deviceType,
-          'deviceId': deviceId,
-        }),
-      ).timeout(_requestTimeout);
+      final response = await http
+          .post(
+            uri,
+            headers: {
+              'Authorization': 'Bearer $accessToken',
+              'Content-Type': 'application/json',
+              'Accept': 'application/json',
+            },
+            body: jsonEncode({
+              'token': token,
+              'deviceType': deviceType,
+              'deviceId': deviceId,
+            }),
+          )
+          .timeout(_requestTimeout);
 
-      if (response.statusCode >= 200 &&
-          response.statusCode < 300) {
-        debugPrint(
-          'Device registered successfully.',
-        );
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        debugPrint('Device registered successfully.');
         return;
       }
 
@@ -192,13 +157,9 @@ class PushNotificationService {
         '(${response.statusCode}).',
       );
     } on TimeoutException {
-      throw Exception(
-        'Device registration timed out.',
-      );
+      throw Exception('Device registration timed out.');
     } catch (e) {
-      debugPrint(
-        'Device registration error: $e',
-      );
+      debugPrint('Device registration error: $e');
       rethrow;
     }
   }
@@ -209,46 +170,39 @@ class PushNotificationService {
 
   void setupNotificationHandlers() {
     // Foreground notifications.
-    _foregroundSubscription ??=
-        FirebaseMessaging.onMessage.listen(
-      (RemoteMessage message) {
-        debugPrint(
-          'Foreground notification received.',
-        );
+    _foregroundSubscription ??= FirebaseMessaging.onMessage.listen((
+      RemoteMessage message,
+    ) {
+      debugPrint('Foreground notification received.');
 
-        if (message.notification != null) {
-          _handleNotification(message);
-        }
-      },
-    );
+      if (message.notification != null) {
+        _handleNotification(message);
+      }
+    });
 
     // User taps notification from background.
-    _openedSubscription ??=
-        FirebaseMessaging.onMessageOpenedApp.listen(
-      (RemoteMessage message) {
-        debugPrint(
-          'Notification opened from background.',
-        );
+    _openedSubscription ??= FirebaseMessaging.onMessageOpenedApp.listen((
+      RemoteMessage message,
+    ) {
+      debugPrint('Notification opened from background.');
 
-        _handleNotificationAction(message.data);
-      },
-    );
+      _handleNotificationAction(message.data);
+    });
 
     // User taps notification from terminated state.
     if (!_initialMessageChecked) {
       _initialMessageChecked = true;
 
-      _messaging.getInitialMessage().then(
-        (RemoteMessage? message) {
-          if (message != null) {
-            _handleNotificationAction(message.data);
-          }
-        },
-      ).catchError((Object error) {
-        debugPrint(
-          'Initial notification check failed: $error',
-        );
-      });
+      _messaging
+          .getInitialMessage()
+          .then((RemoteMessage? message) {
+            if (message != null) {
+              _handleNotificationAction(message.data);
+            }
+          })
+          .catchError((Object error) {
+            debugPrint('Initial notification check failed: $error');
+          });
     }
   }
 
@@ -261,15 +215,11 @@ class PushNotificationService {
 
     switch (data['type']) {
       case 'ARTIFACT_UPLOADED':
-        debugPrint(
-          'Artifact upload notification received.',
-        );
+        debugPrint('Artifact upload notification received.');
         break;
 
       default:
-        debugPrint(
-          'Foreground notification received.',
-        );
+        debugPrint('Foreground notification received.');
     }
 
     // To display a visible foreground notification,
@@ -281,9 +231,7 @@ class PushNotificationService {
   // 6. HANDLE NOTIFICATION ACTIONS
   // ==========================================
 
-  void _handleNotificationAction(
-    Map<String, dynamic> data,
-  ) {
+  void _handleNotificationAction(Map<String, dynamic> data) {
     final type = data['type'];
 
     if (type == 'ARTIFACT_UPLOADED') {
@@ -304,39 +252,27 @@ class PushNotificationService {
   // ==========================================
 
   void setupTokenRefreshHandler(String jwtToken) {
-    _tokenRefreshSubscription ??=
-        _messaging.onTokenRefresh.listen(
-      (String newFcmToken) async {
-        try {
-          if (newFcmToken.isEmpty) {
-            return;
-          }
-
-          final deviceType = Platform.isAndroid
-              ? 'ANDROID'
-              : 'IOS';
-
-          final deviceId = await _getDeviceId();
-
-          // registerDevice fetches a fresh
-          // Supabase access token when called.
-          await registerDevice(
-            newFcmToken,
-            deviceType,
-            deviceId,
-            jwtToken,
-          );
-
-          debugPrint(
-            'FCM token refresh registered successfully.',
-          );
-        } catch (e) {
-          debugPrint(
-            'FCM token refresh registration failed: $e',
-          );
+    _tokenRefreshSubscription ??= _messaging.onTokenRefresh.listen((
+      String newFcmToken,
+    ) async {
+      try {
+        if (newFcmToken.isEmpty) {
+          return;
         }
-      },
-    );
+
+        final deviceType = Platform.isAndroid ? 'ANDROID' : 'IOS';
+
+        final deviceId = await _getDeviceId();
+
+        // registerDevice fetches a fresh
+        // Supabase access token when called.
+        await registerDevice(newFcmToken, deviceType, deviceId, jwtToken);
+
+        debugPrint('FCM token refresh registered successfully.');
+      } catch (e) {
+        debugPrint('FCM token refresh registration failed: $e');
+      }
+    });
   }
 
   // ==========================================
@@ -356,25 +292,20 @@ class PushNotificationService {
 
       final uri = Uri.parse(
         '${ApiConstants.baseUrl}$_unregisterPath',
-      ).replace(
-        queryParameters: {
-          'token': fcmToken,
-        },
-      );
+      ).replace(queryParameters: {'token': fcmToken});
 
-      final response = await http.delete(
-        uri,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Accept': 'application/json',
-        },
-      ).timeout(_requestTimeout);
+      final response = await http
+          .delete(
+            uri,
+            headers: {
+              'Authorization': 'Bearer $accessToken',
+              'Accept': 'application/json',
+            },
+          )
+          .timeout(_requestTimeout);
 
-      if (response.statusCode >= 200 &&
-          response.statusCode < 300) {
-        debugPrint(
-          'Device unregistered successfully.',
-        );
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        debugPrint('Device unregistered successfully.');
       } else {
         throw Exception(
           'Device unregistration failed '
@@ -382,14 +313,10 @@ class PushNotificationService {
         );
       }
     } on TimeoutException {
-      debugPrint(
-        'Device unregistration timed out.',
-      );
+      debugPrint('Device unregistration timed out.');
       rethrow;
     } catch (e) {
-      debugPrint(
-        'Device unregistration failed: $e',
-      );
+      debugPrint('Device unregistration failed: $e');
       rethrow;
     }
   }

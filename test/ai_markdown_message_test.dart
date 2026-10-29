@@ -18,7 +18,12 @@ Outro with <br> tag.
 
       final result = normalizeAiMarkdown(input);
 
-      expect(result.contains('// Code block: <br> and **not bold** must be preserved verbatim!'), isTrue);
+      expect(
+        result.contains(
+          '// Code block: <br> and **not bold** must be preserved verbatim!',
+        ),
+        isTrue,
+      );
       expect(result.contains('print("Line 1\\nLine 2");'), isTrue);
     });
 
@@ -29,7 +34,9 @@ Outro with <br> tag.
       expect(result.contains('World!'), isTrue);
     });
 
-    testWidgets('Renders bold, headings, lists, emojis, and links', (tester) async {
+    testWidgets('Renders bold, headings, lists, emojis, and links', (
+      tester,
+    ) async {
       String? tappedUrl;
 
       const markdown = '''
@@ -75,8 +82,10 @@ Visit [Documentation](https://psms.majstro.com) for details.
       expect(tappedUrl, equals('https://psms.majstro.com'));
     });
 
-    testWidgets('Renders three-column and very long Markdown tables with horizontal scroll', (tester) async {
-      const tableMarkdown = '''
+    testWidgets(
+      'Renders three-column and very long Markdown tables with horizontal scroll',
+      (tester) async {
+        const tableMarkdown = '''
 ### Component Matrix
 
 | Component | Responsibility | Tech Stack | Status | Lead Contact | Extra Notes |
@@ -89,39 +98,40 @@ Visit [Documentation](https://psms.majstro.com) for details.
 Final paragraph after the table.
 ''';
 
-      await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
-            body: Center(
-              child: SizedBox(
-                width: 340, // Constrained mobile screen width
-                child: SingleChildScrollView(
-                  child: AiMarkdownMessage(
-                    content: tableMarkdown,
+        await tester.pumpWidget(
+          const MaterialApp(
+            home: Scaffold(
+              body: Center(
+                child: SizedBox(
+                  width: 340, // Constrained mobile screen width
+                  child: SingleChildScrollView(
+                    child: AiMarkdownMessage(content: tableMarkdown),
                   ),
                 ),
               ),
             ),
           ),
-        ),
-      );
-      await tester.pumpAndSettle();
+        );
+        await tester.pumpAndSettle();
 
-      expect(tester.takeException(), isNull);
-      expect(find.byType(Table), findsOneWidget);
-      expect(find.text('Component Matrix'), findsOneWidget);
-      expect(find.text('Mobile App'), findsOneWidget);
-      expect(find.text('Backend Core'), findsOneWidget);
-      expect(find.textContaining('Final paragraph'), findsOneWidget);
+        expect(tester.takeException(), isNull);
+        expect(find.byType(Table), findsOneWidget);
+        expect(find.text('Component Matrix'), findsOneWidget);
+        expect(find.text('Mobile App'), findsOneWidget);
+        expect(find.text('Backend Core'), findsOneWidget);
+        expect(find.textContaining('Final paragraph'), findsOneWidget);
 
-      // Verify horizontal scrollview exists for the table
-      final scrollFinder = find.byType(SingleChildScrollView);
-      // Main scroll view + table scroll view
-      expect(scrollFinder, findsNWidgets(2));
-    });
+        // Verify horizontal scrollview exists for the table
+        final scrollFinder = find.byType(SingleChildScrollView);
+        // Main scroll view + table scroll view
+        expect(scrollFinder, findsNWidgets(2));
+      },
+    );
 
-    testWidgets('Renders <br> tags properly without breaking tables or paragraphs', (tester) async {
-      const brMarkdown = '''
+    testWidgets(
+      'Renders <br> tags properly without breaking tables or paragraphs',
+      (tester) async {
+        const brMarkdown = '''
 Line A<br>Line B<br/>Line C<br />Line D
 
 | Item | Notes |
@@ -129,65 +139,65 @@ Line A<br>Line B<br/>Line C<br />Line D
 | Task 1 | First part<br>Second part |
 ''';
 
-      await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
-            body: SingleChildScrollView(
-              child: AiMarkdownMessage(
-                content: brMarkdown,
+        await tester.pumpWidget(
+          const MaterialApp(
+            home: Scaffold(
+              body: SingleChildScrollView(
+                child: AiMarkdownMessage(content: brMarkdown),
               ),
             ),
           ),
-        ),
-      );
-      await tester.pumpAndSettle();
+        );
+        await tester.pumpAndSettle();
 
-      expect(tester.takeException(), isNull);
-      expect(find.byType(Table), findsOneWidget);
-      expect(find.textContaining('Line A'), findsOneWidget);
-      expect(find.textContaining('First part'), findsOneWidget);
-    });
+        expect(tester.takeException(), isNull);
+        expect(find.byType(Table), findsOneWidget);
+        expect(find.textContaining('Line A'), findsOneWidget);
+        expect(find.textContaining('First part'), findsOneWidget);
+      },
+    );
 
-    testWidgets('Renders long AI responses exceeding screen height without overflow', (tester) async {
-      final longMarkdown = StringBuffer('# Extensive Project Summary\n\n');
-      for (int i = 1; i <= 30; i++) {
-        longMarkdown.writeln('### Section $i');
-        longMarkdown.writeln('This is detailed paragraph content for milestone $i of the project.');
-        longMarkdown.writeln('- Action item $i.A: Review requirements');
-        longMarkdown.writeln('- Action item $i.B: Implement tests');
-        longMarkdown.writeln('');
-      }
+    testWidgets(
+      'Renders long AI responses exceeding screen height without overflow',
+      (tester) async {
+        final longMarkdown = StringBuffer('# Extensive Project Summary\n\n');
+        for (int i = 1; i <= 30; i++) {
+          longMarkdown.writeln('### Section $i');
+          longMarkdown.writeln(
+            'This is detailed paragraph content for milestone $i of the project.',
+          );
+          longMarkdown.writeln('- Action item $i.A: Review requirements');
+          longMarkdown.writeln('- Action item $i.B: Implement tests');
+          longMarkdown.writeln('');
+        }
 
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: SizedBox(
-              width: 360,
-              height: 640,
-              child: ListView(
-                children: [
-                  AiMarkdownMessage(
-                    content: longMarkdown.toString(),
-                  ),
-                ],
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: SizedBox(
+                width: 360,
+                height: 640,
+                child: ListView(
+                  children: [
+                    AiMarkdownMessage(content: longMarkdown.toString()),
+                  ],
+                ),
               ),
             ),
           ),
-        ),
-      );
-      await tester.pumpAndSettle();
+        );
+        await tester.pumpAndSettle();
 
-      expect(tester.takeException(), isNull);
-      expect(find.text('Extensive Project Summary'), findsOneWidget);
-      expect(find.text('Section 1'), findsOneWidget);
-    });
+        expect(tester.takeException(), isNull);
+        expect(find.text('Extensive Project Summary'), findsOneWidget);
+        expect(find.text('Section 1'), findsOneWidget);
+      },
+    );
 
     testWidgets('Handles empty or blank content gracefully', (tester) async {
       await tester.pumpWidget(
         const MaterialApp(
-          home: Scaffold(
-            body: AiMarkdownMessage(content: '   '),
-          ),
+          home: Scaffold(body: AiMarkdownMessage(content: '   ')),
         ),
       );
       await tester.pumpAndSettle();
@@ -196,4 +206,3 @@ Line A<br>Line B<br/>Line C<br />Line D
     });
   });
 }
-

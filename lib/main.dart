@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'constants/app_branding.dart';
 import 'screens/login_screen.dart';
 import 'theme/app_theme.dart';
 
@@ -13,9 +14,7 @@ Future<void> main() async {
     defaultValue: 'https://ndetluoghrbtzupuawln.supabase.co',
   );
 
-  const supabaseKey = String.fromEnvironment(
-    'SUPABASE_PUBLISHABLE_KEY',
-  );
+  const supabaseKey = String.fromEnvironment('SUPABASE_PUBLISHABLE_KEY');
 
   if (supabaseKey.isEmpty) {
     throw StateError('SUPABASE_PUBLISHABLE_KEY is missing');
@@ -30,10 +29,7 @@ Future<void> main() async {
   }
 
   // Initialize Supabase
-  await Supabase.initialize(
-    url: supabaseUrl,
-    publishableKey: supabaseKey,
-  );
+  await Supabase.initialize(url: supabaseUrl, publishableKey: supabaseKey);
 
   debugPrint('Supabase initialized successfully');
 
@@ -59,7 +55,7 @@ class MyApp extends StatelessWidget {
         listenable: controller,
         builder: (context, _) {
           return MaterialApp(
-            title: 'PSMS Mobile',
+            title: AppBranding.appName,
             debugShowCheckedModeBanner: false,
             theme: AppTheme.lightTheme,
             darkTheme: AppTheme.darkTheme,

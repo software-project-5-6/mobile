@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import '../services/auth_service.dart'; // Import Auth Service (Now using Supabase)
+import '../constants/app_branding.dart';
+import '../services/auth_service.dart';
 import 'verify_email_screen.dart';
 
 class SignupScreen extends StatefulWidget {
@@ -24,12 +25,21 @@ class _SignupScreenState extends State<SignupScreen> {
   bool _isLoading = false;
 
   @override
+  void dispose() {
+    _emailController.dispose();
+    _nameController.dispose();
+    _passwordController.dispose();
+    _confirmPasswordController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        // 1. PURPLE GRADIENT BACKGROUND
+        // Gradient background matching brand theme
         decoration: const BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topLeft,
@@ -44,24 +54,30 @@ class _SignupScreenState extends State<SignupScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  // HEADER TEXT
+                  // Majstro Logo & Brand Lockup
+                  Image.asset(
+                    AppBranding.logoAsset,
+                    height: 72,
+                    fit: BoxFit.contain,
+                  ),
+                  const SizedBox(height: 12),
                   const Text(
-                    "PSMS",
+                    AppBranding.appName,
                     style: TextStyle(
                       color: Colors.white,
-                      fontSize: 32,
+                      fontSize: 28,
                       fontWeight: FontWeight.bold,
-                      letterSpacing: 2,
+                      letterSpacing: 0.5,
                     ),
                   ),
-                  const SizedBox(height: 5),
+                  const SizedBox(height: 6),
                   const Text(
-                    "Project Space Management System",
+                    AppBranding.productDescription,
                     style: TextStyle(color: Colors.white70, fontSize: 14),
                   ),
                   const SizedBox(height: 30),
 
-                  // 2. THE SIGN UP CARD
+                  // The Sign Up Card
                   Card(
                     elevation: 8,
                     shape: RoundedRectangleBorder(
@@ -82,36 +98,53 @@ class _SignupScreenState extends State<SignupScreen> {
                           ),
                           const SizedBox(height: 5),
                           const Text(
-                            "Sign up to get started with PSMS",
+                            "Sign up to get started with ${AppBranding.appName}",
                             style: TextStyle(color: Colors.grey, fontSize: 12),
                           ),
                           const SizedBox(height: 25),
 
                           // EMAIL FIELD
-                          _buildTextField("Email address *", _emailController, false),
+                          _buildTextField(
+                            "Email address *",
+                            _emailController,
+                            false,
+                            keyboardType: TextInputType.emailAddress,
+                          ),
                           const SizedBox(height: 15),
 
                           // FULL NAME FIELD
-                          _buildTextField("Full Name *", _nameController, false),
+                          _buildTextField(
+                            "Full Name *",
+                            _nameController,
+                            false,
+                          ),
                           const SizedBox(height: 15),
 
                           // PASSWORD FIELD
                           _buildPasswordField(
-                              "Password *", _passwordController, _isPasswordVisible, () {
-                            setState(() {
-                              _isPasswordVisible = !_isPasswordVisible;
-                            });
-                          }),
+                            "Password *",
+                            _passwordController,
+                            _isPasswordVisible,
+                            () {
+                              setState(() {
+                                _isPasswordVisible = !_isPasswordVisible;
+                              });
+                            },
+                          ),
                           const SizedBox(height: 15),
 
                           // CONFIRM PASSWORD FIELD
                           _buildPasswordField(
-                              "Confirm Password *", _confirmPasswordController, _isConfirmPasswordVisible,
-                              () {
-                            setState(() {
-                              _isConfirmPasswordVisible = !_isConfirmPasswordVisible;
-                            });
-                          }),
+                            "Confirm Password *",
+                            _confirmPasswordController,
+                            _isConfirmPasswordVisible,
+                            () {
+                              setState(() {
+                                _isConfirmPasswordVisible =
+                                    !_isConfirmPasswordVisible;
+                              });
+                            },
+                          ),
                           const SizedBox(height: 25),
 
                           // CREATE ACCOUNT BUTTON
@@ -126,14 +159,20 @@ class _SignupScreenState extends State<SignupScreen> {
                                   borderRadius: BorderRadius.circular(10),
                                 ),
                               ),
-                              onPressed: _isLoading ? null : _handleSignup, 
+                              onPressed: _isLoading ? null : _handleSignup,
                               child: _isLoading
                                   ? const SizedBox(
                                       height: 20,
                                       width: 20,
-                                      child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                                      child: CircularProgressIndicator(
+                                        color: Colors.white,
+                                        strokeWidth: 2,
+                                      ),
                                     )
-                                  : const Text("Create Account", style: TextStyle(fontSize: 16)),
+                                  : const Text(
+                                      "Create Account",
+                                      style: TextStyle(fontSize: 16),
+                                    ),
                             ),
                           ),
                           const SizedBox(height: 15),
@@ -145,12 +184,12 @@ class _SignupScreenState extends State<SignupScreen> {
                               const Text("Already have an account?"),
                               TextButton(
                                 onPressed: () {
-                                  Navigator.pop(context); // Go back to Login
+                                  Navigator.pop(context);
                                 },
                                 child: const Text("Log In"),
                               ),
                             ],
-                          )
+                          ),
                         ],
                       ),
                     ),
@@ -171,23 +210,29 @@ class _SignupScreenState extends State<SignupScreen> {
         _nameController.text.isEmpty ||
         _passwordController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Please fill all fields"), backgroundColor: Colors.red),
+        const SnackBar(
+          content: Text("Please fill all fields"),
+          backgroundColor: Colors.red,
+        ),
       );
       return;
     }
 
     if (_passwordController.text != _confirmPasswordController.text) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Passwords do not match"), backgroundColor: Colors.red),
+        const SnackBar(
+          content: Text("Passwords do not match"),
+          backgroundColor: Colors.red,
+        ),
       );
       return;
     }
 
-    setState(() => _isLoading = true); 
+    setState(() => _isLoading = true);
 
     // 2. Call Auth Service (Now using Supabase)
     AuthService authService = AuthService();
-    
+
     String? errorMessage = await authService.signUp(
       _emailController.text.trim(),
       _passwordController.text,
@@ -195,18 +240,18 @@ class _SignupScreenState extends State<SignupScreen> {
     );
 
     if (mounted) {
-      setState(() => _isLoading = false); // Stop loading spinner
+      setState(() => _isLoading = false);
     }
 
     // 3. Handle Result
     if (errorMessage == null) {
       // SUCCESS (Error is null)
       if (mounted) {
-        // Navigate to Verification Screen
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => VerifyEmailScreen(email: _emailController.text.trim()),
+            builder: (context) =>
+                VerifyEmailScreen(email: _emailController.text.trim()),
           ),
         );
       }
@@ -214,7 +259,7 @@ class _SignupScreenState extends State<SignupScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(errorMessage), 
+            content: Text(errorMessage),
             backgroundColor: Colors.red,
             duration: const Duration(seconds: 4),
           ),
@@ -224,21 +269,34 @@ class _SignupScreenState extends State<SignupScreen> {
   }
 
   // Helper widget to build standard text fields
-  Widget _buildTextField(String label, TextEditingController controller, bool isPassword) {
+  Widget _buildTextField(
+    String label,
+    TextEditingController controller,
+    bool isPassword, {
+    TextInputType? keyboardType,
+  }) {
     return TextField(
       controller: controller,
       obscureText: isPassword,
+      keyboardType: keyboardType,
       decoration: InputDecoration(
         labelText: label,
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 15,
+          vertical: 15,
+        ),
       ),
     );
   }
 
   // Helper widget to build password fields with eye icon
   Widget _buildPasswordField(
-      String label, TextEditingController controller, bool isVisible, VoidCallback onToggle) {
+    String label,
+    TextEditingController controller,
+    bool isVisible,
+    VoidCallback onToggle,
+  ) {
     return TextField(
       controller: controller,
       obscureText: !isVisible,
@@ -249,7 +307,10 @@ class _SignupScreenState extends State<SignupScreen> {
           icon: Icon(isVisible ? Icons.visibility : Icons.visibility_off),
           onPressed: onToggle,
         ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 15,
+          vertical: 15,
+        ),
       ),
     );
   }

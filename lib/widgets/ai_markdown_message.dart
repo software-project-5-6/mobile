@@ -135,15 +135,14 @@ class AiMarkdownMessage extends StatelessWidget {
     final Color headerColor = isDark ? Colors.white : Colors.black87;
     final Color mutedColor = isDark ? const Color(0xFF94A3B8) : Colors.black54;
     final Color linkColor = isDark ? const Color(0xFFA5B4FC) : primaryColor;
-    final Color borderColor = isDark ? const Color(0xFF334155) : Colors.grey.shade300;
+    final Color borderColor = isDark
+        ? const Color(0xFF334155)
+        : Colors.grey.shade300;
 
     // Custom extension set: GitHub Flavored Markdown + custom HTML break syntax
     final extensionSet = md.ExtensionSet(
       md.ExtensionSet.gitHubFlavored.blockSyntaxes,
-      [
-        HtmlBreakSyntax(),
-        ...md.ExtensionSet.gitHubFlavored.inlineSyntaxes,
-      ],
+      [HtmlBreakSyntax(), ...md.ExtensionSet.gitHubFlavored.inlineSyntaxes],
     );
 
     // Professional, theme-aware stylesheet tailored for mobile chat bubbles
@@ -198,14 +197,8 @@ class AiMarkdownMessage extends StatelessWidget {
       ),
 
       // Text Formatting
-      strong: TextStyle(
-        fontWeight: FontWeight.w700,
-        color: headerColor,
-      ),
-      em: TextStyle(
-        fontStyle: FontStyle.italic,
-        color: textColor,
-      ),
+      strong: TextStyle(fontWeight: FontWeight.w700, color: headerColor),
+      em: TextStyle(fontStyle: FontStyle.italic, color: textColor),
 
       // Links
       a: TextStyle(
@@ -233,12 +226,7 @@ class AiMarkdownMessage extends StatelessWidget {
         color: isDark
             ? const Color(0xFF312E81).withValues(alpha: 0.3)
             : primaryColor.withValues(alpha: 0.05),
-        border: Border(
-          left: BorderSide(
-            color: linkColor,
-            width: 3.5,
-          ),
-        ),
+        border: Border(left: BorderSide(color: linkColor, width: 3.5)),
         borderRadius: const BorderRadius.only(
           topRight: Radius.circular(6),
           bottomRight: Radius.circular(6),
@@ -270,27 +258,17 @@ class AiMarkdownMessage extends StatelessWidget {
 
       // Horizontal Divider
       horizontalRuleDecoration: BoxDecoration(
-        border: Border(
-          top: BorderSide(
-            color: borderColor,
-            width: 1.0,
-          ),
-        ),
+        border: Border(top: BorderSide(color: borderColor, width: 1.0)),
       ),
 
-      // Tables (Task 3: IntrinsicColumnWidth enables horizontal scrolling without clipping!)
+      // Tables (IntrinsicColumnWidth enables horizontal scrolling without clipping!)
       tableColumnWidth: const IntrinsicColumnWidth(),
-      tableScrollbarThumbVisibility: true,
       tableHead: TextStyle(
         fontWeight: FontWeight.w700,
         fontSize: 13.5,
         color: headerColor,
       ),
-      tableBody: TextStyle(
-        fontSize: 13.5,
-        color: textColor,
-        height: 1.35,
-      ),
+      tableBody: TextStyle(fontSize: 13.5, color: textColor, height: 1.35),
       tableHeadAlign: TextAlign.left,
       tableHeadCellsPadding: const EdgeInsets.symmetric(
         horizontal: 12.0,

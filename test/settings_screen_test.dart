@@ -18,22 +18,24 @@ void main() {
       expect(controller.isDarkMode, false);
     });
 
-    test('setThemeMode changes mode and persists to SharedPreferences',
-        () async {
-      final controller = ThemeController();
-      await controller.setThemeMode(ThemeMode.dark);
+    test(
+      'setThemeMode changes mode and persists to SharedPreferences',
+      () async {
+        final controller = ThemeController();
+        await controller.setThemeMode(ThemeMode.dark);
 
-      expect(controller.themeMode, ThemeMode.dark);
-      expect(controller.isDarkMode, true);
+        expect(controller.themeMode, ThemeMode.dark);
+        expect(controller.isDarkMode, true);
 
-      final prefs = await SharedPreferences.getInstance();
-      expect(prefs.getString(ThemeController.themePrefKey), 'dark');
+        final prefs = await SharedPreferences.getInstance();
+        expect(prefs.getString(ThemeController.themePrefKey), 'dark');
 
-      await controller.setThemeMode(ThemeMode.light);
-      expect(controller.themeMode, ThemeMode.light);
-      expect(controller.isDarkMode, false);
-      expect(prefs.getString(ThemeController.themePrefKey), 'light');
-    });
+        await controller.setThemeMode(ThemeMode.light);
+        expect(controller.themeMode, ThemeMode.light);
+        expect(controller.isDarkMode, false);
+        expect(prefs.getString(ThemeController.themePrefKey), 'light');
+      },
+    );
 
     test('toggleTheme alternates between light and dark', () async {
       final controller = ThemeController();
@@ -84,8 +86,9 @@ void main() {
       );
     }
 
-    testWidgets('Renders all standard sections for regular user',
-        (WidgetTester tester) async {
+    testWidgets('Renders all standard sections for regular user', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(createTestSettingsApp(isAdmin: false));
       await tester.pumpAndSettle();
 
@@ -125,8 +128,9 @@ void main() {
       expect(find.text('Open User Management'), findsNothing);
     });
 
-    testWidgets('Tapping Dark Mode updates theme across the app immediately',
-        (WidgetTester tester) async {
+    testWidgets('Tapping Dark Mode updates theme across the app immediately', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(createTestSettingsApp(isAdmin: false));
       await tester.pumpAndSettle();
 
@@ -146,8 +150,9 @@ void main() {
       expect(prefs.getString(ThemeController.themePrefKey), 'dark');
     });
 
-    testWidgets('Renders Administrator Tools only for APP_ADMIN',
-        (WidgetTester tester) async {
+    testWidgets('Renders Administrator Tools only for APP_ADMIN', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(createTestSettingsApp(isAdmin: true));
       await tester.pumpAndSettle();
 
@@ -164,8 +169,9 @@ void main() {
       expect(find.text('Run Health Check'), findsOneWidget);
     });
 
-    testWidgets('Validates password fields on submission',
-        (WidgetTester tester) async {
+    testWidgets('Validates password fields on submission', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(createTestSettingsApp(isAdmin: false));
       await tester.pumpAndSettle();
 
@@ -188,8 +194,10 @@ void main() {
       );
 
       // 3. Mismatching confirm password
-      final confirmPasswordField =
-          find.widgetWithText(TextField, 'Confirm New Password');
+      final confirmPasswordField = find.widgetWithText(
+        TextField,
+        'Confirm New Password',
+      );
       await tester.enterText(newPasswordField, 'secret123');
       await tester.enterText(confirmPasswordField, 'different123');
       await tester.tap(updateButton);

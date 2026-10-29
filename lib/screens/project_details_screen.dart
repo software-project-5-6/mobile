@@ -1,19 +1,24 @@
 import 'package:flutter/material.dart';
 import 'edit_project_screen.dart';
-import 'tabs/project_team_tab.dart'; 
+import 'tabs/project_team_tab.dart';
 import 'tabs/project_artifacts_tab.dart';
 
 class ProjectDetailsScreen extends StatefulWidget {
   final Map<String, dynamic> project;
   final bool isAdmin; // ADDED: To control what details are shown
 
-  const ProjectDetailsScreen({super.key, required this.project, required this.isAdmin});
+  const ProjectDetailsScreen({
+    super.key,
+    required this.project,
+    required this.isAdmin,
+  });
 
   @override
   State<ProjectDetailsScreen> createState() => _ProjectDetailsScreenState();
 }
 
-class _ProjectDetailsScreenState extends State<ProjectDetailsScreen> with SingleTickerProviderStateMixin {
+class _ProjectDetailsScreenState extends State<ProjectDetailsScreen>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
   @override
@@ -31,8 +36,10 @@ class _ProjectDetailsScreenState extends State<ProjectDetailsScreen> with Single
   @override
   Widget build(BuildContext context) {
     // Extract Data
-    final name = widget.project['projectName'] ?? widget.project['name'] ?? 'Project';
-    final description = widget.project['description'] ?? 'No description provided';
+    final name =
+        widget.project['projectName'] ?? widget.project['name'] ?? 'Project';
+    final description =
+        widget.project['description'] ?? 'No description provided';
     final artifacts = widget.project['artifactCount']?.toString() ?? '0';
     final teamSize = widget.project['userCount']?.toString() ?? '0';
     final clientName = widget.project['clientName'] ?? 'N/A';
@@ -43,7 +50,7 @@ class _ProjectDetailsScreenState extends State<ProjectDetailsScreen> with Single
 
     return Scaffold(
       backgroundColor: Colors.grey[50],
-      
+
       // --- APP BAR: TITLE & SUBTITLE FIXED AT TOP ---
       appBar: AppBar(
         backgroundColor: const Color.fromARGB(255, 158, 169, 218),
@@ -56,7 +63,11 @@ class _ProjectDetailsScreenState extends State<ProjectDetailsScreen> with Single
             borderRadius: BorderRadius.circular(50),
             child: Container(
               padding: const EdgeInsets.all(10),
-              child: const Icon(Icons.arrow_back, color: Color.fromARGB(255, 0, 0, 0), size: 22),
+              child: const Icon(
+                Icons.arrow_back,
+                color: Color.fromARGB(255, 0, 0, 0),
+                size: 22,
+              ),
             ),
           ),
         ),
@@ -64,9 +75,22 @@ class _ProjectDetailsScreenState extends State<ProjectDetailsScreen> with Single
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.center,
           children: const [
-            Text("Project Details",style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold, color: Color(0xFF333333))),
+            Text(
+              "Project Details",
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF333333),
+              ),
+            ),
             SizedBox(height: 2),
-            Text("View and manage project information",style: TextStyle(color: Color.fromARGB(255, 66, 66, 66), fontSize: 12)),
+            Text(
+              "View and manage project information",
+              style: TextStyle(
+                color: Color.fromARGB(255, 66, 66, 66),
+                fontSize: 12,
+              ),
+            ),
           ],
         ),
       ),
@@ -82,13 +106,14 @@ class _ProjectDetailsScreenState extends State<ProjectDetailsScreen> with Single
                 // 1. Edit Button (ADMIN ONLY)
                 if (widget.isAdmin)
                   Align(
-                    alignment: Alignment.centerRight, 
+                    alignment: Alignment.centerRight,
                     child: ElevatedButton.icon(
                       onPressed: () {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => EditProjectScreen(project: widget.project),
+                            builder: (context) =>
+                                EditProjectScreen(project: widget.project),
                           ),
                         );
                       },
@@ -98,13 +123,20 @@ class _ProjectDetailsScreenState extends State<ProjectDetailsScreen> with Single
                         backgroundColor: const Color(0xFFED6C02), // Orange
                         foregroundColor: Colors.white,
                         elevation: 0,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 12,
+                        ),
                       ),
                     ),
                   )
-                else 
-                  const SizedBox(height: 48), // Keeps layout spacing consistent when button is hidden
+                else
+                  const SizedBox(
+                    height: 48,
+                  ), // Keeps layout spacing consistent when button is hidden
 
                 const SizedBox(height: 20),
 
@@ -117,7 +149,10 @@ class _ProjectDetailsScreenState extends State<ProjectDetailsScreen> with Single
                         value: artifacts,
                         subtitle: "Files & Documents",
                         icon: Icons.folder,
-                        colors: [const Color(0xFF00C6FF), const Color(0xFF0072FF)],
+                        colors: [
+                          const Color(0xFF00C6FF),
+                          const Color(0xFF0072FF),
+                        ],
                       ),
                     ),
                     const SizedBox(width: 16),
@@ -127,7 +162,10 @@ class _ProjectDetailsScreenState extends State<ProjectDetailsScreen> with Single
                         value: teamSize,
                         subtitle: "Active Collaborators",
                         icon: Icons.people,
-                        colors: [const Color(0xFFFF512F), const Color(0xFFDD2476)],
+                        colors: [
+                          const Color(0xFFFF512F),
+                          const Color(0xFFDD2476),
+                        ],
                       ),
                     ),
                   ],
@@ -138,7 +176,9 @@ class _ProjectDetailsScreenState extends State<ProjectDetailsScreen> with Single
                 // 3. Tab Bar
                 Container(
                   decoration: const BoxDecoration(
-                    border: Border(bottom: BorderSide(color: Colors.grey, width: 0.3)),
+                    border: Border(
+                      bottom: BorderSide(color: Colors.grey, width: 0.3),
+                    ),
                   ),
                   child: TabBar(
                     controller: _tabController,
@@ -146,11 +186,23 @@ class _ProjectDetailsScreenState extends State<ProjectDetailsScreen> with Single
                     unselectedLabelColor: Colors.grey,
                     indicatorColor: const Color(0xFF5B6BBF),
                     indicatorWeight: 3,
-                    labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                    labelStyle: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                    ),
                     tabs: const [
-                      Tab(text: "Project Details", icon: Icon(Icons.info_outline, size: 20)),
-                      Tab(text: "Team Members", icon: Icon(Icons.people_outline, size: 20)),
-                      Tab(text: "Artifacts", icon: Icon(Icons.description_outlined, size: 20)),
+                      Tab(
+                        text: "Project Details",
+                        icon: Icon(Icons.info_outline, size: 20),
+                      ),
+                      Tab(
+                        text: "Team Members",
+                        icon: Icon(Icons.people_outline, size: 20),
+                      ),
+                      Tab(
+                        text: "Artifacts",
+                        icon: Icon(Icons.description_outlined, size: 20),
+                      ),
                     ],
                   ),
                 ),
@@ -166,7 +218,15 @@ class _ProjectDetailsScreenState extends State<ProjectDetailsScreen> with Single
                 // Tab 1: Project Details
                 SingleChildScrollView(
                   padding: const EdgeInsets.fromLTRB(24, 20, 24, 24),
-                  child: _buildDetailsContent(name, description, clientName, clientEmail, clientPhone, createdDate, price),
+                  child: _buildDetailsContent(
+                    name,
+                    description,
+                    clientName,
+                    clientEmail,
+                    clientPhone,
+                    createdDate,
+                    price,
+                  ),
                 ),
 
                 // Tab 2: Team Members
@@ -174,7 +234,7 @@ class _ProjectDetailsScreenState extends State<ProjectDetailsScreen> with Single
                   padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
                   child: ProjectTeamTab(
                     project: widget.project,
-                    isAdmin: widget.isAdmin, 
+                    isAdmin: widget.isAdmin,
                   ),
                 ),
 
@@ -192,14 +252,28 @@ class _ProjectDetailsScreenState extends State<ProjectDetailsScreen> with Single
   }
 
   // --- CONTENT BUILDER: Project Details Tab ---
-  Widget _buildDetailsContent(String name, String description, String clientName, String clientEmail, String clientPhone, String createdDate, String price) {
+  Widget _buildDetailsContent(
+    String name,
+    String description,
+    String clientName,
+    String clientEmail,
+    String clientPhone,
+    String createdDate,
+    String price,
+  ) {
     return Container(
       clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: Colors.grey.shade200),
-        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 15, offset: const Offset(0, 5))],
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 15,
+            offset: const Offset(0, 5),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -207,22 +281,48 @@ class _ProjectDetailsScreenState extends State<ProjectDetailsScreen> with Single
           Container(
             padding: const EdgeInsets.all(24),
             decoration: const BoxDecoration(
-              gradient: LinearGradient(colors: [Color(0xFF6A11CB), Color(0xFF5B6BBF)], begin: Alignment.topLeft, end: Alignment.bottomRight),
+              gradient: LinearGradient(
+                colors: [Color(0xFF6A11CB), Color(0xFF5B6BBF)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
             ),
             child: Row(
               children: [
                 Container(
                   padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(12)),
-                  child: const Icon(Icons.folder, color: Colors.white, size: 30),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.2),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Icon(
+                    Icons.folder,
+                    color: Colors.white,
+                    size: 30,
+                  ),
                 ),
                 const SizedBox(width: 16),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text("PROJECT NAME", style: TextStyle(color: Colors.white70, fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 1)),
+                    const Text(
+                      "PROJECT NAME",
+                      style: TextStyle(
+                        color: Colors.white70,
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 1,
+                      ),
+                    ),
                     const SizedBox(height: 4),
-                    Text(name, style: const TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold)),
+                    Text(
+                      name,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ],
                 ),
               ],
@@ -238,28 +338,59 @@ class _ProjectDetailsScreenState extends State<ProjectDetailsScreen> with Single
                 Container(
                   width: double.infinity,
                   padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(color: Colors.grey[50], borderRadius: BorderRadius.circular(8), border: Border.all(color: Colors.grey.shade200)),
-                  child: Text(description, style: const TextStyle(color: Colors.black87, height: 1.6, fontSize: 14)),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[50],
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.grey.shade200),
+                  ),
+                  child: Text(
+                    description,
+                    style: const TextStyle(
+                      color: Colors.black87,
+                      height: 1.6,
+                      fontSize: 14,
+                    ),
+                  ),
                 ),
-                const SizedBox(height: 24), const Divider(), const SizedBox(height: 24),
-                
+                const SizedBox(height: 24),
+                const Divider(),
+                const SizedBox(height: 24),
+
                 _buildSectionTitle("CLIENT INFORMATION"),
                 const SizedBox(height: 16),
-                
+
                 // CONDITIONAL RENDERING BASED ON ROLE
                 if (widget.isAdmin) ...[
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Expanded(child: _buildInfoTile(Icons.person, "CLIENT NAME", clientName)),
+                      Expanded(
+                        child: _buildInfoTile(
+                          Icons.person,
+                          "CLIENT NAME",
+                          clientName,
+                        ),
+                      ),
                       const SizedBox(width: 16),
-                      Expanded(child: _buildInfoTile(Icons.email, "EMAIL ADDRESS", clientEmail)),
+                      Expanded(
+                        child: _buildInfoTile(
+                          Icons.email,
+                          "EMAIL ADDRESS",
+                          clientEmail,
+                        ),
+                      ),
                     ],
                   ),
                   const SizedBox(height: 16),
                   Row(
                     children: [
-                      Expanded(child: _buildInfoTile(Icons.phone, "PHONE NUMBER", clientPhone)),
+                      Expanded(
+                        child: _buildInfoTile(
+                          Icons.phone,
+                          "PHONE NUMBER",
+                          clientPhone,
+                        ),
+                      ),
                       const SizedBox(width: 16),
                       Expanded(child: Container()),
                     ],
@@ -269,22 +400,47 @@ class _ProjectDetailsScreenState extends State<ProjectDetailsScreen> with Single
                   Row(
                     children: [
                       Expanded(
-                        flex: 1, 
-                        child: _buildInfoTile(Icons.person, "CLIENT NAME", clientName)
+                        flex: 1,
+                        child: _buildInfoTile(
+                          Icons.person,
+                          "CLIENT NAME",
+                          clientName,
+                        ),
                       ),
-                      const Expanded(flex: 1, child: SizedBox()), // Keeps it half-width matching design
+                      const Expanded(
+                        flex: 1,
+                        child: SizedBox(),
+                      ), // Keeps it half-width matching design
                     ],
                   ),
                 ],
 
-                const SizedBox(height: 24), const Divider(), const SizedBox(height: 24),
+                const SizedBox(height: 24),
+                const Divider(),
+                const SizedBox(height: 24),
                 _buildSectionTitle("PROJECT METADATA"),
                 const SizedBox(height: 16),
                 Row(
                   children: [
-                    Expanded(child: _buildInfoTile(Icons.calendar_today, "CREATED DATE", createdDate, iconBgColor: Colors.green.withValues(alpha: 0.1), iconColor: Colors.green)),
+                    Expanded(
+                      child: _buildInfoTile(
+                        Icons.calendar_today,
+                        "CREATED DATE",
+                        createdDate,
+                        iconBgColor: Colors.green.withValues(alpha: 0.1),
+                        iconColor: Colors.green,
+                      ),
+                    ),
                     const SizedBox(width: 16),
-                    Expanded(child: _buildInfoTile(Icons.attach_money, "PROJECT BUDGET", "\$$price", iconBgColor: Colors.blue.withValues(alpha: 0.1), iconColor: Colors.blue)),
+                    Expanded(
+                      child: _buildInfoTile(
+                        Icons.attach_money,
+                        "PROJECT BUDGET",
+                        "\$$price",
+                        iconBgColor: Colors.blue.withValues(alpha: 0.1),
+                        iconColor: Colors.blue,
+                      ),
+                    ),
                   ],
                 ),
               ],
@@ -297,27 +453,159 @@ class _ProjectDetailsScreenState extends State<ProjectDetailsScreen> with Single
 
   // --- WIDGET HELPERS ---
   Widget _buildSectionTitle(String title) {
-    return Text(title, style: const TextStyle(color: Color(0xFF5B6BBF), fontWeight: FontWeight.bold, fontSize: 12, letterSpacing: 1.2));
-  }
-
-  Widget _buildGradientCard({required String title, required String value, required String subtitle, required IconData icon, required List<Color> colors}) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(gradient: LinearGradient(colors: colors, begin: Alignment.topLeft, end: Alignment.bottomRight), borderRadius: BorderRadius.circular(20), boxShadow: [BoxShadow(color: colors[0].withValues(alpha: 0.3), blurRadius: 12, offset: const Offset(0, 6))]),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Container(padding: const EdgeInsets.all(8), decoration: BoxDecoration(color: Colors.white24, borderRadius: BorderRadius.circular(8)), child: Icon(icon, color: Colors.white, size: 20))]), const SizedBox(height: 16), Text(value, style: const TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold)), const SizedBox(height: 4), Text(title, style: const TextStyle(color: Colors.white70, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1)), Text(subtitle, style: const TextStyle(color: Colors.white, fontSize: 12))]),
+    return Text(
+      title,
+      style: const TextStyle(
+        color: Color(0xFF5B6BBF),
+        fontWeight: FontWeight.bold,
+        fontSize: 12,
+        letterSpacing: 1.2,
+      ),
     );
   }
 
-  Widget _buildInfoTile(IconData icon, String label, String value, {Color? iconColor, Color? iconBgColor}) {
+  Widget _buildGradientCard({
+    required String title,
+    required String value,
+    required String subtitle,
+    required IconData icon,
+    required List<Color> colors,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: colors,
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: colors[0].withValues(alpha: 0.3),
+            blurRadius: 12,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.white24,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(icon, color: Colors.white, size: 20),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Text(
+            value,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 32,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            title,
+            style: const TextStyle(
+              color: Colors.white70,
+              fontSize: 10,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 1,
+            ),
+          ),
+          Text(
+            subtitle,
+            style: const TextStyle(color: Colors.white, fontSize: 12),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInfoTile(
+    IconData icon,
+    String label,
+    String value, {
+    Color? iconColor,
+    Color? iconBgColor,
+  }) {
     final themeColor = const Color(0xFF5B6BBF);
-    return Container(padding: const EdgeInsets.all(16), decoration: BoxDecoration(border: Border.all(color: Colors.grey.shade200), borderRadius: BorderRadius.circular(12), color: Colors.grey[50]), child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [Container(padding: const EdgeInsets.all(8), decoration: BoxDecoration(color: iconBgColor ?? themeColor.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(8)), child: Icon(icon, color: iconColor ?? themeColor, size: 20)), const SizedBox(width: 12), Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(label, style: const TextStyle(color: Colors.grey, fontSize: 10, fontWeight: FontWeight.bold)), const SizedBox(height: 4), Text(value, style: const TextStyle(color: Colors.black87, fontWeight: FontWeight.w600, fontSize: 14))]))]));
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        border: Border.all(color: Colors.grey.shade200),
+        borderRadius: BorderRadius.circular(12),
+        color: Colors.grey[50],
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: iconBgColor ?? themeColor.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(icon, color: iconColor ?? themeColor, size: 20),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: const TextStyle(
+                    color: Colors.grey,
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  value,
+                  style: const TextStyle(
+                    color: Colors.black87,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 14,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   String _formatDate(String? dateStr) {
     if (dateStr == null) return "N/A";
     try {
       final date = DateTime.parse(dateStr);
-      const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+      const months = [
+        "Jan",
+        "Feb",
+        "Mar",
+        "Apr",
+        "May",
+        "Jun",
+        "Jul",
+        "Aug",
+        "Sep",
+        "Oct",
+        "Nov",
+        "Dec",
+      ];
       return "${months[date.month - 1]} ${date.day}, ${date.year}";
     } catch (e) {
       return dateStr;

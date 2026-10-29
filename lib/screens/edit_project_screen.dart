@@ -6,9 +6,9 @@ class EditProjectScreen extends StatefulWidget {
   final VoidCallback? onProjectUpdated;
 
   const EditProjectScreen({
-    super.key, 
-    required this.project, 
-    this.onProjectUpdated
+    super.key,
+    required this.project,
+    this.onProjectUpdated,
   });
 
   @override
@@ -34,13 +34,23 @@ class _EditProjectScreenState extends State<EditProjectScreen> {
     super.initState();
     // PRE-FILL THE DATA
     final p = widget.project;
-    _nameController = TextEditingController(text: p['projectName'] ?? p['name'] ?? '');
-    _descriptionController = TextEditingController(text: p['description'] ?? '');
-    _priceController = TextEditingController(text: p['price']?.toString() ?? '');
+    _nameController = TextEditingController(
+      text: p['projectName'] ?? p['name'] ?? '',
+    );
+    _descriptionController = TextEditingController(
+      text: p['description'] ?? '',
+    );
+    _priceController = TextEditingController(
+      text: p['price']?.toString() ?? '',
+    );
     _iconUrlController = TextEditingController(text: p['iconUrl'] ?? '');
     _clientNameController = TextEditingController(text: p['clientName'] ?? '');
-    _clientEmailController = TextEditingController(text: p['clientEmail'] ?? '');
-    _clientPhoneController = TextEditingController(text: p['clientPhone'] ?? '');
+    _clientEmailController = TextEditingController(
+      text: p['clientEmail'] ?? '',
+    );
+    _clientPhoneController = TextEditingController(
+      text: p['clientPhone'] ?? '',
+    );
   }
 
   @override
@@ -60,7 +70,10 @@ class _EditProjectScreenState extends State<EditProjectScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text("Edit Project", style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+        title: const Text(
+          "Edit Project",
+          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+        ),
         backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
@@ -82,21 +95,21 @@ class _EditProjectScreenState extends State<EditProjectScreen> {
 
               // --- SECTION 1: PROJECT DETAILS ---
               _buildSectionHeader("PROJECT DETAILS"),
-              
+
               _buildTextField(
                 label: "Project Name *",
                 controller: _nameController,
                 validator: (v) => v!.isEmpty ? "Required" : null,
               ),
               const SizedBox(height: 15),
-              
+
               _buildTextField(
                 label: "Description",
                 controller: _descriptionController,
                 maxLines: 3,
               ),
               const SizedBox(height: 15),
-              
+
               _buildTextField(
                 label: "Project Price",
                 controller: _priceController,
@@ -129,7 +142,8 @@ class _EditProjectScreenState extends State<EditProjectScreen> {
                 controller: _clientEmailController,
                 prefixIcon: Icons.email_outlined,
                 keyboardType: TextInputType.emailAddress,
-                validator: (v) => v!.isEmpty || !v.contains("@") ? "Invalid email" : null,
+                validator: (v) =>
+                    v!.isEmpty || !v.contains("@") ? "Invalid email" : null,
               ),
               const SizedBox(height: 15),
 
@@ -152,9 +166,14 @@ class _EditProjectScreenState extends State<EditProjectScreen> {
                       style: OutlinedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 15),
                         side: const BorderSide(color: Colors.grey),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
                       ),
-                      child: const Text("Cancel", style: TextStyle(color: Colors.grey)),
+                      child: const Text(
+                        "Cancel",
+                        style: TextStyle(color: Colors.grey),
+                      ),
                     ),
                   ),
                   const SizedBox(width: 15),
@@ -162,13 +181,29 @@ class _EditProjectScreenState extends State<EditProjectScreen> {
                     child: ElevatedButton(
                       onPressed: _isLoading ? null : _handleUpdate,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.orange, // Matches the "Warning" color in your React code
+                        backgroundColor: Colors
+                            .orange, // Matches the "Warning" color in your React code
                         padding: const EdgeInsets.symmetric(vertical: 15),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
                       ),
                       child: _isLoading
-                          ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                          : const Text("Save Changes", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                          ? const SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                                strokeWidth: 2,
+                              ),
+                            )
+                          : const Text(
+                              "Save Changes",
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
                     ),
                   ),
                 ],
@@ -187,7 +222,12 @@ class _EditProjectScreenState extends State<EditProjectScreen> {
       padding: const EdgeInsets.only(bottom: 15),
       child: Text(
         title,
-        style: const TextStyle(color: Colors.grey, fontWeight: FontWeight.bold, fontSize: 12, letterSpacing: 1),
+        style: const TextStyle(
+          color: Colors.grey,
+          fontWeight: FontWeight.bold,
+          fontSize: 12,
+          letterSpacing: 1,
+        ),
       ),
     );
   }
@@ -203,7 +243,13 @@ class _EditProjectScreenState extends State<EditProjectScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: const TextStyle(fontWeight: FontWeight.w500, color: Colors.black87)),
+        Text(
+          label,
+          style: const TextStyle(
+            fontWeight: FontWeight.w500,
+            color: Colors.black87,
+          ),
+        ),
         const SizedBox(height: 8),
         TextFormField(
           controller: controller,
@@ -211,11 +257,25 @@ class _EditProjectScreenState extends State<EditProjectScreen> {
           keyboardType: keyboardType,
           validator: validator,
           decoration: InputDecoration(
-            prefixIcon: prefixIcon != null ? Icon(prefixIcon, color: Colors.grey, size: 20) : null,
-            contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: Colors.grey)),
-            enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: Colors.grey.shade300)),
-            focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: Colors.orange, width: 2)),
+            prefixIcon: prefixIcon != null
+                ? Icon(prefixIcon, color: Colors.grey, size: 20)
+                : null,
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 15,
+              vertical: 15,
+            ),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: const BorderSide(color: Colors.grey),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide(color: Colors.grey.shade300),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: const BorderSide(color: Colors.orange, width: 2),
+            ),
             filled: true,
             fillColor: Colors.grey[50],
           ),
@@ -244,12 +304,14 @@ class _EditProjectScreenState extends State<EditProjectScreen> {
     };
 
     try {
-      final id = widget.project['id']?.toString() ?? widget.project['projectId']?.toString();
-      
+      final id =
+          widget.project['id']?.toString() ??
+          widget.project['projectId']?.toString();
+
       if (id == null) throw Exception("Project ID not found");
 
       await _projectService.updateProject(id, projectData);
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("Project Updated Successfully!")),

@@ -39,7 +39,11 @@ class ViewProjectDialog extends StatelessWidget {
                     children: [
                       const Text(
                         "Project Details",
-                        style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Color(0xFF333333)),
+                        style: TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF333333),
+                        ),
                       ),
                       const SizedBox(height: 4),
                       Text(
@@ -69,22 +73,47 @@ class ViewProjectDialog extends StatelessWidget {
                   _buildSectionLabel("PROJECT DETAILS"),
                   const SizedBox(height: 12),
 
-                  _buildInfoBox(Icons.folder, "Project Name", name, isBold: true),
+                  _buildInfoBox(
+                    Icons.folder,
+                    "Project Name",
+                    name,
+                    isBold: true,
+                  ),
                   const SizedBox(height: 16),
-                  
+
                   _buildInfoBox(null, "Description", description),
                   const SizedBox(height: 16),
-                  
+
                   Row(
                     children: [
-                      Expanded(child: _buildInfoBox(Icons.attach_money, "Price", price, textColor: Colors.green, isBold: true)),
+                      Expanded(
+                        child: _buildInfoBox(
+                          Icons.attach_money,
+                          "Price",
+                          price,
+                          textColor: Colors.green,
+                          isBold: true,
+                        ),
+                      ),
                       const SizedBox(width: 16),
-                      Expanded(child: _buildInfoBox(Icons.calendar_today, "Created", created, isBold: true)),
+                      Expanded(
+                        child: _buildInfoBox(
+                          Icons.calendar_today,
+                          "Created",
+                          created,
+                          isBold: true,
+                        ),
+                      ),
                     ],
                   ),
                   const SizedBox(height: 16),
-                  
-                  _buildInfoBox(null, "Artifact Count", "$artifacts artifacts", isBold: true),
+
+                  _buildInfoBox(
+                    null,
+                    "Artifact Count",
+                    "$artifacts artifacts",
+                    isBold: true,
+                  ),
 
                   const SizedBox(height: 32),
 
@@ -92,13 +121,28 @@ class ViewProjectDialog extends StatelessWidget {
                   _buildSectionLabel("CLIENT INFORMATION"),
                   const SizedBox(height: 12),
 
-                  _buildInfoBox(Icons.person, "Client Name", clientName, isBold: true),
+                  _buildInfoBox(
+                    Icons.person,
+                    "Client Name",
+                    clientName,
+                    isBold: true,
+                  ),
                   const SizedBox(height: 16),
-                  
-                  _buildInfoBox(Icons.email, "Email Address", clientEmail, isBold: true),
+
+                  _buildInfoBox(
+                    Icons.email,
+                    "Email Address",
+                    clientEmail,
+                    isBold: true,
+                  ),
                   const SizedBox(height: 16),
-                  
-                  _buildInfoBox(Icons.phone, "Phone Number", clientPhone, isBold: true),
+
+                  _buildInfoBox(
+                    Icons.phone,
+                    "Phone Number",
+                    clientPhone,
+                    isBold: true,
+                  ),
                 ],
               ),
             ),
@@ -118,10 +162,18 @@ class ViewProjectDialog extends StatelessWidget {
                     backgroundColor: const Color(0xFF5B6BBF),
                     foregroundColor: Colors.white,
                     elevation: 0,
-                    padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 12),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 30,
+                      vertical: 12,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
                   ),
-                  child: const Text("Close", style: TextStyle(fontWeight: FontWeight.bold)),
+                  child: const Text(
+                    "Close",
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
                 ),
               ],
             ),
@@ -145,7 +197,13 @@ class ViewProjectDialog extends StatelessWidget {
     );
   }
 
-  Widget _buildInfoBox(IconData? icon, String label, String value, {bool isBold = false, Color? textColor}) {
+  Widget _buildInfoBox(
+    IconData? icon,
+    String label,
+    String value, {
+    bool isBold = false,
+    Color? textColor,
+  }) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(16),
@@ -165,7 +223,11 @@ class ViewProjectDialog extends StatelessWidget {
               ],
               Text(
                 label,
-                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey),
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.grey,
+                ),
               ),
             ],
           ),
@@ -190,7 +252,20 @@ class ViewProjectDialog extends StatelessWidget {
     if (dateStr == null) return "N/A";
     try {
       final date = DateTime.parse(dateStr);
-      const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+      const months = [
+        "Jan",
+        "Feb",
+        "Mar",
+        "Apr",
+        "May",
+        "Jun",
+        "Jul",
+        "Aug",
+        "Sep",
+        "Oct",
+        "Nov",
+        "Dec",
+      ];
       return "${months[date.month - 1]} ${date.day}, ${date.year}";
     } catch (e) {
       return dateStr;

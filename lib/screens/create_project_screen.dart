@@ -29,7 +29,10 @@ class _CreateProjectScreenState extends State<CreateProjectScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text("Create New Project", style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+        title: const Text(
+          "Create New Project",
+          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+        ),
         backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
@@ -51,21 +54,21 @@ class _CreateProjectScreenState extends State<CreateProjectScreen> {
 
               // --- SECTION 1: PROJECT DETAILS ---
               _buildSectionHeader("PROJECT DETAILS"),
-              
+
               _buildTextField(
                 label: "Project Name *",
                 controller: _nameController,
                 validator: (v) => v!.isEmpty ? "Required" : null,
               ),
               const SizedBox(height: 15),
-              
+
               _buildTextField(
                 label: "Description",
                 controller: _descriptionController,
                 maxLines: 3,
               ),
               const SizedBox(height: 15),
-              
+
               _buildTextField(
                 label: "Project Price",
                 controller: _priceController,
@@ -100,7 +103,8 @@ class _CreateProjectScreenState extends State<CreateProjectScreen> {
                 controller: _clientEmailController,
                 prefixIcon: Icons.email_outlined,
                 keyboardType: TextInputType.emailAddress,
-                validator: (v) => v!.isEmpty || !v.contains("@") ? "Invalid email" : null,
+                validator: (v) =>
+                    v!.isEmpty || !v.contains("@") ? "Invalid email" : null,
               ),
               const SizedBox(height: 15),
 
@@ -124,7 +128,11 @@ class _CreateProjectScreenState extends State<CreateProjectScreen> {
                 ),
                 child: Row(
                   children: const [
-                    Icon(Icons.lightbulb_outline, color: Colors.orange, size: 20),
+                    Icon(
+                      Icons.lightbulb_outline,
+                      color: Colors.orange,
+                      size: 20,
+                    ),
                     SizedBox(width: 10),
                     Expanded(
                       child: Text(
@@ -147,9 +155,14 @@ class _CreateProjectScreenState extends State<CreateProjectScreen> {
                       style: OutlinedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 15),
                         side: const BorderSide(color: Colors.grey),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
                       ),
-                      child: const Text("Cancel", style: TextStyle(color: Colors.grey)),
+                      child: const Text(
+                        "Cancel",
+                        style: TextStyle(color: Colors.grey),
+                      ),
                     ),
                   ),
                   const SizedBox(width: 15),
@@ -159,11 +172,23 @@ class _CreateProjectScreenState extends State<CreateProjectScreen> {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF5B6BBF),
                         padding: const EdgeInsets.symmetric(vertical: 15),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
                       ),
                       child: _isLoading
-                          ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                          : const Text("Create Project", style: TextStyle(fontSize: 16)),
+                          ? const SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                                strokeWidth: 2,
+                              ),
+                            )
+                          : const Text(
+                              "Create Project",
+                              style: TextStyle(fontSize: 16),
+                            ),
                     ),
                   ),
                 ],
@@ -205,7 +230,13 @@ class _CreateProjectScreenState extends State<CreateProjectScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: const TextStyle(fontWeight: FontWeight.w500, color: Colors.black87)),
+        Text(
+          label,
+          style: const TextStyle(
+            fontWeight: FontWeight.w500,
+            color: Colors.black87,
+          ),
+        ),
         const SizedBox(height: 8),
         TextFormField(
           controller: controller,
@@ -215,8 +246,13 @@ class _CreateProjectScreenState extends State<CreateProjectScreen> {
           decoration: InputDecoration(
             hintText: placeholder,
             hintStyle: const TextStyle(color: Colors.grey, fontSize: 14),
-            prefixIcon: prefixIcon != null ? Icon(prefixIcon, color: Colors.grey, size: 20) : null,
-            contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
+            prefixIcon: prefixIcon != null
+                ? Icon(prefixIcon, color: Colors.grey, size: 20)
+                : null,
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 15,
+              vertical: 15,
+            ),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
               borderSide: const BorderSide(color: Colors.grey),
@@ -257,17 +293,17 @@ class _CreateProjectScreenState extends State<CreateProjectScreen> {
 
     try {
       await _projectService.createProject(projectData);
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("Project Created Successfully!")),
         );
-        
+
         // Call the callback to refresh the previous screen
         if (widget.onProjectCreated != null) {
           widget.onProjectCreated!();
         }
-        
+
         Navigator.pop(context); // Close the screen
       }
     } catch (e) {

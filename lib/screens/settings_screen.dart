@@ -7,6 +7,7 @@ import '../theme/app_theme.dart';
 import 'login_screen.dart';
 import 'profile_screen.dart';
 import 'users/users_screen.dart';
+import '../constants/app_branding.dart';
 
 class SettingsScreen extends StatefulWidget {
   final bool isAdmin;
@@ -60,9 +61,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
       if (user != null) {
         email = user.email ?? "";
-        name = user.userMetadata?['name'] ??
-            user.userMetadata?['full_name'] ??
-            "";
+        name =
+            user.userMetadata?['name'] ?? user.userMetadata?['full_name'] ?? "";
       }
 
       if (email.isNotEmpty && name.isEmpty) {
@@ -280,6 +280,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
               const SizedBox(height: 16),
               _buildAdminCard(context, isDark),
             ],
+            const SizedBox(height: 16),
+            _buildAboutCard(context, isDark),
             const SizedBox(height: 32),
           ],
         ),
@@ -305,8 +307,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
               const SizedBox(width: 12),
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
                 decoration: BoxDecoration(
                   color: widget.isAdmin
                       ? Colors.red.withValues(alpha: 0.12)
@@ -316,8 +320,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     color: widget.isAdmin
                         ? (isDark ? Colors.redAccent.shade100 : Colors.red)
                         : (isDark
-                            ? AppTheme.primaryLight
-                            : AppTheme.primaryColor),
+                              ? AppTheme.primaryLight
+                              : AppTheme.primaryColor),
                   ),
                 ),
                 child: Row(
@@ -329,8 +333,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         child: Icon(
                           Icons.admin_panel_settings,
                           size: 14,
-                          color:
-                              isDark ? Colors.redAccent.shade100 : Colors.red,
+                          color: isDark
+                              ? Colors.redAccent.shade100
+                              : Colors.red,
                         ),
                       ),
                     Text(
@@ -341,8 +346,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         color: widget.isAdmin
                             ? (isDark ? Colors.redAccent.shade100 : Colors.red)
                             : (isDark
-                                ? AppTheme.primaryLight
-                                : AppTheme.primaryColor),
+                                  ? AppTheme.primaryLight
+                                  : AppTheme.primaryColor),
                       ),
                     ),
                   ],
@@ -404,10 +409,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   subtitle,
                   style: TextStyle(
                     fontSize: 12,
-                    color: Theme.of(context)
-                        .colorScheme
-                        .onSurface
-                        .withValues(alpha: 0.6),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onSurface.withValues(alpha: 0.6),
                   ),
                 ),
               ],
@@ -458,8 +462,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 style: TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.w700,
-                  color:
-                      isDark ? AppTheme.primaryLight : AppTheme.primaryColor,
+                  color: isDark ? AppTheme.primaryLight : AppTheme.primaryColor,
                 ),
               ),
             ),
@@ -484,8 +487,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         color: !isDark
                             ? AppTheme.primaryColor
                             : (isDark
-                                ? AppTheme.darkBorder
-                                : AppTheme.lightBorder),
+                                  ? AppTheme.darkBorder
+                                  : AppTheme.lightBorder),
                         width: !isDark ? 2 : 1,
                       ),
                     ),
@@ -553,8 +556,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         color: isDark
                             ? AppTheme.primaryLight
                             : (isDark
-                                ? AppTheme.darkBorder
-                                : AppTheme.lightBorder),
+                                  ? AppTheme.darkBorder
+                                  : AppTheme.lightBorder),
                         width: isDark ? 2 : 1,
                       ),
                     ),
@@ -611,10 +614,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   "Changes take effect immediately across all application pages, navigation, and dialogs, and persist on this device.",
                   style: TextStyle(
                     fontSize: 11,
-                    color: Theme.of(context)
-                        .colorScheme
-                        .onSurface
-                        .withValues(alpha: 0.6),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onSurface.withValues(alpha: 0.6),
                   ),
                 ),
               ],
@@ -654,8 +656,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
               ),
               style: OutlinedButton.styleFrom(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 6,
+                ),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
@@ -718,10 +722,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               _userEmail,
                               style: TextStyle(
                                 fontSize: 13,
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .onSurface
-                                    .withValues(alpha: 0.7),
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurface.withValues(alpha: 0.7),
                               ),
                             ),
                             const SizedBox(height: 6),
@@ -733,8 +736,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               decoration: BoxDecoration(
                                 color: widget.isAdmin
                                     ? Colors.red.withValues(alpha: 0.12)
-                                    : AppTheme.primaryColor
-                                        .withValues(alpha: 0.12),
+                                    : AppTheme.primaryColor.withValues(
+                                        alpha: 0.12,
+                                      ),
                                 borderRadius: BorderRadius.circular(6),
                               ),
                               child: Text(
@@ -744,11 +748,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                   fontWeight: FontWeight.w700,
                                   color: widget.isAdmin
                                       ? (isDark
-                                          ? Colors.redAccent.shade100
-                                          : Colors.red)
+                                            ? Colors.redAccent.shade100
+                                            : Colors.red)
                                       : (isDark
-                                          ? AppTheme.primaryLight
-                                          : AppTheme.primaryColor),
+                                            ? AppTheme.primaryLight
+                                            : AppTheme.primaryColor),
                                 ),
                               ),
                             ),
@@ -825,8 +829,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           ),
                         ),
                         InkWell(
-                          onTap: () =>
-                              setState(() => _passwordSuccess = null),
+                          onTap: () => setState(() => _passwordSuccess = null),
                           child: const Icon(
                             Icons.close,
                             size: 16,
@@ -933,8 +936,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         borderRadius: BorderRadius.circular(8),
                       ),
                     ),
-                    onPressed:
-                        _isUpdatingPassword ? null : _handlePasswordUpdate,
+                    onPressed: _isUpdatingPassword
+                        ? null
+                        : _handlePasswordUpdate,
                     icon: _isUpdatingPassword
                         ? const SizedBox(
                             width: 18,
@@ -1007,10 +1011,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             "Secured via Supabase Authentication with HTTPS Bearer Tokens.",
                             style: TextStyle(
                               fontSize: 12,
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .onSurface
-                                  .withValues(alpha: 0.6),
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.onSurface.withValues(alpha: 0.6),
                             ),
                           ),
                         ],
@@ -1119,10 +1122,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         "Review all registered workspace users, inspect global roles, and manage invitations.",
                         style: TextStyle(
                           fontSize: 12,
-                          color: Theme.of(context)
-                              .colorScheme
-                              .onSurface
-                              .withValues(alpha: 0.7),
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.onSurface.withValues(alpha: 0.7),
                         ),
                       ),
                       const SizedBox(height: 12),
@@ -1193,9 +1195,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                 style: TextStyle(
                                   fontSize: 11,
                                   fontWeight: FontWeight.w700,
-                                  color: _healthOk
-                                      ? Colors.green
-                                      : Colors.red,
+                                  color: _healthOk ? Colors.green : Colors.red,
                                 ),
                               ),
                             ),
@@ -1206,10 +1206,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         "Perform a real-time connectivity ping to the Render Spring Boot /health API.",
                         style: TextStyle(
                           fontSize: 12,
-                          color: Theme.of(context)
-                              .colorScheme
-                              .onSurface
-                              .withValues(alpha: 0.7),
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.onSurface.withValues(alpha: 0.7),
                         ),
                       ),
                       const SizedBox(height: 12),
@@ -1219,8 +1218,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             borderRadius: BorderRadius.circular(8),
                           ),
                         ),
-                        onPressed:
-                            _isCheckingHealth ? null : _handleHealthCheck,
+                        onPressed: _isCheckingHealth
+                            ? null
+                            : _handleHealthCheck,
                         icon: _isCheckingHealth
                             ? const SizedBox(
                                 width: 14,
@@ -1231,9 +1231,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               )
                             : const Icon(Icons.refresh, size: 16),
                         label: Text(
-                          _isCheckingHealth
-                              ? "Pinging..."
-                              : "Run Health Check",
+                          _isCheckingHealth ? "Pinging..." : "Run Health Check",
                           style: const TextStyle(fontSize: 13),
                         ),
                       ),
@@ -1247,5 +1245,99 @@ class _SettingsScreenState extends State<SettingsScreen> {
       ),
     );
   }
-}
 
+  Widget _buildAboutCard(BuildContext context, bool isDark) {
+    return Card(
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(color: Theme.of(context).dividerColor),
+      ),
+      color: Theme.of(context).cardColor,
+      child: Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: Column(
+          children: [
+            Row(
+              children: [
+                Image.asset(
+                  AppBranding.logoAsset,
+                  height: 36,
+                  fit: BoxFit.contain,
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        AppBranding.appName,
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Theme.of(context).colorScheme.onSurface,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        AppBranding.productDescription,
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: isDark ? Colors.grey[400] : Colors.grey[600],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Divider(color: Theme.of(context).dividerColor),
+            const SizedBox(height: 8),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  "Company",
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: isDark ? Colors.grey[400] : Colors.grey[600],
+                  ),
+                ),
+                Text(
+                  AppBranding.companyName,
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  "Version",
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: isDark ? Colors.grey[400] : Colors.grey[600],
+                  ),
+                ),
+                Text(
+                  "1.0.0",
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}

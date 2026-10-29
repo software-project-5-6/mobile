@@ -22,7 +22,7 @@ class _InviteMemberDialogState extends State<InviteMemberDialog> {
   final TextEditingController _emailController = TextEditingController();
   String _selectedRole = "VIEWER";
 
-  // Role Descriptions 
+  // Role Descriptions
   final Map<String, String> _roleDescriptions = {
     "MANAGER": "Can manage members, edit project settings, and upload files.",
     "CONTRIBUTOR": "Can upload and edit files, but cannot manage members.",
@@ -40,7 +40,9 @@ class _InviteMemberDialogState extends State<InviteMemberDialog> {
     showDialog(
       context: context,
       barrierDismissible: false, // Prevents closing by tapping outside
-      barrierColor: Colors.black.withValues(alpha: 0.6), // Dark background matching web
+      barrierColor: Colors.black.withValues(
+        alpha: 0.6,
+      ), // Dark background matching web
       builder: (BuildContext context) {
         return Dialog(
           backgroundColor: Colors.transparent,
@@ -124,7 +126,10 @@ class _InviteMemberDialogState extends State<InviteMemberDialog> {
                     },
                     child: const Text(
                       "OK",
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ),
@@ -152,9 +157,9 @@ class _InviteMemberDialogState extends State<InviteMemberDialog> {
       if (mounted) {
         Navigator.pop(context); // Dismiss the Loading Overlay
         Navigator.pop(context); // Dismiss the Invite Form Dialog
-        
+
         widget.onSuccess(); // Refresh parent list
-        
+
         // 2. Show the Success Dialog
         _showSuccessDialog();
       }

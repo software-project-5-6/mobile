@@ -52,59 +52,72 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
 
     return Scaffold(
       // Same grey background for both roles
-      backgroundColor: Colors.grey[100], 
-      
+      backgroundColor: Colors.grey[100],
+
       // Top App Bar (Same for both roles)
       appBar: AppBar(
-    backgroundColor: const Color.fromARGB(255, 158, 169, 218),
-    elevation: 0,
-    toolbarHeight: 60,
-    automaticallyImplyLeading: false,
-    leadingWidth: 70,
+        backgroundColor: const Color.fromARGB(255, 158, 169, 218),
+        elevation: 0,
+        toolbarHeight: 60,
+        automaticallyImplyLeading: false,
+        leadingWidth: 70,
 
-    leading: Center(
-      child: InkWell(
-        onTap: () => Navigator.pop(context),
-        borderRadius: BorderRadius.circular(50),
-        child: Container(
-          padding: const EdgeInsets.all(10),
-          child: const Icon(
-            Icons.arrow_back,
-            color: Color.fromARGB(255, 0, 0, 0),
-            size: 24,
+        leading: Center(
+          child: InkWell(
+            onTap: () => Navigator.pop(context),
+            borderRadius: BorderRadius.circular(50),
+            child: Container(
+              padding: const EdgeInsets.all(10),
+              child: const Icon(
+                Icons.arrow_back,
+                color: Color.fromARGB(255, 0, 0, 0),
+                size: 24,
+              ),
+            ),
           ),
         ),
-      ),
-    ),
 
-    title: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: const [
-        Text("Project Spaces",style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold, color: Color(0xFF333333))),
-        SizedBox(height: 2),
-        Text("Manage all your projects",style: TextStyle(color: Color.fromARGB(255, 66, 66, 66), fontSize: 12)),
-      ],
-    ),
-
-  actions: [
-    Padding(
-      padding: const EdgeInsets.only(right: 16),
-      child: InkWell(
-        onTap: _fetchProjects,
-        borderRadius: BorderRadius.circular(50),
-        child: Container(
-          padding: const EdgeInsets.all(10),
-          child: const Icon(
-            Icons.refresh,
-            color: Color.fromARGB(255, 95, 102, 134),
-            size: 22,
-          ),
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: const [
+            Text(
+              "Project Spaces",
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF333333),
+              ),
+            ),
+            SizedBox(height: 2),
+            Text(
+              "Manage all your projects",
+              style: TextStyle(
+                color: Color.fromARGB(255, 66, 66, 66),
+                fontSize: 12,
+              ),
+            ),
+          ],
         ),
+
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 16),
+            child: InkWell(
+              onTap: _fetchProjects,
+              borderRadius: BorderRadius.circular(50),
+              child: Container(
+                padding: const EdgeInsets.all(10),
+                child: const Icon(
+                  Icons.refresh,
+                  color: Color.fromARGB(255, 95, 102, 134),
+                  size: 22,
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
-    ),
-  ],
-),
 
       body: Column(
         children: [
@@ -127,20 +140,20 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
               ),
             ),
           ),
-          
+
           // Project List (Same padding and styling for both)
           Expanded(
             child: _isLoading
                 ? const Center(child: CircularProgressIndicator())
                 : filteredProjects.isEmpty
-                    ? _buildEmptyState()
-                    : ListView.builder(
-                        padding: const EdgeInsets.all(10),
-                        itemCount: filteredProjects.length,
-                        itemBuilder: (context, index) {
-                          return _buildProjectCard(filteredProjects[index]);
-                        },
-                      ),
+                ? _buildEmptyState()
+                : ListView.builder(
+                    padding: const EdgeInsets.all(10),
+                    itemCount: filteredProjects.length,
+                    itemBuilder: (context, index) {
+                      return _buildProjectCard(filteredProjects[index]);
+                    },
+                  ),
           ),
         ],
       ),
@@ -154,9 +167,8 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => CreateProjectScreen(
-                      onProjectCreated: _fetchProjects,
-                    ),
+                    builder: (context) =>
+                        CreateProjectScreen(onProjectCreated: _fetchProjects),
                   ),
                 );
               },
@@ -172,11 +184,14 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
         children: [
           Icon(Icons.folder_off, size: 60, color: Colors.grey[400]),
           const SizedBox(height: 15),
-          Text("No projects found",
-              style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.grey[600])),
+          Text(
+            "No projects found",
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Colors.grey[600],
+            ),
+          ),
         ],
       ),
     );
@@ -189,10 +204,11 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
     final clientPhone = project['clientPhone'] ?? 'No Phone';
     final teamSize = project['userCount'] ?? project['teamSize'] ?? 0;
     final artifactCount = project['artifactCount'] ?? 0;
-    
+
     String priceDisplay = "\$0.00";
     if (project['price'] != null) {
-      priceDisplay = "\$${double.tryParse(project['price'].toString())?.toStringAsFixed(2) ?? '0.00'}";
+      priceDisplay =
+          "\$${double.tryParse(project['price'].toString())?.toStringAsFixed(2) ?? '0.00'}";
     }
 
     // Exact same card style for both
@@ -210,33 +226,49 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.grey[200],
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(color: Colors.grey.shade300),
                   ),
                   child: Text(
-                    id, 
-                    style: TextStyle(color: Colors.grey[700], fontSize: 12, fontWeight: FontWeight.bold),
+                    id,
+                    style: TextStyle(
+                      color: Colors.grey[700],
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
                 if (widget.isAdmin)
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.green.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: Colors.green.withValues(alpha: 0.3)),
+                      border: Border.all(
+                        color: Colors.green.withValues(alpha: 0.3),
+                      ),
                     ),
                     child: Text(
                       priceDisplay,
-                      style: const TextStyle(color: Colors.green, fontSize: 12, fontWeight: FontWeight.bold),
+                      style: const TextStyle(
+                        color: Colors.green,
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
               ],
             ),
-            
+
             const SizedBox(height: 12),
 
             // ROW 2: Folder Icon + Project Name
@@ -248,7 +280,7 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
                     builder: (context) => ProjectDetailsScreen(
                       project: project,
                       isAdmin: widget.isAdmin, // <-- ADD THIS
-                    )
+                    ),
                   ),
                 );
               },
@@ -259,7 +291,11 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
                   Expanded(
                     child: Text(
                       name,
-                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF333333)),
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF333333),
+                      ),
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
@@ -272,9 +308,17 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
             // ROW 3: Stats (Team & Artifacts)
             Row(
               children: [
-                _buildIconPill(Icons.people, teamSize.toString(), Colors.purple),
+                _buildIconPill(
+                  Icons.people,
+                  teamSize.toString(),
+                  Colors.purple,
+                ),
                 const SizedBox(width: 10),
-                _buildIconPill(Icons.attach_file, artifactCount.toString(), Colors.blue),
+                _buildIconPill(
+                  Icons.attach_file,
+                  artifactCount.toString(),
+                  Colors.blue,
+                ),
               ],
             ),
 
@@ -301,12 +345,17 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
                       onTap: () {
                         showDialog(
                           context: context,
-                          builder: (context) => ViewProjectDialog(project: project),
+                          builder: (context) =>
+                              ViewProjectDialog(project: project),
                         );
                       },
-                      child: const Icon(Icons.remove_red_eye, color: Colors.blue, size: 20),
+                      child: const Icon(
+                        Icons.remove_red_eye,
+                        color: Colors.blue,
+                        size: 20,
+                      ),
                     ),
-                    
+
                     // ADMIN ONLY: Edit and Delete
                     if (widget.isAdmin) ...[
                       const SizedBox(width: 15),
@@ -316,13 +365,17 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
                             context,
                             MaterialPageRoute(
                               builder: (context) => EditProjectScreen(
-                                project: project, 
+                                project: project,
                                 onProjectUpdated: _fetchProjects,
                               ),
                             ),
                           );
                         },
-                        child: const Icon(Icons.edit, color: Colors.amber, size: 20),
+                        child: const Icon(
+                          Icons.edit,
+                          color: Colors.amber,
+                          size: 20,
+                        ),
                       ),
                       const SizedBox(width: 15),
                       InkWell(
@@ -332,17 +385,34 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
                             builder: (context) => DeleteProjectDialog(
                               projectName: name,
                               onConfirm: () async {
-                                final projId = project['id']?.toString() ?? project['projectId']?.toString();
+                                final projId =
+                                    project['id']?.toString() ??
+                                    project['projectId']?.toString();
                                 if (projId != null) {
                                   try {
                                     await _projectService.deleteProject(projId);
-                                    _fetchProjects(); 
+                                    _fetchProjects();
                                     if (context.mounted) {
-                                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Project deleted successfully")));
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
+                                        const SnackBar(
+                                          content: Text(
+                                            "Project deleted successfully",
+                                          ),
+                                        ),
+                                      );
                                     }
                                   } catch (e) {
                                     if (context.mounted) {
-                                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Delete failed: $e"), backgroundColor: Colors.red));
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
+                                        SnackBar(
+                                          content: Text("Delete failed: $e"),
+                                          backgroundColor: Colors.red,
+                                        ),
+                                      );
                                     }
                                   }
                                 }
@@ -350,11 +420,15 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
                             ),
                           );
                         },
-                        child: Icon(Icons.delete, color: Colors.red[300], size: 20),
+                        child: Icon(
+                          Icons.delete,
+                          color: Colors.red[300],
+                          size: 20,
+                        ),
                       ),
-                    ]
+                    ],
                   ],
-                )
+                ),
               ],
             ),
           ],
@@ -375,7 +449,14 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
         children: [
           Icon(icon, size: 14, color: color),
           const SizedBox(width: 4),
-          Text(count, style: TextStyle(color: color, fontWeight: FontWeight.bold, fontSize: 12)),
+          Text(
+            count,
+            style: TextStyle(
+              color: color,
+              fontWeight: FontWeight.bold,
+              fontSize: 12,
+            ),
+          ),
         ],
       ),
     );
@@ -387,7 +468,7 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
         Icon(icon, size: 12, color: Colors.grey), // <-- Removed 'const'
         const SizedBox(width: 4),
         Text(
-          text.length > 20 ? "${text.substring(0, 18)}..." : text, 
+          text.length > 20 ? "${text.substring(0, 18)}..." : text,
           style: const TextStyle(fontSize: 11, color: Colors.grey),
         ),
       ],

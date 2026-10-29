@@ -65,8 +65,8 @@ class ThemeProvider extends InheritedNotifier<ThemeController> {
   });
 
   static ThemeController of(BuildContext context) {
-    final provider =
-        context.dependOnInheritedWidgetOfExactType<ThemeProvider>();
+    final provider = context
+        .dependOnInheritedWidgetOfExactType<ThemeProvider>();
     assert(provider != null, 'No ThemeProvider found in context');
     return provider!.notifier!;
   }
@@ -146,13 +146,14 @@ class AppTheme {
         thickness: 1,
         space: 1,
       ),
-      drawerTheme: const DrawerThemeData(
-        backgroundColor: lightSurface,
-      ),
+      drawerTheme: const DrawerThemeData(backgroundColor: lightSurface),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: lightSurface,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 14,
+        ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
           borderSide: const BorderSide(color: lightBorder),
@@ -217,13 +218,14 @@ class AppTheme {
         thickness: 1,
         space: 1,
       ),
-      drawerTheme: const DrawerThemeData(
-        backgroundColor: darkSurface,
-      ),
+      drawerTheme: const DrawerThemeData(backgroundColor: darkSurface),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: darkBg,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 14,
+        ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
           borderSide: const BorderSide(color: darkBorder),

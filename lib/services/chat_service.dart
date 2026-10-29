@@ -1,4 +1,3 @@
-
 import 'package:flutter/foundation.dart';
 
 import 'api_service.dart';
@@ -27,24 +26,17 @@ class ChatService {
       }
 
       // Do not mutate the caller's original Map.
-      final payload =
-          Map<String, dynamic>.from(questionPayload);
+      final payload = Map<String, dynamic>.from(questionPayload);
 
-      payload['projectId'] =
-          int.tryParse(projectId) ?? projectId;
+      payload['projectId'] = int.tryParse(projectId) ?? projectId;
 
-      final response = await _api.post(
-        '/chat/ask',
-        payload,
-      );
+      final response = await _api.post('/chat/ask', payload);
 
       if (response is Map) {
         return Map<String, dynamic>.from(response);
       }
 
-      throw const FormatException(
-        'Invalid AI response format.',
-      );
+      throw const FormatException('Invalid AI response format.');
     } catch (e) {
       debugPrint('Project AI request failed: $e');
       rethrow;
@@ -59,21 +51,15 @@ class ChatService {
     Map<String, dynamic> newConversationObject,
   ) async {
     try {
-      final payload = Map<String, dynamic>.from(
-        newConversationObject,
-      );
+      final payload = Map<String, dynamic>.from(newConversationObject);
 
       final projectId = payload['projectId'];
 
       if (projectId is String) {
-        payload['projectId'] =
-            int.tryParse(projectId) ?? projectId;
+        payload['projectId'] = int.tryParse(projectId) ?? projectId;
       }
 
-      final response = await _api.post(
-        '/chat/conversation',
-        payload,
-      );
+      final response = await _api.post('/chat/conversation', payload);
 
       if (response is String) {
         return response;
@@ -84,9 +70,7 @@ class ChatService {
       }
 
       if (response is Map) {
-        final id =
-            response['conversationId'] ??
-            response['id'];
+        final id = response['conversationId'] ?? response['id'];
 
         if (id != null) {
           return id.toString();
@@ -107,19 +91,13 @@ class ChatService {
   // 3. GET PROJECT CONVERSATIONS
   // ==========================================
 
-  Future<dynamic> getAllConversationsForProject(
-    String projectId,
-  ) async {
+  Future<dynamic> getAllConversationsForProject(String projectId) async {
     try {
       final id = _encodeId(projectId);
 
-      return await _api.get(
-        '/chat/conversations/$id',
-      );
+      return await _api.get('/chat/conversations/$id');
     } catch (e) {
-      debugPrint(
-        'Fetching project conversations failed: $e',
-      );
+      debugPrint('Fetching project conversations failed: $e');
       rethrow;
     }
   }
@@ -128,19 +106,13 @@ class ChatService {
   // 4. GET CONVERSATION MESSAGES
   // ==========================================
 
-  Future<dynamic> getAllMessagesForConversation(
-    String conversationId,
-  ) async {
+  Future<dynamic> getAllMessagesForConversation(String conversationId) async {
     try {
       final id = _encodeId(conversationId);
 
-      return await _api.get(
-        '/chat/conversation/$id',
-      );
+      return await _api.get('/chat/conversation/$id');
     } catch (e) {
-      debugPrint(
-        'Fetching conversation messages failed: $e',
-      );
+      debugPrint('Fetching conversation messages failed: $e');
       rethrow;
     }
   }
@@ -155,13 +127,9 @@ class ChatService {
     try {
       final id = _encodeId(conversationId);
 
-      return await _api.delete(
-        '/chat/conversation/$id',
-      );
+      return await _api.delete('/chat/conversation/$id');
     } catch (e) {
-      debugPrint(
-        'Deleting conversation failed: $e',
-      );
+      debugPrint('Deleting conversation failed: $e');
       rethrow;
     }
   }

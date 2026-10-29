@@ -1,4 +1,3 @@
-
 import 'dart:async';
 import 'dart:io';
 
@@ -15,8 +14,7 @@ import 'api_service.dart';
 class ArtifactService {
   final ApiService _api = ApiService();
 
-  static const Duration _transferTimeout =
-      Duration(minutes: 5);
+  static const Duration _transferTimeout = Duration(minutes: 5);
 
   String _encodeId(String id) {
     if (id.trim().isEmpty) {
@@ -29,23 +27,17 @@ class ArtifactService {
   // 1. GET ALL ARTIFACTS
   // ==========================================
 
-  Future<List<dynamic>> getArtifacts(
-    String projectId,
-  ) async {
+  Future<List<dynamic>> getArtifacts(String projectId) async {
     try {
       final id = _encodeId(projectId);
 
-      final response = await _api.get(
-        '/projects/$id/artifacts',
-      );
+      final response = await _api.get('/projects/$id/artifacts');
 
       if (response is List) {
         return List<dynamic>.from(response);
       }
 
-      throw const FormatException(
-        'Expected a list of artifacts.',
-      );
+      throw const FormatException('Expected a list of artifacts.');
     } catch (e) {
       debugPrint('Failed to fetch artifacts: $e');
       rethrow;
@@ -56,16 +48,9 @@ class ArtifactService {
   // 2. UPLOAD ARTIFACT
   // ==========================================
 
-  Future<void> uploadArtifact(
-    String projectId,
-    File file,
-    String tags,
-  ) async {
+  Future<void> uploadArtifact(String projectId, File file, String tags) async {
     if (!await file.exists()) {
-      throw FileSystemException(
-        'Upload file not found.',
-        file.path,
-      );
+      throw FileSystemException('Upload file not found.', file.path);
     }
 
     final id = _encodeId(projectId);
@@ -76,9 +61,7 @@ class ArtifactService {
       '$id/artifacts/upload',
     );
 
-    final mimeType =
-        lookupMimeType(file.path) ??
-        'application/octet-stream';
+    final mimeType = lookupMimeType(file.path) ?? 'application/octet-stream';
 
     String fileType = 'DOCUMENT';
 
@@ -90,21 +73,14 @@ class ArtifactService {
       fileType = 'VIDEO';
     }
 
-    final user =
-        Supabase.instance.client.auth.currentUser;
+    final user = Supabase.instance.client.auth.currentUser;
 
     final displayName =
-        user?.userMetadata?['name']?.toString() ??
-        user?.email ??
-        'Mobile User';
+        user?.userMetadata?['name']?.toString() ?? user?.email ?? 'Mobile User';
 
-    final request = http.MultipartRequest(
-      'POST',
-      uri,
-    );
+    final request = http.MultipartRequest('POST', uri);
 
-    request.headers['Authorization'] =
-        'Bearer $token';
+    request.headers['Authorization'] = 'Bearer $token';
 
     // Preserve existing backend field names.
     request.fields['type'] = fileType;
@@ -126,13 +102,11 @@ class ArtifactService {
           .send(request)
           .timeout(_transferTimeout);
 
-      final response =
-          await http.Response.fromStream(
+      final response = await http.Response.fromStream(
         streamedResponse,
       ).timeout(_transferTimeout);
 
-      if (response.statusCode < 200 ||
-          response.statusCode >= 300) {
+      if (response.statusCode < 200 || response.statusCode >= 300) {
         throw Exception(
           'Artifact upload failed '
           '(${response.statusCode}).',
@@ -141,9 +115,7 @@ class ArtifactService {
 
       debugPrint('Artifact uploaded successfully.');
     } on TimeoutException {
-      throw Exception(
-        'Artifact upload timed out.',
-      );
+      throw Exception('Artifact upload timed out.');
     } catch (e) {
       debugPrint('Artifact upload failed: $e');
       rethrow;
@@ -172,12 +144,9 @@ class ArtifactService {
     );
 
     try {
-      final response = await http.get(
-        uri,
-        headers: {
-          'Authorization': 'Bearer $token',
-        },
-      ).timeout(_transferTimeout);
+      final response = await http
+          .get(uri, headers: {'Authorization': 'Bearer $token'})
+          .timeout(_transferTimeout);
 
       if (response.statusCode != 200) {
         throw Exception(
@@ -186,21 +155,17 @@ class ArtifactService {
         );
       }
 
-      final directory =
-          await getApplicationDocumentsDirectory();
+      final directory = await getApplicationDocumentsDirectory();
 
       // Prevent path traversal through server filenames.
-      final lastComponent =
-          filename.split(RegExp(r'[/\\]')).last;
+      final lastComponent = filename.split(RegExp(r'[/\\]')).last;
 
       final safeName = lastComponent.replaceAll(
         RegExp(r'[^a-zA-Z0-9._() -]'),
         '_',
       );
 
-      final finalName = safeName.isEmpty ||
-              safeName == '.' ||
-              safeName == '..'
+      final finalName = safeName.isEmpty || safeName == '.' || safeName == '..'
           ? 'artifact_$artifactId'
           : safeName;
 
@@ -209,22 +174,15 @@ class ArtifactService {
         '${Platform.pathSeparator}$finalName',
       );
 
-      await file.writeAsBytes(
-        response.bodyBytes,
-        flush: true,
-      );
+      await file.writeAsBytes(response.bodyBytes, flush: true);
 
-      debugPrint(
-        'Artifact downloaded successfully.',
-      );
+      debugPrint('Artifact downloaded successfully.');
 
       // Opens with an installed compatible app,
       // if one is available.
       await OpenFile.open(file.path);
     } on TimeoutException {
-      throw Exception(
-        'Artifact download timed out.',
-      );
+      throw Exception('Artifact download timed out.');
     } catch (e) {
       debugPrint('Artifact download failed: $e');
       rethrow;
@@ -235,17 +193,12 @@ class ArtifactService {
   // 4. DELETE ARTIFACT
   // ==========================================
 
-  Future<void> deleteArtifact(
-    String projectId,
-    String artifactId,
-  ) async {
+  Future<void> deleteArtifact(String projectId, String artifactId) async {
     try {
       final project = _encodeId(projectId);
       final artifact = _encodeId(artifactId);
 
-      await _api.delete(
-        '/projects/$project/artifacts/$artifact',
-      );
+      await _api.delete('/projects/$project/artifacts/$artifact');
 
       debugPrint('Artifact deleted successfully.');
     } catch (e) {

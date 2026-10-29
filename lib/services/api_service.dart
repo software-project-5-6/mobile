@@ -1,4 +1,3 @@
-
 import 'dart:async';
 import 'dart:convert';
 
@@ -9,11 +8,9 @@ import '../constants/api_constants.dart';
 
 class ApiService {
   // Hosted Spring Boot Backend
-  static const String baseUrl =
-      '${ApiConstants.baseUrl}/api/v1';
+  static const String baseUrl = '${ApiConstants.baseUrl}/api/v1';
 
-  static const Duration _requestTimeout =
-      Duration(seconds: 60);
+  static const Duration _requestTimeout = Duration(seconds: 60);
 
   // ==========================================
   // GET SUPABASE ACCESS TOKEN
@@ -25,9 +22,7 @@ class ApiService {
     var session = auth.currentSession;
 
     if (session == null) {
-      throw StateError(
-        'No active session. Please login first.',
-      );
+      throw StateError('No active session. Please login first.');
     }
 
     // Refresh the token only when necessary
@@ -36,18 +31,12 @@ class ApiService {
         final response = await auth.refreshSession();
         session = response.session;
       } on AuthException catch (e) {
-        throw StateError(
-          'Session refresh failed: ${e.message}',
-        );
+        throw StateError('Session refresh failed: ${e.message}');
       }
     }
 
-    if (session == null ||
-        session.isExpired ||
-        session.accessToken.isEmpty) {
-      throw StateError(
-        'Session expired. Please login again.',
-      );
+    if (session == null || session.isExpired || session.accessToken.isEmpty) {
+      throw StateError('Session expired. Please login again.');
     }
 
     return session.accessToken;
@@ -72,9 +61,7 @@ class ApiService {
   // ==========================================
 
   Uri _buildUri(String endpoint) {
-    final path = endpoint.startsWith('/')
-        ? endpoint
-        : '/$endpoint';
+    final path = endpoint.startsWith('/') ? endpoint : '/$endpoint';
 
     return Uri.parse('$baseUrl$path');
   }
@@ -84,40 +71,23 @@ class ApiService {
   // ==========================================
 
   Future<dynamic> get(String endpoint) async {
-    return _sendRequest(
-      'GET',
-      endpoint,
-    );
+    return _sendRequest('GET', endpoint);
   }
 
   // ==========================================
   // POST REQUEST
   // ==========================================
 
-  Future<dynamic> post(
-    String endpoint,
-    Map<String, dynamic> data,
-  ) async {
-    return _sendRequest(
-      'POST',
-      endpoint,
-      data: data,
-    );
+  Future<dynamic> post(String endpoint, Map<String, dynamic> data) async {
+    return _sendRequest('POST', endpoint, data: data);
   }
 
   // ==========================================
   // PUT REQUEST
   // ==========================================
 
-  Future<dynamic> put(
-    String endpoint,
-    Map<String, dynamic> data,
-  ) async {
-    return _sendRequest(
-      'PUT',
-      endpoint,
-      data: data,
-    );
+  Future<dynamic> put(String endpoint, Map<String, dynamic> data) async {
+    return _sendRequest('PUT', endpoint, data: data);
   }
 
   // ==========================================
@@ -125,10 +95,7 @@ class ApiService {
   // ==========================================
 
   Future<dynamic> delete(String endpoint) async {
-    return _sendRequest(
-      'DELETE',
-      endpoint,
-    );
+    return _sendRequest('DELETE', endpoint);
   }
 
   // ==========================================
@@ -155,21 +122,13 @@ class ApiService {
 
         case 'POST':
           response = await http
-              .post(
-                uri,
-                headers: headers,
-                body: jsonEncode(data),
-              )
+              .post(uri, headers: headers, body: jsonEncode(data))
               .timeout(_requestTimeout);
           break;
 
         case 'PUT':
           response = await http
-              .put(
-                uri,
-                headers: headers,
-                body: jsonEncode(data),
-              )
+              .put(uri, headers: headers, body: jsonEncode(data))
               .timeout(_requestTimeout);
           break;
 
@@ -180,20 +139,14 @@ class ApiService {
           break;
 
         default:
-          throw ArgumentError(
-            'Unsupported HTTP method: $method',
-          );
+          throw ArgumentError('Unsupported HTTP method: $method');
       }
 
       return _handleResponse(response);
     } on TimeoutException {
-      throw Exception(
-        'Request timed out. Please try again.',
-      );
+      throw Exception('Request timed out. Please try again.');
     } on http.ClientException {
-      throw Exception(
-        'Network error. Please check your internet connection.',
-      );
+      throw Exception('Network error. Please check your internet connection.');
     }
   }
 
@@ -209,8 +162,7 @@ class ApiService {
         return {};
       }
 
-      final contentType =
-          response.headers['content-type'] ?? '';
+      final contentType = response.headers['content-type'] ?? '';
 
       if (contentType.contains('text/plain')) {
         return response.body;
@@ -238,9 +190,7 @@ class ApiService {
     }
 
     if (statusCode == 404) {
-      throw Exception(
-        'Resource not found (404).',
-      );
+      throw Exception('Resource not found (404).');
     }
 
     if (statusCode >= 500) {
@@ -250,8 +200,6 @@ class ApiService {
       );
     }
 
-    throw Exception(
-      'Request failed with status code $statusCode.',
-    );
+    throw Exception('Request failed with status code $statusCode.');
   }
 }

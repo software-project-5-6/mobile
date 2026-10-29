@@ -9,7 +9,20 @@ class ViewUserDialog extends StatelessWidget {
     if (dateString == null) return "N/A";
     try {
       final date = DateTime.parse(dateString);
-      const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+      const months = [
+        "Jan",
+        "Feb",
+        "Mar",
+        "Apr",
+        "May",
+        "Jun",
+        "Jul",
+        "Aug",
+        "Sep",
+        "Oct",
+        "Nov",
+        "Dec",
+      ];
       return "${months[date.month - 1]} ${date.day}, ${date.year}";
     } catch (e) {
       return dateString;
@@ -33,37 +46,78 @@ class ViewUserDialog extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text("User Details", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                  const Text(
+                    "User Details",
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  ),
                   IconButton(
                     icon: const Icon(Icons.close, color: Colors.grey),
                     onPressed: () => Navigator.pop(context),
                     padding: EdgeInsets.zero,
                     constraints: const BoxConstraints(),
-                  )
+                  ),
                 ],
               ),
               const SizedBox(height: 4),
-              const Text("View system information and role permissions", style: TextStyle(color: Colors.grey, fontSize: 12)),
+              const Text(
+                "View system information and role permissions",
+                style: TextStyle(color: Colors.grey, fontSize: 12),
+              ),
               const SizedBox(height: 24),
-              
-              const Text("PROFILE INFORMATION", style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.grey, letterSpacing: 1)),
+
+              const Text(
+                "PROFILE INFORMATION",
+                style: TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.grey,
+                  letterSpacing: 1,
+                ),
+              ),
               const SizedBox(height: 16),
-              
-              _buildInfoRow(Icons.person, "FULL NAME", user['fullName'] ?? 'N/A'),
+
+              _buildInfoRow(
+                Icons.person,
+                "FULL NAME",
+                user['fullName'] ?? 'N/A',
+              ),
               const SizedBox(height: 16),
-              _buildInfoRow(Icons.email, "EMAIL ADDRESS", user['email'] ?? 'N/A'),
+              _buildInfoRow(
+                Icons.email,
+                "EMAIL ADDRESS",
+                user['email'] ?? 'N/A',
+              ),
               const SizedBox(height: 16),
               Row(
                 children: [
-                  Expanded(child: _buildInfoRow(Icons.admin_panel_settings, "ROLE", isAdmin ? "Administrator" : "User", valueColor: isAdmin ? Colors.red : const Color(0xFF5B6BBF))),
-                  Expanded(child: _buildInfoRow(Icons.calendar_today, "JOINED DATE", _formatDate(user['createdAt']))),
+                  Expanded(
+                    child: _buildInfoRow(
+                      Icons.admin_panel_settings,
+                      "ROLE",
+                      isAdmin ? "Administrator" : "User",
+                      valueColor: isAdmin
+                          ? Colors.red
+                          : const Color(0xFF5B6BBF),
+                    ),
+                  ),
+                  Expanded(
+                    child: _buildInfoRow(
+                      Icons.calendar_today,
+                      "JOINED DATE",
+                      _formatDate(user['createdAt']),
+                    ),
+                  ),
                 ],
               ),
-              
+
               const SizedBox(height: 24),
               Container(
                 padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(color: Colors.blue.withValues(alpha: 0.05), border: Border.all(color: Colors.blue.withValues(alpha: 0.2)), borderRadius: BorderRadius.circular(8)),
+                decoration: BoxDecoration(
+                  color: Colors.blue.withValues(alpha: 0.05),
+                  border: Border.all(color: Colors.blue.withValues(alpha: 0.2)),
+                  borderRadius: BorderRadius.circular(8),
+                ),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -72,22 +126,34 @@ class ViewUserDialog extends StatelessWidget {
                     Expanded(
                       child: Text(
                         "This is a read-only view.",
-                        style: TextStyle(color: Colors.grey.shade800, fontSize: 12),
+                        style: TextStyle(
+                          color: Colors.grey.shade800,
+                          fontSize: 12,
+                        ),
                       ),
-                    )
+                    ),
                   ],
                 ),
               ),
-              
+
               const SizedBox(height: 24),
               Align(
                 alignment: Alignment.centerRight,
                 child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF5B6BBF), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)), elevation: 0),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF5B6BBF),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    elevation: 0,
+                  ),
                   onPressed: () => Navigator.pop(context),
-                  child: const Text("Close", style: TextStyle(color: Colors.white)),
+                  child: const Text(
+                    "Close",
+                    style: TextStyle(color: Colors.white),
+                  ),
                 ),
-              )
+              ),
             ],
           ),
         ),
@@ -95,7 +161,12 @@ class ViewUserDialog extends StatelessWidget {
     );
   }
 
-  Widget _buildInfoRow(IconData icon, String label, String value, {Color valueColor = Colors.black87}) {
+  Widget _buildInfoRow(
+    IconData icon,
+    String label,
+    String value, {
+    Color valueColor = Colors.black87,
+  }) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -105,9 +176,23 @@ class ViewUserDialog extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(label, style: const TextStyle(color: Colors.grey, fontSize: 10, fontWeight: FontWeight.bold)),
+              Text(
+                label,
+                style: const TextStyle(
+                  color: Colors.grey,
+                  fontSize: 10,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
               const SizedBox(height: 4),
-              Text(value, style: TextStyle(color: valueColor, fontWeight: FontWeight.w600, fontSize: 14)),
+              Text(
+                value,
+                style: TextStyle(
+                  color: valueColor,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 14,
+                ),
+              ),
             ],
           ),
         ),

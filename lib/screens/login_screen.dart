@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:supabase_flutter/supabase_flutter.dart'; // අලුත් Supabase import එක
+import 'package:supabase_flutter/supabase_flutter.dart';
+import '../constants/app_branding.dart';
 import '../services/auth_service.dart';
 import 'signup_screen.dart';
 import 'forgot_password_screen.dart';
@@ -16,9 +17,16 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  
+
   bool _isPasswordVisible = false;
-  bool _isLoading = false; // To show loading spinner
+  bool _isLoading = false;
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -26,7 +34,7 @@ class _LoginScreenState extends State<LoginScreen> {
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        // 1. THE GRADIENT BACKGROUND
+        // Gradient background matching brand theme
         decoration: const BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topLeft,
@@ -41,24 +49,30 @@ class _LoginScreenState extends State<LoginScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  // 2. THE LOGO TEXT
+                  // Majstro Logo & Brand Lockup
+                  Image.asset(
+                    AppBranding.logoAsset,
+                    height: 72,
+                    fit: BoxFit.contain,
+                  ),
+                  const SizedBox(height: 12),
                   const Text(
-                    "PSMS",
+                    AppBranding.appName,
                     style: TextStyle(
                       color: Colors.white,
-                      fontSize: 32,
+                      fontSize: 28,
                       fontWeight: FontWeight.bold,
-                      letterSpacing: 2,
+                      letterSpacing: 0.5,
                     ),
                   ),
-                  const SizedBox(height: 5),
+                  const SizedBox(height: 6),
                   const Text(
-                    "Project Space Management System",
+                    AppBranding.productDescription,
                     style: TextStyle(color: Colors.white70, fontSize: 14),
                   ),
                   const SizedBox(height: 30),
 
-                  // 3. THE WHITE LOGIN CARD
+                  // Login Form Card
                   Card(
                     elevation: 8,
                     shape: RoundedRectangleBorder(
@@ -87,6 +101,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           // EMAIL INPUT
                           TextField(
                             controller: _emailController,
+                            keyboardType: TextInputType.emailAddress,
                             decoration: InputDecoration(
                               labelText: "Email",
                               border: OutlineInputBorder(
@@ -135,14 +150,20 @@ class _LoginScreenState extends State<LoginScreen> {
                                   borderRadius: BorderRadius.circular(10),
                                 ),
                               ),
-                              onPressed: _isLoading ? null : _handleLogin, 
+                              onPressed: _isLoading ? null : _handleLogin,
                               child: _isLoading
                                   ? const SizedBox(
                                       height: 20,
                                       width: 20,
-                                      child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                                      child: CircularProgressIndicator(
+                                        color: Colors.white,
+                                        strokeWidth: 2,
+                                      ),
                                     )
-                                  : const Text("Sign In", style: TextStyle(fontSize: 16)),
+                                  : const Text(
+                                      "Sign In",
+                                      style: TextStyle(fontSize: 16),
+                                    ),
                             ),
                           ),
                           const SizedBox(height: 15),
@@ -152,12 +173,15 @@ class _LoginScreenState extends State<LoginScreen> {
                             onPressed: () {
                               Navigator.push(
                                 context,
-                                MaterialPageRoute(builder: (context) => const ForgotPasswordScreen()),
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      const ForgotPasswordScreen(),
+                                ),
                               );
                             },
                             child: const Text("Forgot Password?"),
                           ),
-                                                                            
+
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
@@ -166,13 +190,16 @@ class _LoginScreenState extends State<LoginScreen> {
                                 onPressed: () {
                                   Navigator.push(
                                     context,
-                                    MaterialPageRoute(builder: (context) => const SignupScreen()),
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          const SignupScreen(),
+                                    ),
                                   );
                                 },
                                 child: const Text("Sign Up"),
                               ),
                             ],
-                          )
+                          ),
                         ],
                       ),
                     ),
@@ -191,12 +218,15 @@ class _LoginScreenState extends State<LoginScreen> {
     // 1. Basic Validation
     if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Please enter email and password"), backgroundColor: Colors.red),
+        const SnackBar(
+          content: Text("Please enter email and password"),
+          backgroundColor: Colors.red,
+        ),
       );
       return;
     }
 
-    setState(() => _isLoading = true); // Start Spinner
+    setState(() => _isLoading = true);
 
     // 2. Call Service
     AuthService authService = AuthService();
@@ -205,19 +235,18 @@ class _LoginScreenState extends State<LoginScreen> {
       _passwordController.text,
     );
 
-    if (!mounted) return; 
+    if (!mounted) return;
 
-    setState(() => _isLoading = false); // Stop Spinner
-    
+    setState(() => _isLoading = false);
+
     // 3. Handle Result
     if (success) {
-      
-      // --- NEW PUSH NOTIFICATION SETUP WITH SUPABASE ---
+      // Push notification setup with Supabase session
       try {
         debugPrint("Push notification: fetching Supabase session");
         final session = Supabase.instance.client.auth.currentSession;
         final jwtToken = session?.accessToken;
-        
+
         if (jwtToken != null) {
           debugPrint("Push notification: initializing");
           await PushNotificationService().initialize(jwtToken);
@@ -228,26 +257,28 @@ class _LoginScreenState extends State<LoginScreen> {
       } catch (e) {
         debugPrint("Push notification error: $e");
       }
-      // ----------------------------------- -----------------------------------
 
       if (mounted) {
         if (_emailController.text.trim() == "admin@psms.com") {
-           // Go to ADMIN Dashboard
-           Navigator.pushReplacement(
+          // Go to ADMIN Dashboard
+          Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (context) => const DashboardScreen(isAdmin: true)),
+            MaterialPageRoute(
+              builder: (context) => const DashboardScreen(isAdmin: true),
+            ),
           );
         } else {
-           // Go to USER Dashboard (Default for everyone else)
-           Navigator.pushReplacement(
+          // Go to USER Dashboard (Default for everyone else)
+          Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (context) => const DashboardScreen(isAdmin: false)),
+            MaterialPageRoute(
+              builder: (context) => const DashboardScreen(isAdmin: false),
+            ),
           );
         }
       }
     } else {
       if (mounted) {
-        // Fail! Show Error
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text("Login Failed. Incorrect email or password."),

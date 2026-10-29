@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
-import '../services/auth_service.dart'; 
-import 'login_screen.dart'; 
+import '../constants/app_branding.dart';
+import '../services/auth_service.dart';
+import 'login_screen.dart';
 
 class VerifyEmailScreen extends StatefulWidget {
-  final String email; 
-  
+  final String email;
+
   const VerifyEmailScreen({super.key, required this.email});
 
   @override
@@ -13,7 +14,13 @@ class VerifyEmailScreen extends StatefulWidget {
 
 class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
   final _codeController = TextEditingController();
-  bool _isLoading = false; // To show loading spinner
+  bool _isLoading = false;
+
+  @override
+  void dispose() {
+    _codeController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +28,7 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        // 1. PURPLE GRADIENT BACKGROUND
+        // Gradient background matching brand theme
         decoration: const BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topLeft,
@@ -36,19 +43,25 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  // HEADER TEXT
+                  // Majstro Logo & Brand Lockup
+                  Image.asset(
+                    AppBranding.logoAsset,
+                    height: 72,
+                    fit: BoxFit.contain,
+                  ),
+                  const SizedBox(height: 12),
                   const Text(
-                    "PSMS",
+                    AppBranding.appName,
                     style: TextStyle(
                       color: Colors.white,
-                      fontSize: 32,
+                      fontSize: 28,
                       fontWeight: FontWeight.bold,
-                      letterSpacing: 2,
+                      letterSpacing: 0.5,
                     ),
                   ),
-                  const SizedBox(height: 5),
+                  const SizedBox(height: 6),
                   const Text(
-                    "Project Space Management System",
+                    AppBranding.productDescription,
                     style: TextStyle(color: Colors.white70, fontSize: 14),
                   ),
                   const SizedBox(height: 30),
@@ -84,26 +97,43 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
                           Container(
                             padding: const EdgeInsets.all(12),
                             decoration: BoxDecoration(
-                              color: Colors.blue.withValues(alpha: 0.05), // Updated opacity
+                              color: Colors.blue.withValues(alpha: 0.05),
                               borderRadius: BorderRadius.circular(8),
-                              border: Border.all(color: Colors.blue.withValues(alpha: 0.2)), // Updated opacity
+                              border: Border.all(
+                                color: Colors.blue.withValues(alpha: 0.2),
+                              ),
                             ),
                             child: Row(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const Icon(Icons.info_outline, color: Colors.blue, size: 20),
+                                const Icon(
+                                  Icons.info_outline,
+                                  color: Colors.blue,
+                                  size: 20,
+                                ),
                                 const SizedBox(width: 10),
                                 Expanded(
                                   child: RichText(
                                     text: TextSpan(
-                                      style: const TextStyle(color: Colors.black87, fontSize: 12),
+                                      style: const TextStyle(
+                                        color: Colors.black87,
+                                        fontSize: 12,
+                                      ),
                                       children: [
-                                        const TextSpan(text: "We've sent a verification code to\n"),
-                                        TextSpan(
-                                          text: widget.email, 
-                                          style: const TextStyle(fontWeight: FontWeight.bold),
+                                        const TextSpan(
+                                          text:
+                                              "We've sent a verification code to\n",
                                         ),
-                                        const TextSpan(text: ". Check your email (including spam folder) and enter the code below."),
+                                        TextSpan(
+                                          text: widget.email,
+                                          style: const TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                        const TextSpan(
+                                          text:
+                                              ". Check your email (including spam folder) and enter the code below.",
+                                        ),
                                       ],
                                     ),
                                   ),
@@ -123,7 +153,10 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(10),
                               ),
-                              contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
+                              contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 15,
+                                vertical: 15,
+                              ),
                             ),
                           ),
                           const SizedBox(height: 20),
@@ -140,14 +173,22 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
                                   borderRadius: BorderRadius.circular(10),
                                 ),
                               ),
-                              onPressed: _isLoading ? null : _handleVerification,
+                              onPressed: _isLoading
+                                  ? null
+                                  : _handleVerification,
                               child: _isLoading
                                   ? const SizedBox(
                                       height: 20,
                                       width: 20,
-                                      child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                                      child: CircularProgressIndicator(
+                                        color: Colors.white,
+                                        strokeWidth: 2,
+                                      ),
                                     )
-                                  : const Text("Verify Email", style: TextStyle(fontSize: 16)),
+                                  : const Text(
+                                      "Verify Email",
+                                      style: TextStyle(fontSize: 16),
+                                    ),
                             ),
                           ),
                           const SizedBox(height: 15),
@@ -156,10 +197,18 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              const Text("Didn't receive the code?", style: TextStyle(fontSize: 12)),
+                              const Text(
+                                "Didn't receive the code?",
+                                style: TextStyle(fontSize: 12),
+                              ),
                               TextButton(
-                                onPressed: _isLoading ? null : _handleResendCode,
-                                child: const Text("Resend Code", style: TextStyle(fontSize: 12)),
+                                onPressed: _isLoading
+                                    ? null
+                                    : _handleResendCode,
+                                child: const Text(
+                                  "Resend Code",
+                                  style: TextStyle(fontSize: 12),
+                                ),
                               ),
                             ],
                           ),
@@ -170,8 +219,11 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
                               Navigator.pop(context);
                             },
                             child: const Text(
-                              "Back to Sign Up", 
-                              style: TextStyle(color: Colors.grey, fontWeight: FontWeight.bold)
+                              "Back to Sign Up",
+                              style: TextStyle(
+                                color: Colors.grey,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ),
                         ],
@@ -191,7 +243,10 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
   Future<void> _handleVerification() async {
     if (_codeController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Please enter the code"), backgroundColor: Colors.red),
+        const SnackBar(
+          content: Text("Please enter the code"),
+          backgroundColor: Colors.red,
+        ),
       );
       return;
     }
@@ -211,19 +266,24 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
     if (isVerified) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Email Verified Successfully! Please Login.")),
+          const SnackBar(
+            content: Text("Email Verified Successfully! Please Login."),
+          ),
         );
         // Clear history and go to Login
         Navigator.pushAndRemoveUntil(
-          context, 
-          MaterialPageRoute(builder: (context) => const LoginScreen()), 
-          (route) => false 
+          context,
+          MaterialPageRoute(builder: (context) => const LoginScreen()),
+          (route) => false,
         );
       }
     } else {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Invalid Code. Please try again."), backgroundColor: Colors.red),
+          const SnackBar(
+            content: Text("Invalid Code. Please try again."),
+            backgroundColor: Colors.red,
+          ),
         );
       }
     }
@@ -239,13 +299,18 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Verification code resent to your email.")),
+          const SnackBar(
+            content: Text("Verification code resent to your email."),
+          ),
         );
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Failed to resend code: $e"), backgroundColor: Colors.red),
+          SnackBar(
+            content: Text("Failed to resend code: $e"),
+            backgroundColor: Colors.red,
+          ),
         );
       }
     } finally {

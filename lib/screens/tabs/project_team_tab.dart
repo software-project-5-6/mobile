@@ -7,7 +7,11 @@ class ProjectTeamTab extends StatefulWidget {
   final Map<String, dynamic> project;
   final bool isAdmin; // ADDED: To control visibility of admin actions
 
-  const ProjectTeamTab({super.key, required this.project, required this.isAdmin});
+  const ProjectTeamTab({
+    super.key,
+    required this.project,
+    required this.isAdmin,
+  });
 
   @override
   State<ProjectTeamTab> createState() => _ProjectTeamTabState();
@@ -33,14 +37,16 @@ class _ProjectTeamTabState extends State<ProjectTeamTab> {
     setState(() => _isLoading = true);
     try {
       final projectId = _getProjectId();
-      
+
       // 1. Fetch fresh project details (for active members)
       final projectDetails = await _projectService.getProjectById(projectId);
-      
+
       // 2. Fetch pending invitations (Only if Admin)
       List<dynamic> pendingInvites = [];
       if (widget.isAdmin) {
-        pendingInvites = await _invitationService.getPendingInvitations(projectId);
+        pendingInvites = await _invitationService.getPendingInvitations(
+          projectId,
+        );
       }
 
       if (mounted) {
@@ -62,11 +68,18 @@ class _ProjectTeamTabState extends State<ProjectTeamTab> {
       await _projectService.removeUserFromProject(_getProjectId(), userId);
       _fetchTeamData(); // Refresh list
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("User removed successfully")));
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("User removed successfully")),
+        );
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Failed to remove user: $e"), backgroundColor: Colors.red));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("Failed to remove user: $e"),
+            backgroundColor: Colors.red,
+          ),
+        );
       }
     }
   }
@@ -78,26 +91,38 @@ class _ProjectTeamTabState extends State<ProjectTeamTab> {
       _fetchTeamData(); // Refresh list
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Invitation revoked successfully"), backgroundColor: Colors.green),
+          const SnackBar(
+            content: Text("Invitation revoked successfully"),
+            backgroundColor: Colors.green,
+          ),
         );
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Failed to revoke invitation: $e"), backgroundColor: Colors.red),
+          SnackBar(
+            content: Text("Failed to revoke invitation: $e"),
+            backgroundColor: Colors.red,
+          ),
         );
       }
     }
   }
 
   String _getProjectId() {
-    return widget.project['id']?.toString() ?? widget.project['projectId'].toString();
+    return widget.project['id']?.toString() ??
+        widget.project['projectId'].toString();
   }
 
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
-      return const Center(child: Padding(padding: EdgeInsets.all(40), child: CircularProgressIndicator()));
+      return const Center(
+        child: Padding(
+          padding: EdgeInsets.all(40),
+          child: CircularProgressIndicator(),
+        ),
+      );
     }
 
     // Filter Logic
@@ -114,7 +139,11 @@ class _ProjectTeamTabState extends State<ProjectTeamTab> {
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: Colors.grey.shade200),
         boxShadow: [
-          BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 10, offset: const Offset(0, 4))
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
         ],
       ),
       padding: const EdgeInsets.all(24),
@@ -130,7 +159,11 @@ class _ProjectTeamTabState extends State<ProjectTeamTab> {
                   children: [
                     const Text(
                       "Team Members",
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF333333)),
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF333333),
+                      ),
                     ),
                     const SizedBox(height: 4),
                     Text(
@@ -142,7 +175,7 @@ class _ProjectTeamTabState extends State<ProjectTeamTab> {
               ),
             ],
           ),
-          
+
           const SizedBox(height: 20),
 
           // --- SEARCH & INVITE ---
@@ -153,13 +186,29 @@ class _ProjectTeamTabState extends State<ProjectTeamTab> {
                   onChanged: (value) => setState(() => _searchQuery = value),
                   decoration: InputDecoration(
                     hintText: "Search members...",
-                    prefixIcon: const Icon(Icons.search, color: Colors.grey, size: 20),
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
+                    prefixIcon: const Icon(
+                      Icons.search,
+                      color: Colors.grey,
+                      size: 20,
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 0,
+                    ),
                     filled: true,
                     fillColor: Colors.white,
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: Colors.grey.shade300)),
-                    enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: Colors.grey.shade300)),
-                    focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: Color(0xFF5B6BBF))),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide(color: Colors.grey.shade300),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide(color: Colors.grey.shade300),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: const BorderSide(color: Color(0xFF5B6BBF)),
+                    ),
                   ),
                 ),
               ),
@@ -182,11 +231,16 @@ class _ProjectTeamTabState extends State<ProjectTeamTab> {
                     backgroundColor: const Color(0xFF5B6BBF),
                     foregroundColor: Colors.white,
                     elevation: 0,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 14,
+                    ),
                   ),
                 ),
-              ]
+              ],
             ],
           ),
 
@@ -197,15 +251,51 @@ class _ProjectTeamTabState extends State<ProjectTeamTab> {
             padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
             decoration: BoxDecoration(
               color: Colors.grey[50],
-              borderRadius: const BorderRadius.only(topLeft: Radius.circular(8), topRight: Radius.circular(8)),
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(8),
+                topRight: Radius.circular(8),
+              ),
               border: Border(bottom: BorderSide(color: Colors.grey.shade200)),
             ),
             child: Row(
               children: [
-                const Expanded(flex: 3, child: Text("Member", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: Colors.black87))),
-                const Expanded(flex: 3, child: Text("Email", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: Colors.black87))),
-                const Expanded(flex: 2, child: Text("Role", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: Colors.black87))),
-                if (widget.isAdmin) const SizedBox(width: 30), // Space for Delete Icon (Admin Only)
+                const Expanded(
+                  flex: 3,
+                  child: Text(
+                    "Member",
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 12,
+                      color: Colors.black87,
+                    ),
+                  ),
+                ),
+                const Expanded(
+                  flex: 3,
+                  child: Text(
+                    "Email",
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 12,
+                      color: Colors.black87,
+                    ),
+                  ),
+                ),
+                const Expanded(
+                  flex: 2,
+                  child: Text(
+                    "Role",
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 12,
+                      color: Colors.black87,
+                    ),
+                  ),
+                ),
+                if (widget.isAdmin)
+                  const SizedBox(
+                    width: 30,
+                  ), // Space for Delete Icon (Admin Only)
               ],
             ),
           ),
@@ -215,7 +305,10 @@ class _ProjectTeamTabState extends State<ProjectTeamTab> {
             Padding(
               padding: const EdgeInsets.all(40),
               child: Center(
-                child: Text("No members found", style: TextStyle(color: Colors.grey[400])),
+                child: Text(
+                  "No members found",
+                  style: TextStyle(color: Colors.grey[400]),
+                ),
               ),
             )
           else
@@ -223,7 +316,8 @@ class _ProjectTeamTabState extends State<ProjectTeamTab> {
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
               itemCount: filteredActive.length,
-              separatorBuilder: (context, index) => Divider(height: 1, color: Colors.grey.shade100),
+              separatorBuilder: (context, index) =>
+                  Divider(height: 1, color: Colors.grey.shade100),
               itemBuilder: (context, index) {
                 final member = filteredActive[index];
                 final name = member['fullName'] ?? "Unknown";
@@ -232,7 +326,10 @@ class _ProjectTeamTabState extends State<ProjectTeamTab> {
                 final userId = member['userId']?.toString() ?? "";
 
                 return Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 12,
+                    horizontal: 16,
+                  ),
                   child: Row(
                     children: [
                       // Avatar & Name
@@ -245,12 +342,23 @@ class _ProjectTeamTabState extends State<ProjectTeamTab> {
                               backgroundColor: _getAvatarColor(name),
                               child: Text(
                                 _getInitials(name),
-                                style: TextStyle(fontSize: 12, color: _getAvatarTextColor(name), fontWeight: FontWeight.bold),
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: _getAvatarTextColor(name),
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                             ),
                             const SizedBox(width: 10),
                             Expanded(
-                              child: Text(name, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13), overflow: TextOverflow.ellipsis),
+                              child: Text(
+                                name,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 13,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
                             ),
                           ],
                         ),
@@ -258,7 +366,14 @@ class _ProjectTeamTabState extends State<ProjectTeamTab> {
                       // Email
                       Expanded(
                         flex: 3,
-                        child: Text(email, style: const TextStyle(color: Colors.grey, fontSize: 13), overflow: TextOverflow.ellipsis),
+                        child: Text(
+                          email,
+                          style: const TextStyle(
+                            color: Colors.grey,
+                            fontSize: 13,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
                       // Role
                       Expanded(
@@ -273,7 +388,11 @@ class _ProjectTeamTabState extends State<ProjectTeamTab> {
                         SizedBox(
                           width: 30,
                           child: IconButton(
-                            icon: Icon(Icons.delete, size: 18, color: Colors.red[300]),
+                            icon: Icon(
+                              Icons.delete,
+                              size: 18,
+                              color: Colors.red[300],
+                            ),
                             onPressed: () => _confirmRemove(userId, name),
                             padding: EdgeInsets.zero,
                             constraints: const BoxConstraints(),
@@ -293,7 +412,11 @@ class _ProjectTeamTabState extends State<ProjectTeamTab> {
 
             const Text(
               "Pending Invitations",
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF333333)),
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF333333),
+              ),
             ),
             const SizedBox(height: 10),
 
@@ -301,7 +424,10 @@ class _ProjectTeamTabState extends State<ProjectTeamTab> {
               const Padding(
                 padding: EdgeInsets.symmetric(vertical: 20),
                 child: Center(
-                  child: Text("No pending invitations", style: TextStyle(color: Colors.grey, fontSize: 13)),
+                  child: Text(
+                    "No pending invitations",
+                    style: TextStyle(color: Colors.grey, fontSize: 13),
+                  ),
                 ),
               )
             else
@@ -309,43 +435,70 @@ class _ProjectTeamTabState extends State<ProjectTeamTab> {
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
                 itemCount: _pendingInvitations.length,
-                separatorBuilder: (context, index) => Divider(height: 1, color: Colors.grey.shade100),
+                separatorBuilder: (context, index) =>
+                    Divider(height: 1, color: Colors.grey.shade100),
                 itemBuilder: (context, index) {
                   final invite = _pendingInvitations[index];
                   return Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 12,
+                      horizontal: 16,
+                    ),
                     child: Row(
                       children: [
-                        const Icon(Icons.mail_outline, size: 20, color: Colors.grey),
+                        const Icon(
+                          Icons.mail_outline,
+                          size: 20,
+                          color: Colors.grey,
+                        ),
                         const SizedBox(width: 12),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(invite['email'] ?? 'Unknown', style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 13)),
+                              Text(
+                                invite['email'] ?? 'Unknown',
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w500,
+                                  fontSize: 13,
+                                ),
+                              ),
                               const SizedBox(height: 2),
-                              Text("Expires: ${_formatDate(invite['expiresAt'])}", style: const TextStyle(color: Colors.grey, fontSize: 11)),
+                              Text(
+                                "Expires: ${_formatDate(invite['expiresAt'])}",
+                                style: const TextStyle(
+                                  color: Colors.grey,
+                                  fontSize: 11,
+                                ),
+                              ),
                             ],
                           ),
                         ),
                         _buildRoleChip(invite['role'] ?? 'VIEWER'),
                         const SizedBox(width: 16),
                         IconButton(
-                          icon: Icon(Icons.delete_outline, color: Colors.red[300], size: 18),
+                          icon: Icon(
+                            Icons.delete_outline,
+                            color: Colors.red[300],
+                            size: 18,
+                          ),
                           padding: EdgeInsets.zero,
                           constraints: const BoxConstraints(),
                           onPressed: () {
                             if (invite['id'] != null) {
-                              _confirmRevoke(invite['id'], invite['email'] ?? 'this user');
+                              _confirmRevoke(
+                                invite['id'],
+                                invite['email'] ?? 'this user',
+                              );
                             }
                           },
-                        ), 
+                        ),
                       ],
                     ),
                   );
                 },
               ),
-          ]
+          ],
         ],
       ),
     );
@@ -356,7 +509,7 @@ class _ProjectTeamTabState extends State<ProjectTeamTab> {
   Widget _buildRoleChip(String role) {
     Color bg;
     Color text;
-    
+
     switch (role.toUpperCase()) {
       case 'ADMIN':
       case 'MANAGER':
@@ -381,7 +534,11 @@ class _ProjectTeamTabState extends State<ProjectTeamTab> {
       ),
       child: Text(
         role.toUpperCase(),
-        style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: text),
+        style: TextStyle(
+          fontSize: 10,
+          fontWeight: FontWeight.bold,
+          color: text,
+        ),
       ),
     );
   }
@@ -391,9 +548,14 @@ class _ProjectTeamTabState extends State<ProjectTeamTab> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text("Remove Member"),
-        content: Text("Are you sure you want to remove $name from the project?"),
+        content: Text(
+          "Are you sure you want to remove $name from the project?",
+        ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text("Cancel")),
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("Cancel"),
+          ),
           TextButton(
             onPressed: () {
               Navigator.pop(context);
@@ -411,9 +573,14 @@ class _ProjectTeamTabState extends State<ProjectTeamTab> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text("Revoke Invitation"),
-        content: Text("Are you sure you want to cancel the invitation sent to $email?"),
+        content: Text(
+          "Are you sure you want to cancel the invitation sent to $email?",
+        ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text("Cancel")),
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("Cancel"),
+          ),
           TextButton(
             onPressed: () {
               Navigator.pop(context);
@@ -434,12 +601,24 @@ class _ProjectTeamTabState extends State<ProjectTeamTab> {
   }
 
   Color _getAvatarColor(String name) {
-    final colors = [Colors.blue.shade100, Colors.red.shade100, Colors.green.shade100, Colors.orange.shade100, Colors.purple.shade100];
+    final colors = [
+      Colors.blue.shade100,
+      Colors.red.shade100,
+      Colors.green.shade100,
+      Colors.orange.shade100,
+      Colors.purple.shade100,
+    ];
     return colors[name.length % colors.length];
   }
 
   Color _getAvatarTextColor(String name) {
-    final colors = [Colors.blue.shade800, Colors.red.shade800, Colors.green.shade800, Colors.orange.shade800, Colors.purple.shade800];
+    final colors = [
+      Colors.blue.shade800,
+      Colors.red.shade800,
+      Colors.green.shade800,
+      Colors.orange.shade800,
+      Colors.purple.shade800,
+    ];
     return colors[name.length % colors.length];
   }
 

@@ -14,7 +14,8 @@ class DeleteProjectDialog extends StatelessWidget {
   Widget build(BuildContext context) {
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      clipBehavior: Clip.antiAlias, // Ensures the header gradient respects rounded corners
+      clipBehavior: Clip
+          .antiAlias, // Ensures the header gradient respects rounded corners
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -49,7 +50,9 @@ class DeleteProjectDialog extends StatelessWidget {
                   text: TextSpan(
                     style: const TextStyle(fontSize: 16, color: Colors.black87),
                     children: [
-                      const TextSpan(text: "Are you sure you want to delete the project "),
+                      const TextSpan(
+                        text: "Are you sure you want to delete the project ",
+                      ),
                       TextSpan(
                         text: '"$projectName"',
                         style: const TextStyle(fontWeight: FontWeight.bold),
@@ -77,7 +80,10 @@ class DeleteProjectDialog extends StatelessWidget {
               children: [
                 TextButton(
                   onPressed: () => Navigator.pop(context),
-                  child: const Text("Cancel", style: TextStyle(color: Colors.grey)),
+                  child: const Text(
+                    "Cancel",
+                    style: TextStyle(color: Colors.grey),
+                  ),
                 ),
                 const SizedBox(width: 12),
                 ElevatedButton(
@@ -89,10 +95,18 @@ class DeleteProjectDialog extends StatelessWidget {
                     backgroundColor: Colors.red,
                     foregroundColor: Colors.white,
                     elevation: 0,
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 12,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
                   ),
-                  child: const Text("Delete", style: TextStyle(fontWeight: FontWeight.bold)),
+                  child: const Text(
+                    "Delete",
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
                 ),
               ],
             ),
